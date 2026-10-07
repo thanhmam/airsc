@@ -1,0 +1,8 @@
+-- Content Engine (applied 2026-10-06): see migrations content_engine, content_engine_fixes,
+-- agent_lookup_rpcs and scout_seen_cache in the Supabase project history.
+-- Adds resources.{status, category, tags, level, quality, quality_notes, use_cases, prompts,
+-- showcase, demo, sources, first_seen_at, classified_at, produced_at, demoed_at},
+-- tables public.pages, public.pipeline_runs, private.scout_seen and the token-guarded
+-- agent RPCs (patch_resources, agent_resources, agent_resources_by_names, agent_known,
+-- agent_seen, mark_seen, upsert_pages, log_pipeline_run, admin_pipeline_runs, set_resource_status).
+-- Public read is limited to status = 'published'.

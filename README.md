@@ -1,36 +1,74 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Airsc
 
-## Getting Started
+The safety-checked library of AI agent resources (Claude skills, MCP servers, Claude Code
+plugins, subagents, Cursor rules) for vibe coders. Search is free; downloads use credits
+(10 free per week, packs of 100 / 1,000, or unlimited Full-time Access).
 
-First, run the development server:
+Production: https://airsc.vercel.app
+
+## Stack
+
+| Part | Tech |
+| --- | --- |
+| Web | Next.js 16 App Router, Tailwind 4, EN at `/`, VI at `/vi` (`src/proxy.ts`) |
+| DB + auth | Supabase project `airsc` (Postgres + magic-link auth), see `supabase/README.md` |
+| Crawler | GitHub search + tree + raw files → safety scan → install config → AI summary/translation (`src/lib/crawler`) |
+| AI (internal only) | Vercel AI Gateway, `AIRSC_ENRICH_MODEL` (default `anthropic/claude-sonnet-5.5`) |
+| Airsc MCP | `src/app/api/mcp/route.ts` (mcp-handler), key via `Authorization: Bearer airsc_…` or `?key=` |
+| Payments | Polar.sh checkout + webhook (`src/app/api/checkout`, `src/app/api/webhooks/polar`) |
+| Content Engine | Vercel Workflow `src/workflows/content-engine.ts`, daily 02:00 UTC via `/api/cron/pipeline` |
+
+## Content Engine (automated content)
+
+Six agents run as one durable Vercel Workflow (each step is checkpointed and retried):
+
+| Agent | File | Does |
+| --- | --- | --- |
+| Scout | `src/lib/engine/agents/scout.ts` | GitHub topics + code search, MCP Registry, npm, awesome-lists → new/updated repos (remembers rejected repos for 14 days) |
+| Analyst | `src/lib/crawler/run.ts` (`analyse`) | Reads the repo tree and files, safety scan, one-click install config |
+| Curator | `src/lib/engine/agents/curator.ts` | Relevance, category, tags, level, quality 0-100, EN/VI summary + use cases; auto-publish gate |
+| Producer | `src/lib/engine/agents/producer.ts` | 6-scene animated explainer script + example prompts (played with Remotion Player) |
+| Demo | `src/lib/engine/agents/demo.ts` | Starts npx MCP servers in Vercel Sandbox and records their real tool list |
+| Editor | `src/lib/engine/agents/editor.ts` | Category guides `/guides/best-*` and weekly digest `/guides/new-YYYY-wNN` |
+
+Publishing rule: relevant + quality ≥ 40 + not rated danger → published; otherwise review queue (`/admin`) or hidden.
+Admin (`ADMIN_EMAILS`) can watch runs, approve/hide, and start a run at `/admin`.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# manual run (local dev server or production), e.g. content only with small limits
+curl -X POST $SITE/api/admin/pipeline -H "Authorization: Bearer $CRON_SECRET" \
+  -d '{"skipScout":true,"maxCurate":20,"maxProduce":4,"maxDemo":2,"maxPages":1}'
+npx workflow inspect runs --backend vercel --project airsc --team thanhmams-projects
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Local development
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+pnpm install
+vercel env pull .env.local   # or copy the variables below
+pnpm dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Crawl locally (uses your GitHub CLI token):
 
-## Learn More
+```bash
+GITHUB_TOKEN=$(gh auth token) pnpm crawl              # full crawl (~1,000 repos, ~25 min)
+GITHUB_TOKEN=$(gh auth token) pnpm crawl --limit 20   # quick test
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Environment variables
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Name | Purpose |
+| --- | --- |
+| `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Supabase project |
+| `AIRSC_INGEST_TOKEN` | Guards crawler ingest + purchase grants (matches `private.app_secrets`) |
+| `NEXT_PUBLIC_SITE_URL`, `NEXT_PUBLIC_SITE_NAME` | Canonical URL and brand name |
+| `GITHUB_TOKEN` | Fine-grained PAT (public repo read) for the daily cron crawl |
+| `AIRSC_MODEL_FAST` / `AIRSC_MODEL_SMART` | Agent models (default `anthropic/claude-sonnet-5.5` / `anthropic/claude-opus-5.5`) |
+| `AIRSC_MODEL_FALLBACK` / `AIRSC_ENRICH_MODEL` | Used when the primary model is unavailable (default `google/gemini-2.5-flash`) |
+| `ADMIN_EMAILS` | Comma-separated emails allowed into `/admin` |
+| `CRON_SECRET` | Vercel cron auth |
+| `POLAR_ACCESS_TOKEN`, `POLAR_WEBHOOK_SECRET`, `POLAR_SERVER` | Polar.sh (`sandbox` or `production`) |
+| `POLAR_PRODUCT_CREDITS_100`, `POLAR_PRODUCT_CREDITS_1000`, `POLAR_PRODUCT_FULLTIME`, `POLAR_PRODUCT_FOUNDING` | Polar product IDs |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Polar webhook URL: `https://airsc.vercel.app/api/webhooks/polar` (event: `order.paid`).
