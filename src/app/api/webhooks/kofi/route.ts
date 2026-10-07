@@ -26,6 +26,8 @@ export async function POST(req: Request) {
       currency: data.currency,
       type: data.type,
       is_public: data.is_public,
+      // masked in Postgres (th***@gmail.com) so donors can find their entry; the full address is never stored
+      email: data.email,
     },
   });
   if (error) return new Response("Failed", { status: 500 });

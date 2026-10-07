@@ -13,7 +13,7 @@ export async function SiteHeader({ lang, t }: { lang: Locale; t: Dict }) {
     { label: t.nav.pricing, path: "/support" },
   ];
   return (
-    <header className="sticky top-0 z-40 border-b border-line/80 bg-bg/80 backdrop-blur-md">
+    <header className="border-b border-line/80 bg-bg/80 backdrop-blur-md">
       <div className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-4 sm:px-6">
         <Link href={href(lang)} className="flex items-center gap-2 font-semibold tracking-tight">
           <span className="grid size-7 place-items-center rounded-lg bg-accent text-sm font-bold text-accent-fg">A</span>

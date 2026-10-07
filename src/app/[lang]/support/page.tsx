@@ -16,12 +16,10 @@ export default async function Support({ params }: PageProps<"/[lang]/support">) 
   if (!hasLocale(lang)) notFound();
   const t = getDict(lang);
   const s = t.support;
-  const { data: supporters } = await anonClient()
-    .from("supporters")
-    .select("name,message,created_at")
-    .not("name", "is", null)
-    .order("created_at", { ascending: false })
-    .limit(30);
+  // names + masked email only; amounts never leave the database
+  const { data: supporters } = await anonClient().rpc("public_supporters", { p_limit: 100 });
+  const list = (supporters ?? []) as { name: string | null; message: string | null; email_masked: string | null; created_at: string }[];
+  const date = new Intl.DateTimeFormat(lang, { day: "numeric", month: "short", year: "numeric" });
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-14 sm:px-6">
@@ -59,12 +57,17 @@ export default async function Support({ params }: PageProps<"/[lang]/support">) 
 
       <section className="mt-10">
         <h2 className="font-semibold">{s.supporters}</h2>
-        {supporters?.length ? (
+        <p className="mt-1 text-sm text-muted">{s.supportersNote}</p>
+        {list.length ? (
           <ul className="mt-3 grid gap-2 sm:grid-cols-2">
-            {supporters.map((p, i) => (
+            {list.map((p, i) => (
               <li key={i} className="rounded-xl border border-line bg-card p-3 text-sm">
-                <p className="font-medium">{p.name}</p>
-                {p.message && <p className="mt-0.5 text-muted">“{p.message}”</p>}
+                <p className="font-medium">{p.name || s.anonymous}</p>
+                <p className="mt-0.5 text-xs text-muted">
+                  {p.email_masked && <span className="font-mono">{p.email_masked} · </span>}
+                  {date.format(new Date(p.created_at))}
+                </p>
+                {p.message && <p className="mt-1 text-muted">“{p.message}”</p>}
               </li>
             ))}
           </ul>
