@@ -18,6 +18,7 @@
   --danger-soft: #fde5e5;
   --term-bg: #0f0f14;
   --term-fg: #e8e8ee;
+  --logo-ai: #ffffff;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -38,6 +39,7 @@
     --danger: #f2686d;
     --danger-soft: #2c1213;
     --term-bg: #060608;
+    --logo-ai: transparent;
   }
 }
 

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Logo } from "@/components/brand/logo";
 import { href, type Dict, type Locale } from "@/lib/i18n";
 
 export function SiteFooter({ lang, t }: { lang: Locale; t: Dict }) {
@@ -6,7 +7,7 @@ export function SiteFooter({ lang, t }: { lang: Locale; t: Dict }) {
     <footer className="mt-24 border-t border-line">
       <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-10 text-sm text-muted sm:flex-row sm:justify-between sm:px-6">
         <div className="max-w-sm space-y-2">
-          <p className="font-semibold text-fg">{process.env.NEXT_PUBLIC_SITE_NAME ?? "Airsc"}</p>
+          <Logo className="h-6 w-auto text-fg" />
           <p>{t.footer.tagline}</p>
           <p className="text-xs">{t.footer.rights}</p>
         </div>

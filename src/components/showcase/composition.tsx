@@ -1,5 +1,6 @@
 import { AbsoluteFill, interpolate, Sequence, spring, useCurrentFrame, useVideoConfig } from "remotion";
 import type { ShowcaseScene } from "@/lib/types";
+import { Logo } from "@/components/brand/logo";
 
 export const SCENE_FRAMES = 100;
 export const FPS = 30;
@@ -42,10 +43,7 @@ function Scene({ scene, index, total, name }: { scene: ShowcaseScene; index: num
     <AbsoluteFill style={{ background: C.bg, color: C.fg, fontFamily: "var(--font-geist-sans), system-ui, sans-serif", opacity: fadeOut }}>
       <AbsoluteFill style={{ background: `radial-gradient(70% 60% at 50% 0%, ${C.accent}33, transparent)` }} />
       <div style={{ position: "absolute", top: 34, left: 48, right: 48, display: "flex", justifyContent: "space-between", fontSize: 22, color: C.muted }}>
-        <span style={{ fontWeight: 600, color: C.fg }}>
-          <span style={{ background: C.accent, color: C.bg, borderRadius: 8, padding: "2px 10px", marginRight: 10 }}>A</span>
-          Airsc
-        </span>
+        <Logo tone="dark" style={{ height: 32, width: "auto" }} />
         <span>
           {index + 1}/{total} · {name}
         </span>

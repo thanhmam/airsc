@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Logo } from "@/components/brand/logo";
 import { LangSwitch } from "@/components/lang-switch";
 import { href, type Dict, type Locale } from "@/lib/i18n";
 import { currentUser } from "@/lib/supabase/server";
@@ -15,9 +16,8 @@ export async function SiteHeader({ lang, t }: { lang: Locale; t: Dict }) {
   return (
     <header className="border-b border-line/80 bg-bg/80 backdrop-blur-md">
       <div className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-4 sm:px-6">
-        <Link href={href(lang)} className="flex items-center gap-2 font-semibold tracking-tight">
-          <span className="grid size-7 place-items-center rounded-lg bg-accent text-sm font-bold text-accent-fg">A</span>
-          <span>{process.env.NEXT_PUBLIC_SITE_NAME ?? "Airsc"}</span>
+        <Link href={href(lang)} aria-label="Airsc home" className="flex items-center text-fg">
+          <Logo className="h-7 w-auto" />
         </Link>
         <nav className="hidden items-center gap-1 text-sm md:flex">
           {nav.map((n) => (

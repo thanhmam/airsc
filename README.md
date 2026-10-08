@@ -1,4 +1,4 @@
-# Airsc
+<img src="public/brand/airsc-logo.svg" alt="Airsc" height="48">
 
 The safety-checked library of AI agent resources (Claude skills, MCP servers, Claude Code
 plugins, subagents, Cursor rules) for vibe coders. Search is free; downloads use credits
@@ -17,6 +17,13 @@ Production: https://airsc.vercel.app
 | Airsc MCP | `src/app/api/mcp/route.ts` (mcp-handler), key via `Authorization: Bearer airsc_…` or `?key=` |
 | Payments | Polar.sh checkout + webhook (`src/app/api/checkout`, `src/app/api/webhooks/polar`) |
 | Content Engine | Vercel Workflow `src/workflows/content-engine.ts`, daily 02:00 UTC via `/api/cron/pipeline` |
+
+## Brand and UI
+
+Logo kit, colours, typography and component rules are in [BRAND.md](BRAND.md). In short: use
+`<Logo />` from `src/components/brand/logo.tsx` (never redraw the mark), Violet `#5A3DF0` /
+Violet 400 `#8F7BFF` / Ink `#111113` / Paper `#FAFAF7` through the tokens in `src/app/globals.css`,
+and Geist / Geist Mono for type.
 
 ## Content Engine (automated content)
 
