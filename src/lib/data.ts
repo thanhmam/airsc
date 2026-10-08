@@ -70,6 +70,18 @@ export async function getTrending(limit = 8): Promise<ResourceCard[]> {
   return (data ?? []) as ResourceCard[];
 }
 
+/** Cards plus the fields agentPrompt() needs, returned in the order of `slugs` */
+export async function getResourcesBySlugs(slugs: string[]) {
+  const { data } = await anonClient()
+    .from("resources")
+    .select(`${CARD_FIELDS},default_branch,install`)
+    .in("slug", slugs)
+    .neq("safety", "danger");
+  type Row = ResourceCard & Pick<Resource, "default_branch" | "install">;
+  const bySlug = new Map(((data ?? []) as Row[]).map((r) => [r.slug, r]));
+  return slugs.map((s) => bySlug.get(s)).filter((r): r is Row => !!r);
+}
+
 export async function getStats() {
   const db = anonClient();
   const [all, safe] = await Promise.all([

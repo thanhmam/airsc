@@ -3,6 +3,7 @@
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Check, Plug, ShieldCheck, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
 
 function useTyped(text: string, active: boolean, speed = 28) {
   const [n, setN] = useState(0);
@@ -35,7 +36,7 @@ const HERO_COPY = {
 export type HeroResult = { name: string; type: string; stars: string; safe: boolean };
 
 /** Looping product demo: user asks their agent, agent calls Airsc MCP, installs the result */
-export function HeroDemo({ lang, results }: { lang: "en" | "vi"; results: HeroResult[] }) {
+export function HeroDemo({ lang, results, className }: { lang: "en" | "vi"; results: HeroResult[]; className?: string }) {
   const c = HERO_COPY[lang];
   const reduce = useReducedMotion();
   const [step, setStep] = useState(reduce ? 4 : 0);
@@ -49,7 +50,7 @@ export function HeroDemo({ lang, results }: { lang: "en" | "vi"; results: HeroRe
   }, [step, c.ask.length, reduce]);
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-line bg-term-bg text-term-fg shadow-[0_30px_80px_-30px_rgba(90,61,240,0.45)]">
+    <div className={cn("relative overflow-hidden rounded-2xl border border-line bg-term-bg text-term-fg shadow-[0_30px_80px_-30px_rgba(90,61,240,0.45)]", className)}>
       <div className="flex items-center gap-1.5 border-b border-white/10 px-4 py-2.5">
         <span className="size-2.5 rounded-full bg-[#ff5f57]" />
         <span className="size-2.5 rounded-full bg-[#febc2e]" />
