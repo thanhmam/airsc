@@ -25,6 +25,9 @@ Logo kit, colours, typography and component rules are in [BRAND.md](BRAND.md). I
 Violet 400 `#8F7BFF` / Ink `#111113` / Paper `#FAFAF7` through the tokens in `src/app/globals.css`,
 and Geist / Geist Mono for type.
 
+The 30 s vertical short (`src/video`, Remotion, three hook variants × VI/EN) is rendered with
+`pnpm video:render`; see the "Short video" section of BRAND.md.
+
 ## Content Engine (automated content)
 
 Six agents run as one durable Vercel Workflow (each step is checkpointed and retried):

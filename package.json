@@ -8,7 +8,10 @@
     "start": "next start",
     "lint": "eslint",
     "crawl": "node --env-file=.env.local --import tsx scripts/crawl.ts",
-    "rescore": "node --env-file=.env.local --import tsx scripts/rescore.mts"
+    "rescore": "node --env-file=.env.local --import tsx scripts/rescore.mts",
+    "video:music": "tsx scripts/make-video-music.ts",
+    "video:studio": "remotion studio src/video/index.ts",
+    "video:render": "node scripts/render-shorts.mjs"
   },
   "dependencies": {
     "@modelcontextprotocol/server": "^2.3.0",
@@ -34,6 +37,8 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@remotion/cli": "4.0.533",
+    "@remotion/google-fonts": "4.0.533",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",

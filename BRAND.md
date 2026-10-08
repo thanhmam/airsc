@@ -74,3 +74,34 @@ Always-dark panels (Today's picks stage, Airsc MCP block, terminals) use `#0f0f1
 - Safety is always shown with `SafetyBadge` (or the same colours), never with the accent colour.
 - Every animation has a `prefers-reduced-motion` fallback.
 - All user-facing copy goes through `src/lib/i18n.ts` in both English and Vietnamese.
+
+## Short video (vertical, TikTok / Shorts / Reels)
+
+Source: `src/video/` (Remotion). Brief: 30 s, 1080×1920, 30 fps, sound-off readable, loops cleanly.
+
+```bash
+pnpm video:music            # regenerate the licence-free soundtrack in public/video/
+pnpm video:studio           # preview and scrub in Remotion Studio
+pnpm video:render           # all six → out/airsc-short-{a,b,c}-{vi,en}.mp4
+pnpm video:render a vi      # one variant + language
+```
+
+Story: hook (0–3 s) → problem (3–8 s) → solution (8–14 s) → preview + install (14–21 s) → ask your agent via MCP (21–26 s) → free, airsc.vercel.app (26–30 s). Cuts sit on the beat (120 BPM). Dark = risk, light = relief: the video turns from dark to light at the moment Airsc appears.
+
+Three hooks share the same body so they can be A/B tested on the first 3 seconds:
+
+| Id | Hook | Idea |
+| --- | --- | --- |
+| `a` | Fear (recommended) | A random MCP install quietly reads `~/.env` |
+| `b` | Result first | One sentence in, a whole deck out |
+| `c` | Overwhelm | 1,000+ tools, "which one?" |
+
+Rules:
+
+- Keep text inside the safe area: nothing important in the top 250 px or bottom 380 px (platform UI covers them). `SAFE` in `src/video/timeline.ts`.
+- Same brand as the site: `<Logo />`, Geist / Geist Mono, the colours in `src/video/theme.ts` (mirrors this file).
+- Say "scanned", never "guaranteed safe": the safety label is an automated scan of the files we read, and the scale includes Caution.
+- Never name a real repository in a danger scene; the hook uses invented names and an RFC 5737 documentation IP, and is labelled as an illustrative simulation.
+- Search results and labels shown in the video are real library data (snapshot in `src/video/scenes/solution.tsx`); refresh them before re-rendering if the library changed.
+- Copy lives in `src/video/copy.ts` in Vietnamese and English; add both.
+- Audio is synthesised by `scripts/make-video-music.ts`, so there is no third-party licence to track.
