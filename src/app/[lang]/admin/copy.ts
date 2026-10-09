@@ -20,7 +20,7 @@ const en = {
   filters: {
     search: "Search name or owner/repo", allTypes: "All types", allStatus: "All statuses", allCategories: "All categories",
     allSafety: "All safety", allStages: "Any stage", apply: "Apply",
-    stages: { unclassified: "Not classified", no_video: "Published, no video", has_video: "Has video", demo_ok: "Demo verified", demo_failed: "Demo failed" } as Record<string, string>,
+    stages: { unclassified: "Not classified", no_video: "Published, no video", has_video: "Has video", has_slideshow: "Has slideshow", demo_ok: "Demo verified", demo_failed: "Demo failed" } as Record<string, string>,
     sorts: { stars: "Stars", views: "Views", downloads: "Downloads", quality: "Quality", newest: "Newest" } as Record<string, string>,
   },
   table: { resource: "Resource", status: "Status", category: "Category", quality: "Score", pipeline: "Pipeline", views: "Views", downloads: "Downloads", stars: "Stars", seen: "Found" },
@@ -55,7 +55,7 @@ const vi: AdminCopy = {
   filters: {
     search: "Tìm theo tên hoặc owner/repo", allTypes: "Mọi loại", allStatus: "Mọi trạng thái", allCategories: "Mọi danh mục",
     allSafety: "Mọi mức an toàn", allStages: "Mọi bước", apply: "Lọc",
-    stages: { unclassified: "Chưa phân loại", no_video: "Đã đăng, chưa có video", has_video: "Có video", demo_ok: "Demo đạt", demo_failed: "Demo lỗi" },
+    stages: { unclassified: "Chưa phân loại", no_video: "Đã đăng, chưa có video", has_video: "Có video", has_slideshow: "Có slideshow", demo_ok: "Demo đạt", demo_failed: "Demo lỗi" },
     sorts: { stars: "Số sao", views: "Lượt xem", downloads: "Lượt tải", quality: "Điểm chất lượng", newest: "Mới nhất" },
   },
   table: { resource: "Tài nguyên", status: "Trạng thái", category: "Danh mục", quality: "Điểm", pipeline: "Agent", views: "Xem", downloads: "Tải", stars: "Sao", seen: "Phát hiện" },

@@ -97,7 +97,7 @@ export async function contentEngine(opts: EngineOptions = {}) {
     }
 
     if (aiAllowed && (opts.maxPreview ?? 40) > 0) {
-      for (const batch of chunks(await previewQueueStep(opts.maxPreview ?? 40), 4)) {
+      for (const batch of chunks(await previewQueueStep(logId, opts.maxPreview ?? 40), 4)) {
         if (await brake()) break;
         const r = await previewStep(logId, batch, opts.models?.previewer);
         add("previewed", r.previewed);
@@ -226,17 +226,23 @@ async function demoStep(name: string) {
 }
 demoStep.maxRetries = 1;
 
-async function previewQueueStep(limit: number) {
+async function previewQueueStep(logId: number, limit: number) {
   "use step";
-  return db.previewQueue(limit);
+  // needs a Blob store for the images and migration 20261009000100 for the queue; skip until both exist
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    await log(logId, "previewer skipped: connect a Vercel Blob store (BLOB_READ_WRITE_TOKEN) to the project");
+    return [];
+  }
+  try {
+    return await db.previewQueue(limit);
+  } catch (e) {
+    await log(logId, `previewer skipped: ${(e as Error).message.slice(0, 160)}`);
+    return [];
+  }
 }
 
 async function previewStep(logId: number, batch: PreviewTarget[], model?: string) {
   "use step";
-  if (!process.env.BLOB_READ_WRITE_TOKEN) {
-    await log(logId, "previewer skipped: connect a Vercel Blob store (BLOB_READ_WRITE_TOKEN) to the project");
-    return { previewed: 0, found: 0, cost_usd: 0 };
-  }
   let cost = 0;
   const rows: { full_name: string; previews: Preview[] }[] = [];
   for (const t of batch) {

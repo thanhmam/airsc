@@ -17,11 +17,6 @@ export function ResourceCard({ r, lang, t }: { r: Card; lang: Locale; t: Dict })
       href={href(lang, `/r/${r.slug}`)}
       className="group flex flex-col gap-3 rounded-2xl border border-line bg-card p-4 transition hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-[0_8px_30px_-12px_rgba(90,61,240,0.35)]"
     >
-      {thumb && (
-        <div className="-mx-1 -mt-1 aspect-video overflow-hidden rounded-xl border border-line bg-soft">
-          <Image src={thumb.thumb} alt="" width={640} height={360} unoptimized className="size-full object-cover object-top" />
-        </div>
-      )}
       <div className="flex items-center justify-between gap-2">
         <span className="inline-flex items-center gap-1.5 text-xs font-medium text-muted">
           <Icon className="size-3.5" aria-hidden />
@@ -29,9 +24,22 @@ export function ResourceCard({ r, lang, t }: { r: Card; lang: Locale; t: Dict })
         </span>
         <SafetyBadge safety={r.safety} t={t} />
       </div>
-      <div className="min-w-0">
-        <h3 className="truncate font-semibold tracking-tight group-hover:text-accent">{r.name}</h3>
-        <p className="truncate text-xs text-muted">{r.owner}</p>
+      <div className="flex items-center gap-3">
+        <div className="min-w-0 flex-1">
+          <h3 className="truncate font-semibold tracking-tight group-hover:text-accent">{r.name}</h3>
+          <p className="truncate text-xs text-muted">{r.owner}</p>
+        </div>
+        {/* a small real-result thumbnail keeps every card in a row the same height */}
+        {thumb && (
+          <Image
+            src={thumb.thumb}
+            alt=""
+            width={640}
+            height={360}
+            unoptimized
+            className="aspect-video w-20 flex-none rounded-md border border-line bg-soft object-cover object-top"
+          />
+        )}
       </div>
       <p className="line-clamp-2 text-sm leading-relaxed text-muted">{blurb}</p>
       <div className="mt-auto flex items-center gap-3 text-xs text-muted">
