@@ -39,8 +39,26 @@ export function resolveImage(ref: string, fullName: string, branch: string): str
   }
 }
 
+/**
+ * Only the author's own pictures: files in this repo, or images uploaded to GitHub (user-attachments).
+ * Aggregator READMEs link to other projects' images, which would show the wrong thing on this resource's card.
+ */
+export function isOwnImage(url: string, fullName: string): boolean {
+  try {
+    const u = new URL(url);
+    const repo = `/${fullName.toLowerCase()}/`;
+    const path = decodeURIComponent(u.pathname).toLowerCase();
+    if (u.hostname === "raw.githubusercontent.com") return path.startsWith(repo);
+    if (u.hostname === "media.githubusercontent.com") return path.startsWith(`/media${repo}`);
+    if (u.hostname === "github.com") return path.startsWith("/user-attachments/assets/") || path.startsWith(repo);
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 /** Image references in README order, scored by how likely they show a real result */
-export function extractCandidates(md: string, fullName: string, branch: string, max = 6): Candidate[] {
+export function extractCandidates(md: string, fullName: string, branch: string, max = 4): Candidate[] {
   const found: { ref: string; alt: string }[] = [];
   const text = md.replace(/<!--[\s\S]*?-->/g, "");
   for (const m of text.matchAll(/!\[([^\]]*)\]\(([^)]+)\)/g)) found.push({ ref: m[2], alt: m[1] });
@@ -55,7 +73,7 @@ export function extractCandidates(md: string, fullName: string, branch: string, 
   const out: Candidate[] = [];
   found.forEach(({ ref, alt }, i) => {
     const url = resolveImage(ref, fullName, branch);
-    if (!url || seen.has(url) || NOISE.test(url) || NOISE.test(alt)) return;
+    if (!url || seen.has(url) || !isOwnImage(url, fullName) || NOISE.test(url) || NOISE.test(alt)) return;
     if (/\.svg(\?|$)/i.test(url)) return; // mostly logos, badges and diagrams
     seen.add(url);
     const name = `${alt} ${url.split("/").pop()}`;
@@ -119,12 +137,12 @@ const verdict = z.object({
 const SYSTEM = `You pick preview images for Airsc, a library of AI agent resources (Claude skills, MCP servers, Claude Code plugins, subagents, Cursor rules).
 A good preview shows what the user gets: real output the resource produced (a generated page, slide, chart, image, document), the tool running in an app or terminal, or a before/after.
 Classify every image. kind: result = output it produced; screenshot = the tool's UI or a terminal/editor session using it; demo = animated walkthrough; diagram = architecture or flow chart; banner = title art or marketing header; logo = logo or icon.
-score 0-10 for how convincingly it shows the resource working (banners, logos and generic diagrams score 0-3). Captions are short and factual: never invent features.`;
+score 0-10 for how convincingly it shows the resource working (banners, logos and generic diagrams score 0-3). An image that does not clearly belong to THIS resource (another project, a generic sample, an ad, an unrelated gallery) scores 0. Captions are short and factual: never invent features.`;
 
 /** Asks the vision model to rank the candidates; falls back to the README heuristic without a gateway key */
-async function judge(name: string, imgs: Loaded[], model: string) {
-  // small JPEG copies keep the vision call cheap (a middle frame for GIFs)
-  const thumbs = await Promise.all(imgs.map((i) => still(i).resize({ width: 768, withoutEnlargement: true }).jpeg({ quality: 70 }).toBuffer()));
+async function judge(name: string, about: string, imgs: Loaded[], model: string) {
+  // small JPEG copies (512 px, at most 4) keep the vision call cheap (a middle frame for GIFs)
+  const thumbs = await Promise.all(imgs.map((i) => still(i).resize({ width: 512, withoutEnlargement: true }).jpeg({ quality: 60 }).toBuffer()));
   const { output, providerMetadata } = await generateText({
     model,
     output: Output.object({ schema: verdict }),
@@ -133,7 +151,7 @@ async function judge(name: string, imgs: Loaded[], model: string) {
       {
         role: "user",
         content: [
-          { type: "text", text: `Resource: ${name}. Images in README order, index 0..${imgs.length - 1}. Alt texts: ${JSON.stringify(imgs.map((i) => i.alt))}` },
+          { type: "text", text: `Resource: ${name}. About: ${about}\nImages in README order, index 0..${imgs.length - 1}. Alt texts: ${JSON.stringify(imgs.map((i) => i.alt))}` },
           ...thumbs.map((image) => ({ type: "image" as const, image, mediaType: "image/jpeg" })),
         ],
       },
@@ -167,7 +185,8 @@ export async function preview(
   let picks: { img: Loaded; kind: Preview["kind"]; caption: Preview["caption"] }[];
   let cost = 0;
   if (opts.useVision ?? true) {
-    const { ranked, cost: c } = await judge(t.full_name, loaded, opts.model ?? PREVIEW_MODEL());
+    const about = md.replace(/!\[[^\]]*\]\([^)]*\)|<[^>]+>|\[!\[[^\]]*\]\([^)]*\)\]\([^)]*\)/g, " ").replace(/\s+/g, " ").trim().slice(0, 500);
+    const { ranked, cost: c } = await judge(t.full_name, about, loaded, opts.model ?? PREVIEW_MODEL());
     cost = c;
     picks = ranked
       .filter((r) => loaded[r.index] && r.score >= 6 && ["result", "screenshot", "demo"].includes(r.kind))
