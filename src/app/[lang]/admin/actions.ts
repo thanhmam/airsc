@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { getRun } from "workflow/api";
 import { requireAdmin } from "@/lib/admin";
 import { db } from "@/lib/engine/db";
-import { MODEL_CHOICES, type EngineSettings } from "@/lib/engine/settings";
+import { MODEL_CHOICES, type EngineSettings, PREVIEW_DEFAULT } from "@/lib/engine/settings";
 import { startEngine, type Preset } from "@/lib/engine/start";
 
 async function guard() {
@@ -60,12 +60,14 @@ export async function saveSettings(form: FormData) {
       maxCurate: clamp(form.get("maxCurate"), 0, 2000, cur.limits.maxCurate),
       maxProduce: clamp(form.get("maxProduce"), 0, 500, cur.limits.maxProduce),
       maxDemo: clamp(form.get("maxDemo"), 0, 100, cur.limits.maxDemo),
+      maxPreview: clamp(form.get("maxPreview"), 0, 1000, cur.limits.maxPreview ?? 40),
       maxPages: clamp(form.get("maxPages"), 0, 30, cur.limits.maxPages),
     },
     models: {
       curator: model(form.get("model_curator"), cur.models.curator),
       editor: model(form.get("model_editor"), cur.models.editor),
       producer: model(form.get("model_producer"), cur.models.producer),
+      previewer: model(form.get("model_previewer"), cur.models.previewer ?? PREVIEW_DEFAULT),
     },
     budget: {
       run_usd: clamp(form.get("run_usd"), 0, 100, cur.budget.run_usd),

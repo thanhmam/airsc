@@ -72,11 +72,27 @@ export type Resource = {
     error?: string;
     verified_at: string;
   } | null;
+  /** Real-result images, picked by the Previewer agent or captured from an Airsc run */
+  previews: Preview[] | null;
   sources: string[];
   first_seen_at: string;
 };
 
 export type Bilingual = { en: string; vi: string };
+
+export type Preview = {
+  src: string;
+  /** 640x360 cover crop for cards */
+  thumb: string;
+  width: number;
+  height: number;
+  /** run = Airsc ran the resource on its own codebase; the rest come from the author's README */
+  kind: "result" | "screenshot" | "demo" | "run";
+  animated: boolean;
+  caption: Bilingual;
+  /** original image URL (README) or the task Airsc gave the agent (run) */
+  source: string;
+};
 
 export type ShowcaseScene = {
   kind: "hook" | "problem" | "ask" | "agent" | "result" | "cta";

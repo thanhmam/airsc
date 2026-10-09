@@ -1,19 +1,27 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Star } from "lucide-react";
 import { TYPE_ICON } from "@/components/icons";
 import { SafetyBadge } from "@/components/safety-badge";
+import { cardThumb } from "@/lib/airsc-runs";
 import type { ResourceCard as Card } from "@/lib/data";
 import { href, type Dict, type Locale } from "@/lib/i18n";
 import { compact } from "@/lib/utils";
 
 export function ResourceCard({ r, lang, t }: { r: Card; lang: Locale; t: Dict }) {
   const Icon = TYPE_ICON[r.type];
+  const thumb = cardThumb(r.slug, r.previews);
   const blurb = (lang === "vi" ? r.summary_vi || r.description_vi : r.summary) || r.description || "";
   return (
     <Link
       href={href(lang, `/r/${r.slug}`)}
       className="group flex flex-col gap-3 rounded-2xl border border-line bg-card p-4 transition hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-[0_8px_30px_-12px_rgba(90,61,240,0.35)]"
     >
+      {thumb && (
+        <div className="-mx-1 -mt-1 aspect-video overflow-hidden rounded-xl border border-line bg-soft">
+          <Image src={thumb.thumb} alt="" width={640} height={360} unoptimized className="size-full object-cover object-top" />
+        </div>
+      )}
       <div className="flex items-center justify-between gap-2">
         <span className="inline-flex items-center gap-1.5 text-xs font-medium text-muted">
           <Icon className="size-3.5" aria-hidden />

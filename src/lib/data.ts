@@ -3,12 +3,13 @@ import { anonClient } from "@/lib/supabase/anon";
 import type { GuidePageRow, Kit, Resource, ResourceType } from "@/lib/types";
 
 export const CARD_FIELDS =
-  "id,slug,type,name,owner,full_name,description,description_vi,summary,summary_vi,stars,safety,license,pushed_at,downloads,topics,category,first_seen_at";
+  "id,slug,type,name,owner,full_name,description,description_vi,summary,summary_vi,stars,safety,license,pushed_at,downloads,topics,category,first_seen_at,previews";
 
 export type ResourceCard = Pick<
   Resource,
   | "id" | "slug" | "type" | "name" | "owner" | "full_name" | "description" | "description_vi" | "summary"
   | "summary_vi" | "stars" | "safety" | "license" | "pushed_at" | "downloads" | "topics" | "category" | "first_seen_at"
+  | "previews"
 >;
 
 export type SortKey = "stars" | "recent" | "downloads" | "new";

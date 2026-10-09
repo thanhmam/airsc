@@ -7,6 +7,7 @@ import { anonClient } from "@/lib/supabase/anon";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { BadgeCheck, ExternalLink, GitFork, Star } from "lucide-react";
+import { Previews } from "@/components/previews";
 import { ShowcasePlayer } from "@/components/showcase/player";
 import { categoryLabel } from "@/lib/taxonomy";
 import { CopyButton } from "@/components/copy-button";
@@ -14,6 +15,7 @@ import { GetResource } from "@/components/get-resource";
 import { InstallPreview } from "@/components/demos";
 import { KIT_ICON, TYPE_ICON } from "@/components/icons";
 import { SafetyBadge } from "@/components/safety-badge";
+import { runFor } from "@/lib/airsc-runs";
 import { getResource, kitsForResource } from "@/lib/data";
 import { getDict, hasLocale, href } from "@/lib/i18n";
 import { fmtDate, tzFor } from "@/lib/time";
@@ -51,6 +53,7 @@ export default async function ResourcePage({ params }: PageProps<"/[lang]/r/[slu
   const viDescription = r.description_vi && r.description_vi.length < 400 ? r.description_vi : null;
   const description = vi ? viDescription || r.description : r.description;
   const showcase = r.showcase?.[lang];
+  const run = runFor(r.slug);
   const mcp = r.install.mcp;
   const previewLines = r.install.commands?.length
     ? r.install.commands.map((c) => c.cmd.split(" && ")).flat().slice(0, 4)
@@ -100,6 +103,10 @@ export default async function ResourcePage({ params }: PageProps<"/[lang]/r/[slu
               <span>{compact(r.downloads)} {t.resource.downloads}</span>
             </div>
           </header>
+
+          {(run || (r.previews?.length ?? 0) > 0) && (
+            <Previews name={r.name} owner={r.owner} repoUrl={r.repo_url} run={run} previews={r.previews ?? []} lang={lang} t={t} />
+          )}
 
           {showcase?.length ? (
             <section aria-labelledby="showcase" className="space-y-2">
