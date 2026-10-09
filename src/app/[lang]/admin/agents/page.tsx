@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { Activity, Bot, Clapperboard, FileText, FlaskConical, Info, Radar, ScanSearch, Square } from "lucide-react";
+import { Activity, Bot, Clapperboard, FileText, FlaskConical, Images, Info, Radar, ScanSearch, Square } from "lucide-react";
 import { aiCredits } from "@/lib/engine/credits";
 import { db } from "@/lib/engine/db";
-import { MODEL_CHOICES } from "@/lib/engine/settings";
+import { MODEL_CHOICES, PREVIEW_DEFAULT } from "@/lib/engine/settings";
 import { href, type Locale } from "@/lib/i18n";
 import { fmtDateTime, VN_TZ } from "@/lib/time";
 import { cn } from "@/lib/utils";
@@ -21,10 +21,11 @@ const T = {
     off: "Scheduled runs are turned off",
     quick: "Run now",
     presets: {
-      full: ["Full run", "All 6 agents with the saved limits"],
+      full: ["Full run", "All 7 agents with the saved limits"],
       discover: ["Find & classify", "Scout + Analyst + Curator"],
       curate: ["Curator only", "Classify resources waiting for agents"],
       demo: ["Demo only", "Verify MCP servers in the sandbox"],
+      preview: ["Previewer only", "Find real-result images in READMEs"],
       editor: ["Editor only", "Write or refresh guide pages"],
       produce: ["Producer only", "Make explainer videos"],
     },
@@ -41,6 +42,7 @@ const T = {
       curator: "Reads each new repo, decides if it belongs in the library, scores quality 0-100, picks a category and writes the English and Vietnamese summaries. Runs on every resource, so it is the biggest cost: pick a cheap, fast model.",
       editor: "Writes the guide pages (best resources per category) and the weekly digest, choosing and explaining the top picks. Few pages per day, and the text is public, so a stronger model is worth it.",
       producer: "Writes the 6-scene explainer video script and example prompts for each resource. Currently turned off (limit 0).",
+      previewer: "Looks at up to 6 images from each README and keeps the ones that show the resource really working (screenshots, demos, generated output). Needs a vision model; a cheap one is enough.",
     } as Record<string, string>,
     budget: "Budget",
     runCap: "Stop AI agents when a run has spent (USD)",
@@ -56,6 +58,7 @@ const T = {
       maxCurate: "Curator: resources",
       maxProduce: "Producer: videos (0 = off)",
       maxDemo: "Demo: MCP servers",
+      maxPreview: "Previewer: resources",
       maxPages: "Editor: guide pages",
     } as Record<string, string>,
   },
@@ -70,10 +73,11 @@ const T = {
     off: "Lịch chạy tự động đang tắt",
     quick: "Chạy ngay",
     presets: {
-      full: ["Chạy đầy đủ", "Cả 6 agent theo giới hạn đã lưu"],
+      full: ["Chạy đầy đủ", "Cả 7 agent theo giới hạn đã lưu"],
       discover: ["Tìm & phân loại", "Scout + Analyst + Curator"],
       curate: ["Chỉ Curator", "Phân loại tài nguyên đang chờ agent"],
       demo: ["Chỉ Demo", "Chạy thử MCP server trong sandbox"],
+      preview: ["Chỉ Previewer", "Tìm ảnh kết quả thật trong README"],
       editor: ["Chỉ Editor", "Viết hoặc làm mới trang hướng dẫn"],
       produce: ["Chỉ Producer", "Tạo video giới thiệu"],
     },
@@ -90,6 +94,7 @@ const T = {
       curator: "Đọc từng repo mới, quyết định có đưa vào thư viện không, chấm điểm chất lượng 0-100, chọn danh mục và viết tóm tắt tiếng Anh và tiếng Việt. Chạy cho mọi tài nguyên nên tốn nhất: nên chọn model rẻ và nhanh.",
       editor: "Viết các trang hướng dẫn (tài nguyên tốt nhất theo danh mục) và bản tin tuần, chọn và giải thích các lựa chọn hàng đầu. Mỗi ngày chỉ vài trang và nội dung hiển thị công khai nên đáng dùng model mạnh hơn.",
       producer: "Viết kịch bản video giới thiệu 6 cảnh và các câu lệnh mẫu cho từng tài nguyên. Hiện đang tắt (giới hạn 0).",
+      previewer: "Xem tối đa 6 ảnh trong README của mỗi tài nguyên và giữ lại ảnh cho thấy tài nguyên chạy thật (ảnh chụp màn hình, demo, kết quả tạo ra). Cần model đọc được ảnh; model rẻ là đủ.",
     },
     budget: "Ngân sách",
     runCap: "Dừng agent AI khi một lần chạy đã tiêu (USD)",
@@ -105,6 +110,7 @@ const T = {
       maxCurate: "Curator: tài nguyên",
       maxProduce: "Producer: video (0 = tắt)",
       maxDemo: "Demo: MCP server",
+      maxPreview: "Previewer: tài nguyên",
       maxPages: "Editor: trang hướng dẫn",
     },
   },
@@ -147,6 +153,7 @@ export default async function AdminAgents({ params }: PageProps<"/[lang]/admin/a
     { name: "Curator", icon: Bot, desc: lang === "vi" ? "Phân loại, chấm điểm, tóm tắt EN/VI, đăng hoặc lọc bỏ" : "Classifies, scores, summarises, publishes or filters", count: sum("curated"), cost: sum("cost_curator"), unit: perItem("curated", "cost_curator"), model: settings.models.curator, off: settings.limits.maxCurate === 0 },
     { name: "Producer", icon: Clapperboard, desc: lang === "vi" ? "Kịch bản video + câu lệnh mẫu" : "Explainer video script + prompts", count: sum("produced"), cost: sum("cost_producer"), unit: perItem("produced", "cost_producer"), model: settings.models.producer, off: settings.limits.maxProduce === 0 },
     { name: "Demo", icon: FlaskConical, desc: lang === "vi" ? "Chạy thật MCP server trong sandbox" : "Runs MCP servers in a sandbox", count: sum("demos_tried"), extra: `${sum("demos_verified")} ✓`, cost: 0, model: "Vercel Sandbox", off: settings.limits.maxDemo === 0 },
+    { name: "Previewer", icon: Images, desc: lang === "vi" ? "Ảnh kết quả thật từ README" : "Real-result images from READMEs", count: sum("previewed"), extra: `${sum("previews_found")} 🖼`, cost: sum("cost_previewer"), unit: perItem("previewed", "cost_previewer"), model: settings.models.previewer ?? PREVIEW_DEFAULT, off: (settings.limits.maxPreview ?? 40) === 0 },
     { name: "Editor", icon: FileText, desc: lang === "vi" ? "Viết trang hướng dẫn, bản tin tuần" : "Writes guides and the weekly digest", count: sum("pages"), cost: sum("cost_editor"), unit: perItem("pages", "cost_editor"), model: settings.models.editor, off: settings.limits.maxPages === 0 },
   ];
   const input = "h-8 w-24 rounded-lg border border-line bg-bg px-2 text-right text-sm tabular-nums";
@@ -268,16 +275,16 @@ export default async function AdminAgents({ params }: PageProps<"/[lang]/admin/a
         </div>
         <fieldset className="space-y-2">
           <legend className="mb-1 text-xs font-medium text-muted">{t.limits}</legend>
-          {(["maxNew", "maxRefresh", "maxCurate", "maxProduce", "maxDemo", "maxPages"] as const).map((k) => (
+          {(["maxNew", "maxRefresh", "maxCurate", "maxProduce", "maxDemo", "maxPreview", "maxPages"] as const).map((k) => (
             <label key={k} className="flex items-center justify-between gap-3 text-sm">
               {t.lim[k]}
-              <input name={k} type="number" min={0} defaultValue={settings.limits[k]} className={input} />
+              <input name={k} type="number" min={0} defaultValue={settings.limits[k] ?? 40} className={input} />
             </label>
           ))}
         </fieldset>
         <div className="flex flex-col gap-2">
           <p className="text-xs font-medium text-muted">{t.models}</p>
-          {(["curator", "editor", "producer"] as const).map((k) => (
+          {(["curator", "editor", "producer", "previewer"] as const).map((k) => (
             <label key={k} className="flex flex-col gap-1 text-sm">
               <span className="group relative inline-flex w-fit items-center gap-1.5 capitalize">
                 {k}
@@ -295,7 +302,7 @@ export default async function AdminAgents({ params }: PageProps<"/[lang]/admin/a
                   {t.modelHelp[k]}
                 </span>
               </span>
-              <select name={`model_${k}`} defaultValue={settings.models[k]} className={select}>
+              <select name={`model_${k}`} defaultValue={settings.models[k] ?? PREVIEW_DEFAULT} className={select}>
                 {MODEL_CHOICES.map((m) => (
                   <option key={m.id} value={m.id}>
                     {m.label} · {m.price}

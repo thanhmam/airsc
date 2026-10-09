@@ -10,7 +10,6 @@ export const href = (lang: Locale, path = "/") => (lang === "en" ? path : `/vi${
 const en = {
   nav: { browse: "Browse", kits: "Kits", guides: "Guides", mcp: "Airsc MCP", pricing: "Support", signIn: "Sign in", account: "Account" },
   content: {
-    showcase: "Watch the 20-second explainer",
     tryAsking: "Try asking your agent",
     useCases: "What you can do with it",
     verified: "Verified live",
@@ -25,8 +24,14 @@ const en = {
     guidesSub: "Hand-picked collections for what you want to build, refreshed every week.",
     whyPick: "Why we picked it",
     updated: "Updated",
-    illustrative: "Animated walkthrough based on the README. Your agent's real output may differ.",
+    inAction: "See it in action",
+    runOnAirsc: "Run on Airsc",
+    task: "Task",
+    fromReadme: "From the author's README",
+    source: "Source",
+    previewAlt: "Result produced by",
   },
+  slideshow: { prev: "Previous image", next: "Next image", pause: "Pause slideshow", play: "Play slideshow", slide: "Image", of: "of" },
   types: { skill: "Skill", mcp: "MCP server", plugin: "Plugin", agent: "Agent", rule: "Cursor rule" } as Record<string, string>,
   typesPlural: { skill: "Skills", mcp: "MCP servers", plugin: "Plugins", agent: "Agents", rule: "Cursor rules" } as Record<string, string>,
   safety: {
@@ -251,7 +256,6 @@ export type Dict = typeof en;
 const vi: Dict = {
   nav: { browse: "Khám phá", kits: "Kit", guides: "Hướng dẫn", mcp: "Airsc MCP", pricing: "Ủng hộ", signIn: "Đăng nhập", account: "Tài khoản" },
   content: {
-    showcase: "Xem video giới thiệu 20 giây",
     tryAsking: "Thử hỏi agent của bạn",
     useCases: "Bạn có thể làm gì với nó",
     verified: "Đã chạy thử thật",
@@ -266,8 +270,14 @@ const vi: Dict = {
     guidesSub: "Bộ sưu tập chọn lọc theo thứ bạn muốn làm, cập nhật hằng tuần.",
     whyPick: "Vì sao chọn",
     updated: "Cập nhật",
-    illustrative: "Video minh hoạ dựa trên README. Kết quả thật từ agent của bạn có thể khác.",
+    inAction: "Xem kết quả thực tế",
+    runOnAirsc: "Chạy thật trên Airsc",
+    task: "Việc giao",
+    fromReadme: "Ảnh từ README của tác giả",
+    source: "Nguồn",
+    previewAlt: "Kết quả tạo bởi",
   },
+  slideshow: { prev: "Ảnh trước", next: "Ảnh sau", pause: "Tạm dừng trình chiếu", play: "Phát trình chiếu", slide: "Ảnh", of: "trên" },
   types: { skill: "Skill", mcp: "MCP server", plugin: "Plugin", agent: "Agent", rule: "Cursor rule" },
   typesPlural: { skill: "Skills", mcp: "MCP servers", plugin: "Plugins", agent: "Agents", rule: "Cursor rules" },
   safety: {

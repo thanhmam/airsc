@@ -7,12 +7,14 @@ import { db } from "@/lib/engine/db";
 import { curate } from "@/lib/engine/agents/curator";
 import { demoable, demoMcp } from "@/lib/engine/agents/demo";
 import { categoryGuide, isoWeek, weeklyDigest } from "@/lib/engine/agents/editor";
+import { preview } from "@/lib/engine/agents/previewer";
 import { produce } from "@/lib/engine/agents/producer";
 import { discover, metadata } from "@/lib/engine/agents/scout";
 import { chunks, select, type Candidate } from "@/lib/engine/select";
 import { anonClient } from "@/lib/supabase/anon";
 import { CATEGORIES } from "@/lib/taxonomy";
-import type { Resource } from "@/lib/types";
+import type { Preview, Resource } from "@/lib/types";
+import type { PreviewTarget } from "@/lib/engine/agents/previewer";
 
 export type EngineOptions = {
   trigger?: "cron" | "manual" | "backfill";
@@ -23,13 +25,14 @@ export type EngineOptions = {
   maxProduce?: number;
   maxDemo?: number;
   maxPages?: number;
-  models?: { curator?: string; producer?: string; editor?: string };
+  maxPreview?: number;
+  models?: { curator?: string; producer?: string; editor?: string; previewer?: string };
   budget?: { run_usd?: number; min_balance_usd?: number };
 };
 
 /**
  * Airsc Content Engine. Runs daily (and on demand from /admin):
- * Scout → Analyst → Curator → kits → Producer → Demo → Editor.
+ * Scout → Analyst → Curator → kits → Producer → Demo → Previewer → Editor.
  * Every step is retried and checkpointed, so a failure resumes where it stopped.
  */
 export async function contentEngine(opts: EngineOptions = {}) {
@@ -90,6 +93,17 @@ export async function contentEngine(opts: EngineOptions = {}) {
         const results = await Promise.allSettled(batch.map((name) => demoStep(name)));
         add("demos_verified", results.filter((r) => r.status === "fulfilled" && r.value).length);
         add("demos_tried", batch.length);
+      }
+    }
+
+    if (aiAllowed && (opts.maxPreview ?? 40) > 0) {
+      for (const batch of chunks(await previewQueueStep(logId, opts.maxPreview ?? 40), 4)) {
+        if (await brake()) break;
+        const r = await previewStep(logId, batch, opts.models?.previewer);
+        add("previewed", r.previewed);
+        add("previews_found", r.found);
+        add("cost_usd", r.cost_usd);
+        add("cost_previewer", r.cost_usd);
       }
     }
 
@@ -211,6 +225,41 @@ async function demoStep(name: string) {
   return demo.ok;
 }
 demoStep.maxRetries = 1;
+
+async function previewQueueStep(logId: number, limit: number) {
+  "use step";
+  // needs a Blob store for the images and migration 20261009000100 for the queue; skip until both exist
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    await log(logId, "previewer skipped: connect a Vercel Blob store (BLOB_READ_WRITE_TOKEN) to the project");
+    return [];
+  }
+  try {
+    return await db.previewQueue(limit);
+  } catch (e) {
+    await log(logId, `previewer skipped: ${(e as Error).message.slice(0, 160)}`);
+    return [];
+  }
+}
+
+async function previewStep(logId: number, batch: PreviewTarget[], model?: string) {
+  "use step";
+  let cost = 0;
+  const rows: { full_name: string; previews: Preview[] }[] = [];
+  for (const t of batch) {
+    try {
+      const r = await preview(t, { model });
+      cost += r.cost;
+      rows.push({ full_name: t.full_name, previews: r.previews });
+    } catch (e) {
+      // not marked as checked: tried again on the next run
+      await log(logId, `previewer ${t.full_name} failed: ${(e as Error).message.slice(0, 160)}`);
+    }
+  }
+  if (rows.length) await db.setPreviews(rows);
+  const found = rows.filter((r) => r.previews.length).length;
+  await log(logId, `previewer · ${rows.length} checked · ${found} with previews · $${cost.toFixed(4)}`);
+  return { previewed: rows.length, found, cost_usd: cost };
+}
 
 type EditorTask = { kind: "category"; category: string } | { kind: "digest" };
 

@@ -1,13 +1,16 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Star } from "lucide-react";
 import { TYPE_ICON } from "@/components/icons";
 import { SafetyBadge } from "@/components/safety-badge";
+import { cardThumb } from "@/lib/airsc-runs";
 import type { ResourceCard as Card } from "@/lib/data";
 import { href, type Dict, type Locale } from "@/lib/i18n";
 import { compact } from "@/lib/utils";
 
 export function ResourceCard({ r, lang, t }: { r: Card; lang: Locale; t: Dict }) {
   const Icon = TYPE_ICON[r.type];
+  const thumb = cardThumb(r.slug, r.previews);
   const blurb = (lang === "vi" ? r.summary_vi || r.description_vi : r.summary) || r.description || "";
   return (
     <Link
@@ -21,9 +24,22 @@ export function ResourceCard({ r, lang, t }: { r: Card; lang: Locale; t: Dict })
         </span>
         <SafetyBadge safety={r.safety} t={t} />
       </div>
-      <div className="min-w-0">
-        <h3 className="truncate font-semibold tracking-tight group-hover:text-accent">{r.name}</h3>
-        <p className="truncate text-xs text-muted">{r.owner}</p>
+      <div className="flex items-center gap-3">
+        <div className="min-w-0 flex-1">
+          <h3 className="truncate font-semibold tracking-tight group-hover:text-accent">{r.name}</h3>
+          <p className="truncate text-xs text-muted">{r.owner}</p>
+        </div>
+        {/* a small real-result thumbnail keeps every card in a row the same height */}
+        {thumb && (
+          <Image
+            src={thumb.thumb}
+            alt=""
+            width={640}
+            height={360}
+            unoptimized
+            className="aspect-video w-20 flex-none rounded-md border border-line bg-soft object-cover object-top"
+          />
+        )}
       </div>
       <p className="line-clamp-2 text-sm leading-relaxed text-muted">{blurb}</p>
       <div className="mt-auto flex items-center gap-3 text-xs text-muted">

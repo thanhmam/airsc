@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { BadgeCheck, CircleDashed, Clapperboard, Tags, XCircle } from "lucide-react";
+import { BadgeCheck, CircleDashed, Clapperboard, GalleryHorizontal, Tags, XCircle } from "lucide-react";
 import { SafetyBadge } from "@/components/safety-badge";
+import { adminSlideshowResources, slideshowSlugs } from "@/lib/data";
 import { db } from "@/lib/engine/db";
 import { getDict, href, type Locale } from "@/lib/i18n";
 import { CATEGORIES, categoryLabel } from "@/lib/taxonomy";
@@ -36,7 +37,12 @@ export default async function AdminResources({ params, searchParams }: PageProps
     sort: one("sort") ?? "stars",
   };
   const page = Math.max(1, Number(one("page")) || 1);
-  const { total, rows } = await db.adminResources({ ...filter, limit: PAGE, offset: (page - 1) * PAGE });
+  const range = { ...filter, limit: PAGE, offset: (page - 1) * PAGE };
+  // "Has slideshow" is not a database stage: it is read from the public table (see adminSlideshowResources)
+  const [{ total, rows }, slideshows] = await Promise.all([
+    filter.stage === "has_slideshow" ? adminSlideshowResources(range) : db.adminResources(range),
+    slideshowSlugs(),
+  ]);
   const pages = Math.ceil(total / PAGE);
   const qs = (patch: Record<string, string | undefined>) => {
     const p = new URLSearchParams();
@@ -142,6 +148,9 @@ export default async function AdminResources({ params, searchParams }: PageProps
                     </span>
                     <span title={c.filters.stages.has_video} className={r.produced_at ? "text-accent" : "text-muted/40"}>
                       <Clapperboard className="size-4" aria-label={r.produced_at ? "video" : "no video"} />
+                    </span>
+                    <span title={c.filters.stages.has_slideshow} className={slideshows.has(r.slug) ? "text-accent" : "text-muted/40"}>
+                      <GalleryHorizontal className="size-4" aria-label={slideshows.has(r.slug) ? "slideshow" : "no slideshow"} />
                     </span>
                     {r.demo_ok === "true" ? (
                       <span className="inline-flex items-center gap-0.5 text-safe"><BadgeCheck className="size-4" aria-label="demo ok" />{r.demo_tools}</span>

@@ -7,13 +7,14 @@ import { anonClient } from "@/lib/supabase/anon";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { BadgeCheck, ExternalLink, GitFork, Star } from "lucide-react";
-import { ShowcasePlayer } from "@/components/showcase/player";
+import { Previews } from "@/components/previews";
 import { categoryLabel } from "@/lib/taxonomy";
 import { CopyButton } from "@/components/copy-button";
 import { GetResource } from "@/components/get-resource";
 import { InstallPreview } from "@/components/demos";
 import { KIT_ICON, TYPE_ICON } from "@/components/icons";
 import { SafetyBadge } from "@/components/safety-badge";
+import { runFor } from "@/lib/airsc-runs";
 import { getResource, kitsForResource } from "@/lib/data";
 import { getDict, hasLocale, href } from "@/lib/i18n";
 import { fmtDate, tzFor } from "@/lib/time";
@@ -50,7 +51,7 @@ export default async function ResourcePage({ params }: PageProps<"/[lang]/r/[slu
   // early machine translations sometimes contain whole README chunks: fall back to the GitHub description
   const viDescription = r.description_vi && r.description_vi.length < 400 ? r.description_vi : null;
   const description = vi ? viDescription || r.description : r.description;
-  const showcase = r.showcase?.[lang];
+  const run = runFor(r.slug);
   const mcp = r.install.mcp;
   const previewLines = r.install.commands?.length
     ? r.install.commands.map((c) => c.cmd.split(" && ")).flat().slice(0, 4)
@@ -101,12 +102,8 @@ export default async function ResourcePage({ params }: PageProps<"/[lang]/r/[slu
             </div>
           </header>
 
-          {showcase?.length ? (
-            <section aria-labelledby="showcase" className="space-y-2">
-              <h2 id="showcase" className="text-lg font-semibold">{t.content.showcase}</h2>
-              <ShowcasePlayer scenes={showcase} name={r.name} label={t.content.showcase} />
-              <p className="text-xs text-muted">{t.content.illustrative}</p>
-            </section>
+          {run || (r.previews?.length ?? 0) > 0 ? (
+            <Previews name={r.name} owner={r.owner} repoUrl={r.repo_url} run={run} previews={r.previews ?? []} lang={lang} t={t} />
           ) : (
             <section aria-labelledby="preview" className="space-y-3">
               <h2 id="preview" className="text-lg font-semibold">{t.resource.preview}</h2>
@@ -210,7 +207,7 @@ export default async function ResourcePage({ params }: PageProps<"/[lang]/r/[slu
           )}
         </div>
 
-        <aside className="space-y-4 lg:sticky lg:top-20 lg:self-start">
+        <aside className="min-w-0 space-y-4 lg:sticky lg:top-20 lg:self-start">
           <GetResource r={r} lang={lang} t={t} />
 
           {kits.length > 0 && (

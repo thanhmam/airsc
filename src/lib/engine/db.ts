@@ -34,6 +34,10 @@ export const db = {
   setStatus: (slug: string, status: "published" | "pending" | "hidden") =>
     rpc<void>("set_resource_status", { p_slug: slug, p_status: status }),
   requeue: (slug: string, stage: "curate" | "produce" | "demo") => rpc<void>("admin_requeue", { p_slug: slug, p_stage: stage }),
+  previewQueue: (limit: number) =>
+    rpc<{ full_name: string; slug: string; default_branch: string }[]>("agent_preview_queue", { p_limit: limit }),
+  setPreviews: (rows: { full_name: string; previews: unknown[] }[]) => rpc<number>("set_previews", { p_rows: rows }),
+  resetPreviews: (slug: string) => rpc<void>("reset_previews", { p_slug: slug }),
   adminResources: (f: AdminFilter) =>
     rpc<{ total: number; rows: AdminResourceRow[] }>("admin_resources", {
       p_q: f.q ?? null,
