@@ -8,7 +8,7 @@ export type Preset = "full" | "discover" | "curate" | "produce" | "demo" | "prev
 
 export function optionsFor(s: EngineSettings, preset: Preset, trigger: EngineOptions["trigger"]): EngineOptions {
   const L = s.limits;
-  const none = { maxCurate: 0, maxProduce: 0, maxDemo: 0, maxPreview: 0, maxPages: 0 };
+  const none = { maxCurate: 0, maxProduce: 0, maxDemo: 0, maxPreview: 0, maxPages: 0, picks: false };
   const base: EngineOptions = { trigger, models: s.models, budget: s.budget, maxNew: L.maxNew, maxRefresh: L.maxRefresh };
   switch (preset) {
     case "discover":

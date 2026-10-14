@@ -100,6 +100,15 @@ export async function getResourcesBySlugs(slugs: string[]) {
   return slugs.map((s) => bySlug.get(s)).filter((r): r is Row => !!r);
 }
 
+/**
+ * The latest set of Today's picks chosen by the Content Engine, or null before the first one exists
+ * (also while migration 20261014000100_daily_picks is not applied): the homepage then shows its built-in picks.
+ */
+export async function getDailyPicks(): Promise<{ day: string; slugs: string[] } | null> {
+  const { data, error } = await anonClient().from("daily_picks").select("day,slugs").order("day", { ascending: false }).limit(1).maybeSingle();
+  return error || !data ? null : (data as { day: string; slugs: string[] });
+}
+
 export async function getStats() {
   const db = anonClient();
   const [all, safe] = await Promise.all([

@@ -10,12 +10,15 @@ import { ResourceArt } from "@/components/home/resource-art";
 import { TodaysPicks, type Pick, type SceneKind } from "@/components/home/todays-picks";
 import { TYPE_ICON } from "@/components/icons";
 import { SafetyBadge } from "@/components/safety-badge";
-import { getGuides, getKit, getKits, getNewThisWeek, getResourcesBySlugs, getStats, getTrending } from "@/lib/data";
+import { getDailyPicks, getGuides, getKit, getKits, getNewThisWeek, getResourcesBySlugs, getStats, getTrending } from "@/lib/data";
 import { getDict, hasLocale, href, type Dict, type Locale } from "@/lib/i18n";
 import { agentPrompt } from "@/lib/install-links";
 import { compact } from "@/lib/utils";
 
-/** Curated picks: each has a hand-made "what you get" scene on the homepage stage */
+/**
+ * Resources with a hand-made "what you get" scene on the homepage stage. They are also the picks shown
+ * until the Content Engine has chosen its first daily set; every other pick shows its real-result image.
+ */
 const PICKS: { slug: string; scene: SceneKind; cmds: string[] }[] = [
   {
     slug: "zarazhangrui-frontend-slides",
@@ -49,18 +52,25 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
   if (!hasLocale(lang)) notFound();
   const t = getDict(lang);
   const h = t.home;
-  const [stats, kits, picksRaw, fresh, loved, guides, landing] = await Promise.all([
+  const [stats, kits, daily, fresh, loved, guides, landing] = await Promise.all([
     getStats(),
     getKits(),
-    getResourcesBySlugs(PICKS.map((p) => p.slug)),
+    getDailyPicks(),
     getNewThisWeek(8),
     getTrending(8),
     getGuides(),
     getKit("beautiful-landing-page"),
   ]);
+  const builtIn = PICKS.map((p) => p.slug);
+  let picksRaw = await getResourcesBySlugs(daily?.slugs ?? builtIn);
+  // a daily set can thin out when its resources are hidden later
+  const fromEngine = !!daily && picksRaw.length >= 3;
+  if (daily && !fromEngine) picksRaw = await getResourcesBySlugs(builtIn);
 
   const picks: Pick[] = picksRaw.map((r) => {
-    const cfg = PICKS.find((p) => p.slug === r.slug)!;
+    const cfg = PICKS.find((p) => p.slug === r.slug);
+    const shot = cfg ? undefined : r.previews?.[0];
+    const mcp = r.install.mcp;
     return {
       slug: r.slug,
       name: r.name,
@@ -71,8 +81,21 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
       license: r.license,
       blurb: blurbOf(r, lang),
       prompt: agentPrompt(r),
-      scene: cfg.scene,
-      cmds: cfg.cmds,
+      scene: cfg?.scene,
+      shot: shot && {
+        src: shot.src,
+        width: shot.width,
+        height: shot.height,
+        caption: (lang === "vi" ? shot.caption.vi : shot.caption.en) || `${t.content.previewAlt} ${r.name}`,
+        note: shot.kind === "run" ? t.content.runOnAirsc : `${t.content.fromReadme} ${r.owner}`,
+      },
+      cmds:
+        cfg?.cmds ??
+        (r.install.commands?.length
+          ? r.install.commands.flatMap((c) => c.cmd.split(" && ")).slice(0, 4)
+          : mcp
+            ? [`${mcp.config.command ?? "npx"} ${(mcp.config.args ?? []).join(" ")}`.trim()]
+            : [`git clone https://github.com/${r.full_name}`]),
     };
   });
   const demoResults = (landing?.items ?? []).slice(0, 3).map((r) => ({
@@ -82,7 +105,10 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
     safe: r.safety === "safe",
   }));
   const site = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
-  const today = new Intl.DateTimeFormat(lang, { weekday: "short", month: "short", day: "numeric" }).format(new Date());
+  // the day the picks were chosen for (Vietnam time), which trails the calendar until the daily run finishes
+  const today = new Intl.DateTimeFormat(lang, { weekday: "short", month: "short", day: "numeric", timeZone: "Asia/Ho_Chi_Minh" }).format(
+    fromEngine ? new Date(`${daily.day}T12:00:00+07:00`) : new Date(),
+  );
   const labels = { types: t.types, typesPlural: t.typesPlural, safety: t.safety };
 
   return (

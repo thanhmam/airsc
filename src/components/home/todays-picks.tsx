@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowRight, Check } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { SAFETY_ICON, TYPE_ICON } from "@/components/icons";
@@ -21,7 +22,10 @@ export type Pick = {
   license: string | null;
   blurb: string;
   prompt: string;
-  scene: SceneKind;
+  /** hand-made walkthrough; picks without one show `shot` */
+  scene?: SceneKind;
+  /** real-result image: from the author's README, or from our own Airsc run */
+  shot?: { src: string; width: number; height: number; caption: string; note: string };
   cmds: string[];
 };
 
@@ -43,7 +47,7 @@ export type PicksCopy = {
 const DARK_SAFE: Record<Safety, string> = { safe: "text-[#4cc58a]", caution: "text-[#f0a843]", danger: "text-[#f2686d]" };
 const TICK = 5600;
 
-/** Four curated picks on the left, an animated "what you get" stage on the right; auto-advances until touched */
+/** The day's picks on the left, a "what you get" stage on the right (walkthrough or real-result image); auto-advances until touched */
 export function TodaysPicks({ lang, picks, c }: { lang: Locale; picks: Pick[]; c: PicksCopy }) {
   const [pick, setPick] = useState(0);
   const [tab, setTab] = useState<"result" | "install">("result");
@@ -144,9 +148,17 @@ export function TodaysPicks({ lang, picks, c }: { lang: Locale; picks: Pick[]; c
         </div>
 
         <div key={`${pick}-${tab}`} className="flex min-h-[336px] flex-1 flex-col gap-3.5 px-5 pb-3.5 pt-4">
-          {tab === "result" ? <Scene kind={cur.scene} lang={lang} /> : <Install cmds={cur.cmds} c={c} />}
+          {tab === "install" || !(cur.scene || cur.shot) ? (
+            <Install cmds={cur.cmds} c={c} />
+          ) : cur.scene ? (
+            <Scene kind={cur.scene} lang={lang} />
+          ) : (
+            <Shot shot={cur.shot!} />
+          )}
         </div>
-        {tab === "result" && <p className="px-5 pb-3 text-xs text-[#a3a0b5]">{c.walkNote}</p>}
+        {tab === "result" && (cur.scene || cur.shot) && (
+          <p className="px-5 pb-3 text-xs text-[#a3a0b5]">{cur.scene ? c.walkNote : cur.shot!.note}</p>
+        )}
 
         <div className="flex flex-wrap items-center gap-x-5 gap-y-3 border-t border-white/10 py-3.5 pl-5 pr-4">
           <div className="min-w-0 flex-[1_1_260px]">
@@ -208,6 +220,20 @@ function Install({ cmds, c }: { cmds: string[]; c: PicksCopy }) {
         </div>
       </div>
       <p className="text-[12.5px] text-[#a3a0b5]">{c.installNote}</p>
+    </>
+  );
+}
+
+function Shot({ shot }: { shot: NonNullable<Pick["shot"]> }) {
+  return (
+    <>
+      <div className="a-pop relative min-h-[240px] flex-1 overflow-hidden rounded-xl border border-white/10 bg-[#16141f]">
+        {/* pre-sized WebP, so Next does not optimise it again */}
+        <Image src={shot.src} alt={shot.caption} width={shot.width} height={shot.height} unoptimized className="absolute inset-0 size-full object-contain" />
+      </div>
+      <p className="a-rise line-clamp-2 text-[13px] leading-[1.45] text-[#b4b3bd]" style={{ animationDelay: "0.3s" }}>
+        {shot.caption}
+      </p>
     </>
   );
 }
