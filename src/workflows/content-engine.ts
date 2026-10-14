@@ -4,6 +4,7 @@ import { KITS, pickKitMembers } from "@/lib/crawler/kits";
 import { analyse, pool, type Row } from "@/lib/crawler/run";
 import { aiCredits } from "@/lib/engine/credits";
 import { db } from "@/lib/engine/db";
+import { choosePicks, PICK_MIN_QUALITY, PICKS_PER_DAY, type PickCandidate, type PickDay } from "@/lib/engine/picks";
 import { curate } from "@/lib/engine/agents/curator";
 import { demoable, demoMcp } from "@/lib/engine/agents/demo";
 import { categoryGuide, isoWeek, weeklyDigest } from "@/lib/engine/agents/editor";
@@ -26,6 +27,8 @@ export type EngineOptions = {
   maxDemo?: number;
   maxPages?: number;
   maxPreview?: number;
+  /** choose Today's picks for the homepage (full runs only) */
+  picks?: boolean;
   models?: { curator?: string; producer?: string; editor?: string; previewer?: string };
   budget?: { run_usd?: number; min_balance_usd?: number };
 };
@@ -116,6 +119,8 @@ export async function contentEngine(opts: EngineOptions = {}) {
         add("cost_editor", r.cost_usd);
       }
     }
+
+    if (opts.picks ?? true) add("picks", await picksStep(logId));
 
     await finishRun(logId, "completed", stats);
   } catch (e) {
@@ -318,6 +323,40 @@ async function editorWriteStep(logId: number, task: EditorTask, modelId?: string
   } catch (e) {
     await log(logId, `editor ${task.kind} failed: ${(e as Error).message.slice(0, 200)}`);
     return { pages: 0, cost_usd: 0 };
+  }
+}
+
+async function picksStep(logId: number) {
+  "use step";
+  // needs migration 20261014000100; until it is applied the homepage keeps its built-in picks
+  try {
+    const sb = anonClient();
+    const since = new Date(Date.now() - 120 * 86_400_000).toISOString().slice(0, 10);
+    const [pool, past] = await Promise.all([
+      sb
+        .from("resources")
+        .select("slug,owner,type,category,quality,stars,first_seen_at")
+        .eq("safety", "safe")
+        .gte("quality", PICK_MIN_QUALITY)
+        .not("previews->0", "is", null)
+        .order("quality", { ascending: false })
+        .order("stars", { ascending: false })
+        .limit(1000),
+      sb.from("daily_picks").select("day,slugs").gte("day", since).order("day", { ascending: false }),
+    ]);
+    if (pool.error) throw new Error(pool.error.message);
+    if (past.error) throw new Error(past.error.message);
+    const chosen = choosePicks(pool.data as PickCandidate[], past.data as PickDay[]);
+    if (chosen.length < PICKS_PER_DAY) {
+      await log(logId, `picks skipped: only ${chosen.length} candidates with a preview`);
+      return 0;
+    }
+    const live = await db.setDailyPicks(chosen);
+    await log(logId, `picks · ${live.join(" · ")}${live.join() === chosen.join() ? "" : " (already chosen today)"}`);
+    return live.length;
+  } catch (e) {
+    await log(logId, `picks skipped: ${(e as Error).message.slice(0, 160)}`);
+    return 0;
   }
 }
 

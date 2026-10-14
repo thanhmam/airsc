@@ -38,6 +38,8 @@ export const db = {
     rpc<{ full_name: string; slug: string; default_branch: string }[]>("agent_preview_queue", { p_limit: limit }),
   setPreviews: (rows: { full_name: string; previews: unknown[] }[]) => rpc<number>("set_previews", { p_rows: rows }),
   resetPreviews: (slug: string) => rpc<void>("reset_previews", { p_slug: slug }),
+  /** first call of the Vietnam day wins; returns the picks in effect */
+  setDailyPicks: (slugs: string[]) => rpc<string[]>("set_daily_picks", { p_slugs: slugs }),
   adminResources: (f: AdminFilter) =>
     rpc<{ total: number; rows: AdminResourceRow[] }>("admin_resources", {
       p_q: f.q ?? null,
