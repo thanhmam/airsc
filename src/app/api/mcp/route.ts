@@ -139,7 +139,7 @@ const handler = createMcpHandler(
     );
   },
   {
-    serverInfo: { name: "airsc", version: "0.1.2" },
+    serverInfo: { name: "airsc", version: "0.1.3" },
     instructions:
       "Airsc is a searchable, safety-checked library of ready-made AI agent resources: Claude skills, MCP servers, Claude Code plugins, subagents and Cursor rules. " +
       "Use it whenever the user wants to add a capability to their agent or project (e.g. payments, auth, database, landing page design, SEO, deploy, email, charts, a chatbot), " +
