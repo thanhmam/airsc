@@ -40,6 +40,27 @@ export const db = {
   resetPreviews: (slug: string) => rpc<void>("reset_previews", { p_slug: slug }),
   /** first call of the Vietnam day wins; returns the picks in effect */
   setDailyPicks: (slugs: string[]) => rpc<string[]>("set_daily_picks", { p_slugs: slugs }),
+  /** first draft of the day wins unless forced (Regenerate); returns the row in effect */
+  saveSocialDraft: async (d: { day: string; channel: string; text: string; highlight: string | null; slugs: string[]; image_alt: string }, force = false) =>
+    (
+      await rpc<SocialPost[]>("save_social_draft", {
+        p_day: d.day,
+        p_channel: d.channel,
+        p_text: d.text,
+        p_highlight: d.highlight,
+        p_slugs: d.slugs,
+        p_image_alt: d.image_alt,
+        p_force: force,
+      })
+    )[0],
+  updateSocialText: (id: number, text: string) => rpc<void>("update_social_text", { p_id: id, p_text: text }),
+  /** moves the post to 'posting' if it is in one of `from`; null when someone else has it */
+  claimSocialPost: async (id: number, from: SocialStatus[]) =>
+    (await rpc<SocialPost[]>("claim_social_post", { p_id: id, p_from: from }))[0] ?? null,
+  finishSocialPost: (id: number, status: "posted" | "failed", r: { post_id?: string; post_url?: string; error?: string }) =>
+    rpc<void>("finish_social_post", { p_id: id, p_status: status, p_post_id: r.post_id ?? null, p_post_url: r.post_url ?? null, p_error: r.error ?? null }),
+  setSocialStatus: (id: number, status: "skipped" | "posted" | "failed" | "draft") => rpc<void>("set_social_status", { p_id: id, p_status: status }),
+  socialPosts: (limit = 14) => rpc<SocialPost[]>("admin_social_posts", { p_limit: limit }),
   adminResources: (f: AdminFilter) =>
     rpc<{ total: number; rows: AdminResourceRow[] }>("admin_resources", {
       p_q: f.q ?? null,
@@ -71,6 +92,26 @@ export type AdminFilter = {
   sort?: string;
   limit?: number;
   offset?: number;
+};
+
+export type SocialStatus = "draft" | "posting" | "posted" | "skipped" | "failed";
+
+/** One announcement of Today's picks on a social channel (migration 20261015000100) */
+export type SocialPost = {
+  id: number;
+  day: string;
+  channel: string;
+  status: SocialStatus;
+  text: string;
+  highlight: string | null;
+  slugs: string[];
+  image_alt: string | null;
+  post_id: string | null;
+  post_url: string | null;
+  error: string | null;
+  posted_at: string | null;
+  created_at: string;
+  updated_at: string;
 };
 
 export type AdminResourceRow = {

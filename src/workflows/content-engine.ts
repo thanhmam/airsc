@@ -5,6 +5,9 @@ import { analyse, pool, type Row } from "@/lib/crawler/run";
 import { aiCredits } from "@/lib/engine/credits";
 import { db } from "@/lib/engine/db";
 import { choosePicks, PICK_MIN_QUALITY, PICKS_PER_DAY, type PickCandidate, type PickDay } from "@/lib/engine/picks";
+import { socialSettings } from "@/lib/engine/settings";
+import { vnDay } from "@/lib/social/compose";
+import { makeDraft } from "@/lib/social/draft";
 import { curate } from "@/lib/engine/agents/curator";
 import { demoable, demoMcp } from "@/lib/engine/agents/demo";
 import { categoryGuide, isoWeek, weeklyDigest } from "@/lib/engine/agents/editor";
@@ -120,7 +123,13 @@ export async function contentEngine(opts: EngineOptions = {}) {
       }
     }
 
-    if (opts.picks ?? true) add("picks", await picksStep(logId));
+    if (opts.picks ?? true) {
+      add("picks", await picksStep(logId));
+      const s = await socialDraftStep(logId, aiAllowed && !overBudget(), opts.models?.editor);
+      add("social_drafts", s.drafts);
+      add("cost_usd", s.cost_usd);
+      add("cost_social", s.cost_usd);
+    }
 
     await finishRun(logId, "completed", stats);
   } catch (e) {
@@ -357,6 +366,24 @@ async function picksStep(logId: number) {
   } catch (e) {
     await log(logId, `picks skipped: ${(e as Error).message.slice(0, 160)}`);
     return 0;
+  }
+}
+
+/** Drafts today's X post about the picks when X posting is on; /api/cron/social publishes it */
+async function socialDraftStep(logId: number, ai: boolean, modelId?: string) {
+  "use step";
+  try {
+    if (!socialSettings(await db.settings()).x_enabled) return { drafts: 0, cost_usd: 0 };
+    const r = await makeDraft(vnDay(), { model: modelId, ai });
+    if (!r.post) {
+      await log(logId, `social skipped: ${r.reason}`);
+      return { drafts: 0, cost_usd: 0 };
+    }
+    await log(logId, `social · x draft ${r.post.status} · highlight ${r.post.highlight ?? "none"} · ${r.model} · $${r.cost.toFixed(4)}`);
+    return { drafts: 1, cost_usd: r.cost };
+  } catch (e) {
+    await log(logId, `social skipped: ${(e as Error).message.slice(0, 160)}`);
+    return { drafts: 0, cost_usd: 0 };
   }
 }
 

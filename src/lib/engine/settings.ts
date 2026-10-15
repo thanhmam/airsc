@@ -5,8 +5,17 @@ export type EngineSettings = {
   limits: { maxNew: number; maxRefresh: number; maxCurate: number; maxProduce: number; maxDemo: number; maxPages: number; maxPreview?: number };
   models: { curator: string; editor: string; producer: string; previewer?: string };
   budget: { run_usd: number; min_balance_usd: number };
+  social?: SocialSettings;
   updated_at?: string;
 };
+
+/** Daily X post about Today's picks (src/lib/social) */
+export type SocialSettings = { x_enabled: boolean; x_auto: boolean; x_post_hour_vn: number };
+
+/** Off until turned on in /admin/social; 20:00 Vietnam is 9:00 on the US East Coast */
+export const SOCIAL_DEFAULT: SocialSettings = { x_enabled: false, x_auto: true, x_post_hour_vn: 20 };
+
+export const socialSettings = (s: EngineSettings): SocialSettings => ({ ...SOCIAL_DEFAULT, ...s.social });
 
 /** Previewer model until one is saved in /admin: a cheap vision model is enough */
 export const PREVIEW_DEFAULT = "google/gemini-3-flash";
