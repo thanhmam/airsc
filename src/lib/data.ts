@@ -31,15 +31,55 @@ export type ResourceCard = Pick<
 
 export type SortKey = "stars" | "recent" | "downloads" | "new";
 
-/** Turn free text into a prefix tsquery: "stripe pay" -> "stripe:* & pay:*" */
-export function toTsQuery(q: string): string | null {
+/** Words that say nothing about what a resource does: "send email with resend" searches send, email, resend */
+const FILLER = new Set(["the", "and", "for", "with", "to", "of", "in", "on", "my", "your", "our", "me", "using", "use", "how", "want", "need", "that", "this", "is", "are", "can", "from", "by", "into", "via", "an"]);
+
+/** The words a query searches for (up to six); filler is dropped unless nothing else is left */
+export function searchWords(q: string): string[] {
   const words = q
     .toLowerCase()
     .normalize("NFC")
     .split(/[^\p{L}\p{N}]+/u)
-    .filter((w) => w.length > 1)
-    .slice(0, 6);
+    .filter((w) => w.length > 1);
+  const meaningful = words.filter((w) => !FILLER.has(w));
+  return (meaningful.length ? meaningful : words).slice(0, 6);
+}
+
+/** Turn free text into a prefix tsquery: "stripe pay" -> "stripe:* & pay:*" */
+export function toTsQuery(q: string): string | null {
+  const words = searchWords(q);
   return words.length ? words.map((w) => `${w}:*`).join(" & ") : null;
+}
+
+const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+/**
+ * When no resource has every word ("stripe payments"), take the ones that have any of them and rank by
+ * how many words they match (a word in the name counts three times), then stars.
+ */
+async function anyWordSearch(opts: Parameters<typeof searchResources>[0], words: string[]) {
+  const { type, category, safeOnly, page = 1, pageSize = 24 } = opts;
+  let query = anonClient()
+    .from("resources")
+    .select(await cardFields(), { count: "exact" })
+    .textSearch("search", words.map((w) => `${w}:*`).join(" | "), { config: "simple" });
+  if (type) query = query.eq("type", type);
+  if (category) query = query.eq("category", category);
+  if (safeOnly) query = query.eq("safety", "safe");
+  const { data, count, error } = await query.order("stars", { ascending: false }).limit(300);
+  if (error) throw new Error(error.message);
+  const patterns = words.map((w) => new RegExp(`(^|[^\\p{L}\\p{N}])${escapeRe(w)}`, "u"));
+  const score = (r: ResourceCard) => {
+    const name = `${r.name} ${r.full_name}`.toLowerCase();
+    const rest = [r.description, r.summary, r.category, ...(r.topics ?? [])].join(" ").toLowerCase();
+    return patterns.reduce((s, re) => s + (re.test(name) ? 3 : re.test(rest) ? 1 : 0), 0);
+  };
+  const ranked = ((data ?? []) as unknown as ResourceCard[])
+    .map((r) => ({ r, s: score(r) }))
+    .sort((a, b) => b.s - a.s || b.r.stars - a.r.stars)
+    .map((x) => x.r);
+  const from = (page - 1) * pageSize;
+  return { items: ranked.slice(from, from + pageSize), total: count ?? 0 };
 }
 
 export async function searchResources(opts: {
@@ -69,6 +109,8 @@ export async function searchResources(opts: {
   const from = (page - 1) * pageSize;
   const { data, count, error } = await query.range(from, from + pageSize - 1);
   if (error) throw new Error(error.message);
+  // every word in one resource is strict ("stripe payments" finds nothing): fall back to any word
+  if (!count && q && ts?.includes(" & ")) return anyWordSearch(opts, searchWords(q));
   return { items: (data ?? []) as unknown as ResourceCard[], total: count ?? 0 };
 }
 
