@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { saveSocialSettings } from "../actions";
 import { CardControls, type CardCopy } from "./card-controls";
 import { SocialEditor, type EditorCopy } from "./editor";
+import { XCheck, type XCheckCopy } from "./x-check";
 
 const T = {
   en: {
@@ -43,6 +44,14 @@ const T = {
     } satisfies EditorCopy,
     defaultStyle: "Card style for new drafts",
     defaultTheme: "Card colours for new drafts",
+    check: {
+      test: "Test X connection",
+      ok: "Connected as",
+      fail: "Failed:",
+      hint401:
+        "401 = X does not accept these keys. In the X developer app, check that all four come from the same app; if you regenerated any key or token after adding it to Vercel, the old one no longer works: copy the new values into Vercel (no spaces), then redeploy.",
+      hint403: "403 = the keys work but cannot write: set the app to Read and write, regenerate the Access Token and Secret, update Vercel, redeploy.",
+    } satisfies XCheckCopy,
     card: {
       style: "Style",
       styles: { editorial: "Editorial", spotlight: "Spotlight", list: "List" },
@@ -91,6 +100,14 @@ const T = {
     } satisfies EditorCopy,
     defaultStyle: "Style ảnh cho bản nháp mới",
     defaultTheme: "Tông màu ảnh cho bản nháp mới",
+    check: {
+      test: "Kiểm tra kết nối X",
+      ok: "Đã kết nối với",
+      fail: "Lỗi:",
+      hint401:
+        "401 = X không chấp nhận bộ khóa này. Trong app trên X developer, kiểm tra cả 4 khóa cùng một app; nếu bạn đã tạo lại (regenerate) khóa hoặc token sau khi thêm vào Vercel thì khóa cũ hết hiệu lực: chép giá trị mới vào Vercel (không có dấu cách), rồi redeploy.",
+      hint403: "403 = khóa đúng nhưng không có quyền ghi: đặt app là Read and write, tạo lại Access Token và Secret, cập nhật Vercel, redeploy.",
+    } satisfies XCheckCopy,
     card: {
       style: "Style",
       styles: { editorial: "Biên tập", spotlight: "Tràn viền", list: "Danh sách" },
@@ -205,6 +222,7 @@ export default async function AdminSocial({ params }: PageProps<"/[lang]/admin/s
         <p className="text-sm">
           {t.keys}: <span className={configured ? "text-safe" : "text-caution"}>{configured ? t.keysOk : t.keysMissing}</span>
         </p>
+        {configured && <XCheck c={t.check} />}
         <button className="h-9 w-fit rounded-lg bg-accent px-4 text-sm font-medium text-accent-fg hover:opacity-90">{t.save}</button>
       </form>
 

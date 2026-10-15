@@ -9,6 +9,7 @@ import { startEngine, type Preset } from "@/lib/engine/start";
 import { loadPicks } from "@/lib/social/compose";
 import { artDirect, makeDraft } from "@/lib/social/draft";
 import { publishPost } from "@/lib/social/publish";
+import { whoAmI } from "@/lib/social/x";
 
 async function guard() {
   if (!(await requireAdmin())) throw new Error("Forbidden");
@@ -160,4 +161,15 @@ export async function setSocialStatus(id: number, status: "skipped" | "posted" |
   await db.setSocialStatus(id, status);
   refresh();
   return { ok: true };
+}
+
+/** Reads the X account the four keys post as, so a 401 can be traced to the keys, not the post */
+export async function testXConnection(): Promise<SocialResult & { username?: string }> {
+  await guard();
+  try {
+    const me = await whoAmI();
+    return { ok: true, username: me.username };
+  } catch (e) {
+    return { ok: false, error: String((e as Error)?.message ?? e).slice(0, 300) };
+  }
 }
