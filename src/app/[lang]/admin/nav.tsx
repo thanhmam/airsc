@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Blocks, Bot, EyeOff, ExternalLink, FileCode2, Inbox, LayoutDashboard, Library, Plug, Sparkles, Users, type LucideIcon } from "lucide-react";
+import { Blocks, Bot, EyeOff, ExternalLink, FileCode2, Inbox, LayoutDashboard, Library, Plug, Send, Sparkles, Users, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export type NavItem = {
@@ -17,7 +17,7 @@ export type NavItem = {
   tone?: "warn";
 };
 
-const ICONS = { overview: LayoutDashboard, library: Library, skill: Sparkles, mcp: Plug, plugin: Blocks, agent: Users, rule: FileCode2, review: Inbox, hidden: EyeOff, agents: Bot, site: ExternalLink } satisfies Record<string, LucideIcon>;
+const ICONS = { overview: LayoutDashboard, library: Library, skill: Sparkles, mcp: Plug, plugin: Blocks, agent: Users, rule: FileCode2, review: Inbox, hidden: EyeOff, agents: Bot, social: Send, site: ExternalLink } satisfies Record<string, LucideIcon>;
 
 function useActive() {
   const path = usePathname();

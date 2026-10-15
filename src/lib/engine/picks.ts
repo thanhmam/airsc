@@ -12,7 +12,7 @@ export const PICK_MIN_QUALITY = 80;
 const WEEK = 7 * 86_400_000;
 
 /** Quality first, stars as a tie-breaker in the same league, and a lift for this week's arrivals */
-function score(c: PickCandidate, now: number) {
+export function score(c: PickCandidate, now = Date.now()) {
   const fresh = now - new Date(c.first_seen_at).getTime() < WEEK ? 10 : 0;
   return (c.quality ?? 0) + 6 * Math.log10(c.stars + 1) + fresh;
 }

@@ -1,6 +1,6 @@
 const en = {
   title: "Airsc admin",
-  tabs: { overview: "Overview", resources: "Resources", agents: "Agents & costs", allResources: "All resources", queued: "Waiting for agents", hidden: "Filtered out", site: "View site" },
+  tabs: { overview: "Overview", resources: "Resources", agents: "Agents & costs", social: "Social posts", allResources: "All resources", queued: "Waiting for agents", hidden: "Filtered out", site: "View site" },
   reasons: {
     not_relevant: "Not an agent resource (app, library or framework)",
     low_quality: "Quality score under 40",
@@ -35,7 +35,7 @@ export type AdminCopy = typeof en;
 
 const vi: AdminCopy = {
   title: "Quản trị Airsc",
-  tabs: { overview: "Tổng quan", resources: "Tài nguyên", agents: "Agent & chi phí", allResources: "Tất cả", queued: "Chờ agent xử lý", hidden: "Agent đã lọc bỏ", site: "Xem trang web" },
+  tabs: { overview: "Tổng quan", resources: "Tài nguyên", agents: "Agent & chi phí", social: "Bài đăng mạng xã hội", allResources: "Tất cả", queued: "Chờ agent xử lý", hidden: "Agent đã lọc bỏ", site: "Xem trang web" },
   reasons: {
     not_relevant: "Không phải tài nguyên cho agent (app, thư viện, framework)",
     low_quality: "Điểm chất lượng dưới 40",

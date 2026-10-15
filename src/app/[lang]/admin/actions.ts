@@ -4,8 +4,10 @@ import { revalidatePath } from "next/cache";
 import { getRun } from "workflow/api";
 import { requireAdmin } from "@/lib/admin";
 import { db } from "@/lib/engine/db";
-import { MODEL_CHOICES, type EngineSettings, PREVIEW_DEFAULT } from "@/lib/engine/settings";
+import { MODEL_CHOICES, type EngineSettings, PREVIEW_DEFAULT, socialSettings } from "@/lib/engine/settings";
 import { startEngine, type Preset } from "@/lib/engine/start";
+import { makeDraft } from "@/lib/social/draft";
+import { publishPost } from "@/lib/social/publish";
 
 async function guard() {
   if (!(await requireAdmin())) throw new Error("Forbidden");
@@ -73,7 +75,60 @@ export async function saveSettings(form: FormData) {
       run_usd: clamp(form.get("run_usd"), 0, 100, cur.budget.run_usd),
       min_balance_usd: clamp(form.get("min_balance_usd"), 0, 100, cur.budget.min_balance_usd),
     },
+    // edited on /admin/social
+    social: cur.social,
   };
   await db.saveSettings(next);
   refresh();
+}
+
+// ---------------------------------------------------------------- social posts (/admin/social)
+
+export async function saveSocialSettings(form: FormData) {
+  await guard();
+  const cur = await db.settings();
+  const s = socialSettings(cur);
+  await db.saveSettings({
+    ...cur,
+    social: {
+      x_enabled: form.get("x_enabled") === "on",
+      x_auto: form.get("x_auto") === "on",
+      x_post_hour_vn: clamp(form.get("x_post_hour_vn"), 0, 23, s.x_post_hour_vn),
+    },
+  });
+  refresh();
+}
+
+export type SocialResult = { ok: boolean; error?: string; url?: string };
+
+export async function saveSocialText(id: number, text: string): Promise<SocialResult> {
+  await guard();
+  if (!text.trim()) return { ok: false, error: "empty" };
+  await db.updateSocialText(id, text.trim());
+  refresh();
+  return { ok: true };
+}
+
+/** Writes (or rewrites) the draft for `day` from its picks */
+export async function regenerateSocial(day: string): Promise<SocialResult> {
+  await guard();
+  const settings = await db.settings();
+  const r = await makeDraft(day, { force: true, model: settings.models.editor });
+  refresh();
+  return r.post ? { ok: true } : { ok: false, error: r.reason ?? "no picks" };
+}
+
+export async function postSocialNow(id: number): Promise<SocialResult> {
+  await guard();
+  const r = await publishPost({ id }, ["draft", "failed"]);
+  refresh();
+  return r.ok ? { ok: true, url: r.url } : { ok: false, error: r.error };
+}
+
+/** Skip today's post, or settle one stuck in 'posting' after checking X by hand */
+export async function setSocialStatus(id: number, status: "skipped" | "posted" | "failed" | "draft"): Promise<SocialResult> {
+  await guard();
+  await db.setSocialStatus(id, status);
+  refresh();
+  return { ok: true };
 }
