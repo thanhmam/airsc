@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { getRun } from "workflow/api";
 import { requireAdmin } from "@/lib/admin";
 import { db } from "@/lib/engine/db";
-import { CARD_STYLES, type CardStyle, MODEL_CHOICES, type EngineSettings, PREVIEW_DEFAULT, socialSettings } from "@/lib/engine/settings";
+import { CARD_STYLES, CARD_THEMES, type CardStyle, type CardTheme, MODEL_CHOICES, type EngineSettings, PREVIEW_DEFAULT, socialSettings } from "@/lib/engine/settings";
 import { startEngine, type Preset } from "@/lib/engine/start";
 import { loadPicks } from "@/lib/social/compose";
 import { artDirect, makeDraft } from "@/lib/social/draft";
@@ -96,6 +96,7 @@ export async function saveSocialSettings(form: FormData) {
       x_auto: form.get("x_auto") === "on",
       x_post_hour_vn: clamp(form.get("x_post_hour_vn"), 0, 23, s.x_post_hour_vn),
       x_card_style: cardStyle(form.get("x_card_style")) ?? s.x_card_style,
+      x_card_theme: cardTheme(form.get("x_card_theme")) ?? s.x_card_theme,
     },
   });
   refresh();
@@ -104,8 +105,9 @@ export async function saveSocialSettings(form: FormData) {
 export type SocialResult = { ok: boolean; error?: string; url?: string };
 
 const cardStyle = (v: unknown) => (CARD_STYLES.includes(v as CardStyle) ? (v as CardStyle) : null);
+const cardTheme = (v: unknown) => (CARD_THEMES.includes(v as CardTheme) ? (v as CardTheme) : null);
 
-export type CardInput = { style: string; highlight: string; headline: string };
+export type CardInput = { style: string; theme: string; highlight: string; headline: string };
 
 /**
  * Saves the card's style, featured pick and headline. Without a headline (Regenerate image) Sonnet
@@ -115,9 +117,13 @@ export async function saveSocialCard(day: string, c: CardInput, regenerate = fal
   await guard();
   const post = await db.socialPost(day);
   if (!post) return { ok: false, error: "no draft for this day" };
-  const style = cardStyle(c.style) ?? socialSettings(await db.settings()).x_card_style;
+  const settings = await db.settings();
+  const s = socialSettings(settings);
+  // light or dark is one setting for every card, saved from the card's toggle too
+  const theme = cardTheme(c.theme);
+  if (theme && theme !== s.x_card_theme) await db.saveSettings({ ...settings, social: { ...s, x_card_theme: theme } });
   const r = await artDirect(day, await loadPicks(day), post, {
-    style,
+    style: cardStyle(c.style) ?? s.x_card_style,
     highlight: c.highlight || null,
     headline: regenerate ? null : c.headline.trim().slice(0, 90),
   });

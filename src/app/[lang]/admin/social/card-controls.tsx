@@ -4,13 +4,15 @@ import { Loader2, RefreshCw } from "lucide-react";
 import Image from "next/image";
 import { useState, useTransition } from "react";
 import type { SocialPost } from "@/lib/engine/db";
-import { CARD_STYLES, type CardStyle } from "@/lib/engine/settings";
+import { CARD_STYLES, CARD_THEMES, type CardStyle, type CardTheme } from "@/lib/engine/settings";
 import { cn } from "@/lib/utils";
 import { saveSocialCard } from "../actions";
 
 export type CardCopy = {
   style: string;
   styles: Record<CardStyle, string>;
+  theme: string;
+  themes: Record<CardTheme, string>;
   featured: string;
   noImage: string;
   headline: string;
@@ -26,19 +28,32 @@ export type PickOption = { slug: string; name: string; hasImage: boolean };
 const btn = "inline-flex h-9 items-center gap-1.5 rounded-lg border border-line px-3 text-sm font-medium transition hover:border-accent/60 disabled:cursor-not-allowed disabled:opacity-50";
 
 /** The day's card: preview a style instantly, pick the featured resource, edit or regenerate Sonnet's headline */
-export function CardControls({ day, post, picks, defaultStyle, c }: { day: string; post: SocialPost; picks: PickOption[]; defaultStyle: CardStyle; c: CardCopy }) {
-  const saved = { style: post.card_style ?? defaultStyle, highlight: post.highlight ?? "", headline: post.headline ?? "" };
+export function CardControls({
+  day,
+  post,
+  picks,
+  defaults,
+  c,
+}: {
+  day: string;
+  post: SocialPost;
+  picks: PickOption[];
+  defaults: { style: CardStyle; theme: CardTheme };
+  c: CardCopy;
+}) {
+  const saved = { style: post.card_style ?? defaults.style, theme: defaults.theme, highlight: post.highlight ?? "", headline: post.headline ?? "" };
   const [style, setStyle] = useState<CardStyle>(saved.style);
+  const [theme, setTheme] = useState<CardTheme>(saved.theme);
   const [highlight, setHighlight] = useState(saved.highlight);
   const [headline, setHeadline] = useState(saved.headline);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [pending, start] = useTransition();
   const editable = post.status === "draft" || post.status === "failed";
-  const dirty = style !== saved.style || highlight !== saved.highlight || headline.trim() !== saved.headline;
+  const dirty = style !== saved.style || theme !== saved.theme || highlight !== saved.highlight || headline.trim() !== saved.headline;
 
   const run = (regenerate: boolean) =>
     start(async () => {
-      const r = await saveSocialCard(day, { style, highlight, headline }, regenerate);
+      const r = await saveSocialCard(day, { style, theme, highlight, headline }, regenerate);
       setMsg({ ok: r.ok, text: r.ok ? c.saved : (r.error ?? "error") });
     });
 
@@ -46,7 +61,7 @@ export function CardControls({ day, post, picks, defaultStyle, c }: { day: strin
     <div className="flex flex-col gap-3">
       <div className="relative">
         <Image
-          src={`/api/social/card/${day}?v=${encodeURIComponent(post.updated_at)}&style=${style}`}
+          src={`/api/social/card/${day}?v=${encodeURIComponent(post.updated_at)}&style=${style}&theme=${theme}`}
           alt={post.image_alt ?? ""}
           width={1200}
           height={675}
@@ -73,6 +88,20 @@ export function CardControls({ day, post, picks, defaultStyle, c }: { day: strin
                   className={cn("h-8 rounded-md px-3 text-sm", style === s ? "bg-accent-soft font-medium text-accent" : "text-muted hover:text-fg")}
                 >
                   {c.styles[s]}
+                </button>
+              ))}
+            </div>
+            <span className="ml-2 text-muted">{c.theme}</span>
+            <div className="flex rounded-lg border border-line p-0.5">
+              {CARD_THEMES.map((k) => (
+                <button
+                  key={k}
+                  type="button"
+                  onClick={() => setTheme(k)}
+                  aria-pressed={theme === k}
+                  className={cn("h-8 rounded-md px-3 text-sm", theme === k ? "bg-accent-soft font-medium text-accent" : "text-muted hover:text-fg")}
+                >
+                  {c.themes[k]}
                 </button>
               ))}
             </div>

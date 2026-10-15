@@ -1,5 +1,5 @@
 import { db } from "@/lib/engine/db";
-import { CARD_STYLES, socialSettings } from "@/lib/engine/settings";
+import { CARD_STYLES, CARD_THEMES, socialSettings } from "@/lib/engine/settings";
 import type { Locale } from "@/lib/i18n";
 import { loadPicks, usable, vnDay } from "@/lib/social/compose";
 import { xConfigured } from "@/lib/social/x";
@@ -42,9 +42,12 @@ const T = {
       notConfigured: "X API keys are not set on this deployment",
     } satisfies EditorCopy,
     defaultStyle: "Card style for new drafts",
+    defaultTheme: "Card colours for new drafts",
     card: {
       style: "Style",
       styles: { editorial: "Editorial", spotlight: "Spotlight", list: "List" },
+      theme: "Colours",
+      themes: { light: "Light", dark: "Dark" },
       featured: "Featured pick",
       noImage: "no image",
       headline: "Headline (Sonnet 5.5)",
@@ -87,9 +90,12 @@ const T = {
       notConfigured: "Bản triển khai này chưa có khóa X API",
     } satisfies EditorCopy,
     defaultStyle: "Style ảnh cho bản nháp mới",
+    defaultTheme: "Tông màu ảnh cho bản nháp mới",
     card: {
       style: "Style",
       styles: { editorial: "Biên tập", spotlight: "Tràn viền", list: "Danh sách" },
+      theme: "Tông màu",
+      themes: { light: "Sáng", dark: "Tối" },
       featured: "Tài nguyên nổi bật",
       noImage: "không có ảnh",
       headline: "Headline (Sonnet 5.5)",
@@ -151,7 +157,7 @@ export default async function AdminSocial({ params }: PageProps<"/[lang]/admin/s
               day={day}
               post={today}
               picks={picks.map((p) => ({ slug: p.slug, name: p.name, hasImage: usable(p.previews?.[0]) }))}
-              defaultStyle={s.x_card_style}
+              defaults={{ style: s.x_card_style, theme: s.x_card_theme }}
               c={t.card}
             />
           )}
@@ -182,6 +188,16 @@ export default async function AdminSocial({ params }: PageProps<"/[lang]/admin/s
             {CARD_STYLES.map((k) => (
               <option key={k} value={k}>
                 {t.card.styles[k]}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="flex items-center gap-3 text-sm">
+          {t.defaultTheme}
+          <select name="x_card_theme" defaultValue={s.x_card_theme} className={select}>
+            {CARD_THEMES.map((k) => (
+              <option key={k} value={k}>
+                {t.card.themes[k]}
               </option>
             ))}
           </select>

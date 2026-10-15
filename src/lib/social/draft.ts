@@ -20,8 +20,12 @@ export async function makeDraft(day: string, opts: { force?: boolean; model?: st
   let total = cost;
   // a new (or rewritten) draft gets its card art direction; an existing one keeps the admin's
   if (post && (opts.force || !post.headline) && (post.status === "draft" || post.status === "failed")) {
-    const style = post.card_style ?? socialSettings(await db.settings()).x_card_style;
-    const card = await artDirect(day, rows, post, { highlight: hi?.slug ?? null, style, model: opts.model, ai: opts.ai });
+    const card = await artDirect(day, rows, post, {
+      highlight: hi?.slug ?? null,
+      style: post.card_style ?? socialSettings(await db.settings()).x_card_style,
+      model: opts.model,
+      ai: opts.ai,
+    });
     post = card.post ?? post;
     total += card.cost;
   }

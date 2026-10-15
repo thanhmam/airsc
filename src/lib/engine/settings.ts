@@ -10,17 +10,21 @@ export type EngineSettings = {
 };
 
 /** Daily X post about Today's picks (src/lib/social) */
-export type SocialSettings = { x_enabled: boolean; x_auto: boolean; x_post_hour_vn: number; x_card_style?: CardStyle };
+export type SocialSettings = { x_enabled: boolean; x_auto: boolean; x_post_hour_vn: number; x_card_style?: CardStyle; x_card_theme?: CardTheme };
 
 /** editorial: Sonnet's headline + real result; spotlight: the result full-bleed under the headline; list: the four picks */
 export const CARD_STYLES = ["editorial", "spotlight", "list"] as const;
 export type CardStyle = (typeof CARD_STYLES)[number];
 
+/** light: the site's light theme (default, easier to read in the timeline); dark: the always-dark panel */
+export const CARD_THEMES = ["light", "dark"] as const;
+export type CardTheme = (typeof CARD_THEMES)[number];
+
 /** Social copy and card headlines: Sonnet 5.5 thinking hard, since one post a day is public and cheap */
 export const SOCIAL_MODEL = "anthropic/claude-sonnet-5.5";
 
 /** Off until turned on in /admin/social; 20:00 Vietnam is 9:00 on the US East Coast */
-export const SOCIAL_DEFAULT: Required<SocialSettings> = { x_enabled: false, x_auto: true, x_post_hour_vn: 20, x_card_style: "editorial" };
+export const SOCIAL_DEFAULT: Required<SocialSettings> = { x_enabled: false, x_auto: true, x_post_hour_vn: 20, x_card_style: "editorial", x_card_theme: "light" };
 
 export const socialSettings = (s: EngineSettings): Required<SocialSettings> => ({ ...SOCIAL_DEFAULT, ...s.social });
 
