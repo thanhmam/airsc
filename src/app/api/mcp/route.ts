@@ -159,4 +159,30 @@ const authed = withMcpAuth(
   { required: false },
 );
 
-export { authed as GET, authed as POST, authed as DELETE };
+/**
+ * Browser-based MCP clients (Grok, Cursor's web views, the MCP Inspector) need CORS. Any origin is fine:
+ * nothing rides on cookies, the optional key travels in a header or the URL.
+ */
+const CORS: Record<string, string> = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Accept, Authorization, Mcp-Session-Id, Mcp-Protocol-Version, Last-Event-ID",
+  "Access-Control-Expose-Headers": "Mcp-Session-Id, Mcp-Protocol-Version, WWW-Authenticate",
+  "Access-Control-Max-Age": "86400",
+};
+
+const withCors = (h: (req: Request) => Promise<Response>) => async (req: Request) => {
+  const res = await h(req);
+  // a fresh Response keeps the (streamed) body and lets us add headers
+  const out = new Response(res.body, res);
+  for (const [k, v] of Object.entries(CORS)) out.headers.set(k, v);
+  return out;
+};
+
+const cors = withCors(authed);
+
+export function OPTIONS() {
+  return new Response(null, { status: 204, headers: CORS });
+}
+
+export { cors as GET, cors as POST, cors as DELETE };
