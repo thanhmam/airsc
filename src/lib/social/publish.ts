@@ -1,4 +1,5 @@
 import { db, type SocialPost, type SocialStatus } from "@/lib/engine/db";
+import { socialSettings } from "@/lib/engine/settings";
 import { renderCard } from "./card";
 import { loadPicks } from "./compose";
 import { createPost, uploadImage, xConfigured } from "./x";
@@ -15,7 +16,14 @@ export async function publishPost(post: Pick<SocialPost, "id">, from: SocialStat
 
   let result: { id: string; url: string };
   try {
-    const png = await renderCard(claimed.day, await loadPicks(claimed.day));
+    const s = socialSettings(await db.settings());
+    const png = await renderCard(claimed.day, await loadPicks(claimed.day), {
+      style: claimed.card_style ?? s.x_card_style,
+      // light or dark is one setting for every card (/admin/social)
+      theme: s.x_card_theme,
+      highlight: claimed.highlight,
+      headline: claimed.headline,
+    });
     const media = await uploadImage(png, claimed.image_alt ?? undefined);
     result = await createPost(claimed.text, [media]);
   } catch (e) {

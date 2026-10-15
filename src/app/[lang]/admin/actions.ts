@@ -4,9 +4,10 @@ import { revalidatePath } from "next/cache";
 import { getRun } from "workflow/api";
 import { requireAdmin } from "@/lib/admin";
 import { db } from "@/lib/engine/db";
-import { MODEL_CHOICES, type EngineSettings, PREVIEW_DEFAULT, socialSettings } from "@/lib/engine/settings";
+import { CARD_STYLES, CARD_THEMES, type CardStyle, type CardTheme, MODEL_CHOICES, type EngineSettings, PREVIEW_DEFAULT, socialSettings } from "@/lib/engine/settings";
 import { startEngine, type Preset } from "@/lib/engine/start";
-import { makeDraft } from "@/lib/social/draft";
+import { loadPicks } from "@/lib/social/compose";
+import { artDirect, makeDraft } from "@/lib/social/draft";
 import { publishPost } from "@/lib/social/publish";
 
 async function guard() {
@@ -94,12 +95,41 @@ export async function saveSocialSettings(form: FormData) {
       x_enabled: form.get("x_enabled") === "on",
       x_auto: form.get("x_auto") === "on",
       x_post_hour_vn: clamp(form.get("x_post_hour_vn"), 0, 23, s.x_post_hour_vn),
+      x_card_style: cardStyle(form.get("x_card_style")) ?? s.x_card_style,
+      x_card_theme: cardTheme(form.get("x_card_theme")) ?? s.x_card_theme,
     },
   });
   refresh();
 }
 
 export type SocialResult = { ok: boolean; error?: string; url?: string };
+
+const cardStyle = (v: unknown) => (CARD_STYLES.includes(v as CardStyle) ? (v as CardStyle) : null);
+const cardTheme = (v: unknown) => (CARD_THEMES.includes(v as CardTheme) ? (v as CardTheme) : null);
+
+export type CardInput = { style: string; theme: string; highlight: string; headline: string };
+
+/**
+ * Saves the card's style, featured pick and headline. Without a headline (Regenerate image) Sonnet
+ * writes a new one for the featured pick, different from the current one.
+ */
+export async function saveSocialCard(day: string, c: CardInput, regenerate = false): Promise<SocialResult> {
+  await guard();
+  const post = await db.socialPost(day);
+  if (!post) return { ok: false, error: "no draft for this day" };
+  const settings = await db.settings();
+  const s = socialSettings(settings);
+  // light or dark is one setting for every card, saved from the card's toggle too
+  const theme = cardTheme(c.theme);
+  if (theme && theme !== s.x_card_theme) await db.saveSettings({ ...settings, social: { ...s, x_card_theme: theme } });
+  const r = await artDirect(day, await loadPicks(day), post, {
+    style: cardStyle(c.style) ?? s.x_card_style,
+    highlight: c.highlight || null,
+    headline: regenerate ? null : c.headline.trim().slice(0, 90),
+  });
+  refresh();
+  return r.post ? { ok: true } : { ok: false, error: "this post has already gone out" };
+}
 
 export async function saveSocialText(id: number, text: string): Promise<SocialResult> {
   await guard();
@@ -112,8 +142,7 @@ export async function saveSocialText(id: number, text: string): Promise<SocialRe
 /** Writes (or rewrites) the draft for `day` from its picks */
 export async function regenerateSocial(day: string): Promise<SocialResult> {
   await guard();
-  const settings = await db.settings();
-  const r = await makeDraft(day, { force: true, model: settings.models.editor });
+  const r = await makeDraft(day, { force: true });
   refresh();
   return r.post ? { ok: true } : { ok: false, error: r.reason ?? "no picks" };
 }
