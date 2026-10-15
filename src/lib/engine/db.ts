@@ -1,6 +1,6 @@
 import { anonClient } from "@/lib/supabase/anon";
 import type { Resource } from "@/lib/types";
-import type { EngineSettings } from "./settings";
+import type { CardStyle, EngineSettings } from "./settings";
 
 /** Token-guarded RPCs used by the content agents (never exposed to browsers) */
 const token = () => {
@@ -61,6 +61,18 @@ export const db = {
     rpc<void>("finish_social_post", { p_id: id, p_status: status, p_post_id: r.post_id ?? null, p_post_url: r.post_url ?? null, p_error: r.error ?? null }),
   setSocialStatus: (id: number, status: "skipped" | "posted" | "failed" | "draft") => rpc<void>("set_social_status", { p_id: id, p_status: status }),
   socialPosts: (limit = 14) => rpc<SocialPost[]>("admin_social_posts", { p_limit: limit }),
+  socialPost: async (day: string, channel = "x") => (await rpc<SocialPost[]>("get_social_post", { p_day: day, p_channel: channel }))[0] ?? null,
+  /** card art direction for a post that has not gone out yet; null when it already has */
+  setSocialCard: async (id: number, c: { highlight: string | null; headline: string; card_style: CardStyle; image_alt: string }) =>
+    (
+      await rpc<SocialPost[]>("set_social_card", {
+        p_id: id,
+        p_highlight: c.highlight,
+        p_headline: c.headline,
+        p_card_style: c.card_style,
+        p_image_alt: c.image_alt,
+      })
+    )[0] ?? null,
   adminResources: (f: AdminFilter) =>
     rpc<{ total: number; rows: AdminResourceRow[] }>("admin_resources", {
       p_q: f.q ?? null,
@@ -104,6 +116,9 @@ export type SocialPost = {
   status: SocialStatus;
   text: string;
   highlight: string | null;
+  /** big line on the card, written by Sonnet for the highlight (editable in /admin/social) */
+  headline: string | null;
+  card_style: CardStyle | null;
   slugs: string[];
   image_alt: string | null;
   post_id: string | null;

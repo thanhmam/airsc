@@ -1,12 +1,12 @@
-import Image from "next/image";
 import { db } from "@/lib/engine/db";
-import { socialSettings } from "@/lib/engine/settings";
+import { CARD_STYLES, socialSettings } from "@/lib/engine/settings";
 import type { Locale } from "@/lib/i18n";
-import { vnDay } from "@/lib/social/compose";
+import { loadPicks, usable, vnDay } from "@/lib/social/compose";
 import { xConfigured } from "@/lib/social/x";
 import { fmtDate, fmtDateTime } from "@/lib/time";
 import { cn } from "@/lib/utils";
 import { saveSocialSettings } from "../actions";
+import { CardControls, type CardCopy } from "./card-controls";
 import { SocialEditor, type EditorCopy } from "./editor";
 
 const T = {
@@ -41,6 +41,19 @@ const T = {
       chars: "characters (X count)",
       notConfigured: "X API keys are not set on this deployment",
     } satisfies EditorCopy,
+    defaultStyle: "Card style for new drafts",
+    card: {
+      style: "Style",
+      styles: { editorial: "Editorial", spotlight: "Spotlight", list: "List" },
+      featured: "Featured pick",
+      noImage: "no image",
+      headline: "Headline (Sonnet 5.5)",
+      headlineHint: "best under 48",
+      save: "Save image",
+      regenerate: "Regenerate image",
+      working: "Sonnet is writing…",
+      saved: "Image updated.",
+    } satisfies CardCopy,
   },
   vi: {
     title: "Bài đăng mạng xã hội",
@@ -73,6 +86,19 @@ const T = {
       chars: "ký tự (theo cách X đếm)",
       notConfigured: "Bản triển khai này chưa có khóa X API",
     } satisfies EditorCopy,
+    defaultStyle: "Style ảnh cho bản nháp mới",
+    card: {
+      style: "Style",
+      styles: { editorial: "Biên tập", spotlight: "Tràn viền", list: "Danh sách" },
+      featured: "Tài nguyên nổi bật",
+      noImage: "không có ảnh",
+      headline: "Headline (Sonnet 5.5)",
+      headlineHint: "nên dưới 48",
+      save: "Lưu ảnh",
+      regenerate: "Tạo lại ảnh",
+      working: "Sonnet đang viết…",
+      saved: "Đã cập nhật ảnh.",
+    } satisfies CardCopy,
   },
 };
 
@@ -88,7 +114,7 @@ export default async function AdminSocial({ params }: PageProps<"/[lang]/admin/s
   const { lang } = (await params) as { lang: Locale };
   const t = T[lang];
   const day = vnDay();
-  const [settings, posts] = await Promise.all([db.settings(), db.socialPosts(14)]);
+  const [settings, posts, picks] = await Promise.all([db.settings(), db.socialPosts(14), loadPicks(day)]);
   const s = socialSettings(settings);
   const configured = xConfigured();
   const today = posts.find((p) => p.day === day && p.channel === "x") ?? null;
@@ -120,17 +146,14 @@ export default async function AdminSocial({ params }: PageProps<"/[lang]/admin/s
             <SocialEditor key={today?.updated_at ?? "none"} day={day} post={today} configured={configured} c={t.editor} />
           </div>
           {today && (
-            <div className="flex flex-col gap-2">
-              <Image
-                src={`/api/social/card/${day}?v=${encodeURIComponent(today.updated_at)}`}
-                alt={today.image_alt ?? ""}
-                width={1200}
-                height={675}
-                unoptimized
-                className="h-auto w-full rounded-xl border border-line"
-              />
-              {today.image_alt && <p className="text-xs text-muted">{today.image_alt}</p>}
-            </div>
+            <CardControls
+              key={today.updated_at}
+              day={day}
+              post={today}
+              picks={picks.map((p) => ({ slug: p.slug, name: p.name, hasImage: usable(p.previews?.[0]) }))}
+              defaultStyle={s.x_card_style}
+              c={t.card}
+            />
           )}
         </div>
       </section>
@@ -150,6 +173,16 @@ export default async function AdminSocial({ params }: PageProps<"/[lang]/admin/s
           <select name="x_post_hour_vn" defaultValue={s.x_post_hour_vn} className={select}>
             {Array.from({ length: 24 }, (_, h) => (
               <option key={h} value={h}>{`${String(h).padStart(2, "0")}:05`}</option>
+            ))}
+          </select>
+        </label>
+        <label className="flex items-center gap-3 text-sm">
+          {t.defaultStyle}
+          <select name="x_card_style" defaultValue={s.x_card_style} className={select}>
+            {CARD_STYLES.map((k) => (
+              <option key={k} value={k}>
+                {t.card.styles[k]}
+              </option>
             ))}
           </select>
         </label>

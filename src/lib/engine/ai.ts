@@ -21,6 +21,8 @@ export async function generateObject<T>(opts: {
   schema: z.ZodType<T>;
   system: string;
   prompt: string;
+  /** reasoning effort for models that think (Claude: effort) */
+  reasoning?: "low" | "medium" | "high";
 }): Promise<{ object: T; model: string; cost: number; inputTokens: number; outputTokens: number }> {
   const models = [opts.model || MODELS[opts.tier](), MODELS.fallback()].filter((m, i, a) => a.indexOf(m) === i);
   let lastError: unknown;
@@ -31,6 +33,7 @@ export async function generateObject<T>(opts: {
         output: Output.object({ schema: opts.schema }),
         system: opts.system,
         prompt: opts.prompt,
+        ...(opts.reasoning ? { reasoning: opts.reasoning } : {}),
       });
       // AI Gateway reports the billed USD cost of each call
       const cost = Number((providerMetadata?.gateway as { cost?: string } | undefined)?.cost ?? 0);

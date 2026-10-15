@@ -21,7 +21,7 @@ export async function GET(req: Request) {
 
   const day = vnDay();
   let post = (await db.socialPosts(3)).find((p) => p.day === day && p.channel === "x") ?? null;
-  if (!post) post = (await makeDraft(day, { model: settings.models.editor })).post;
+  if (!post) post = (await makeDraft(day)).post;
   if (!post) return Response.json({ skipped: "no picks today" });
   if (post.status !== "draft") return Response.json({ skipped: `today's post is ${post.status}` });
   return Response.json(await publishPost(post, ["draft"]));
