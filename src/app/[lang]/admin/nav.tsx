@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Blocks, Bot, EyeOff, ExternalLink, FileCode2, Inbox, LayoutDashboard, Library, Plug, Send, Sparkles, Users, type LucideIcon } from "lucide-react";
+import { Blocks, Bot, CalendarDays, EyeOff, ExternalLink, FileCode2, History, Inbox, Layers, LayoutDashboard, Library, ListChecks, Milestone, Network, Plug, Send, Sparkles, Users, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export type NavItem = {
@@ -17,7 +17,7 @@ export type NavItem = {
   tone?: "warn";
 };
 
-const ICONS = { overview: LayoutDashboard, library: Library, skill: Sparkles, mcp: Plug, plugin: Blocks, agent: Users, rule: FileCode2, review: Inbox, hidden: EyeOff, agents: Bot, social: Send, site: ExternalLink } satisfies Record<string, LucideIcon>;
+const ICONS = { overview: LayoutDashboard, library: Library, skill: Sparkles, mcp: Plug, plugin: Blocks, agent: Users, rule: FileCode2, review: Inbox, hidden: EyeOff, agents: Bot, social: Send, site: ExternalLink, architecture: Network, stack: Layers, roadmap: Milestone, changelog: History, features: ListChecks, picks: CalendarDays } satisfies Record<string, LucideIcon>;
 
 function useActive() {
   const path = usePathname();
@@ -55,14 +55,21 @@ function Row({ item, active, sub }: { item: NavItem; active: boolean; sub?: bool
   );
 }
 
-export function AdminNav({ items }: { items: NavItem[] }) {
+export type NavSection = { title: string; items: NavItem[] };
+
+export function AdminNav({ sections }: { sections: NavSection[] }) {
   const isActive = useActive();
   return (
     <nav aria-label="Admin" className="flex gap-1 overflow-x-auto pb-2 lg:flex-col lg:overflow-visible lg:pb-0">
-      {items.map((item) => (
-        <div key={item.href} className="contents lg:block lg:space-y-0.5">
-          <Row item={item} active={isActive(item)} />
-          {item.children?.map((c) => <Row key={c.href} item={c} active={isActive(c)} sub />)}
+      {sections.map((section, i) => (
+        <div key={section.title} className="contents lg:block lg:space-y-0.5">
+          <p className={cn("mb-3 hidden px-2.5 text-xs font-semibold uppercase tracking-wide text-muted lg:block", i > 0 && "mt-6")}>{section.title}</p>
+          {section.items.map((item) => (
+            <div key={item.href} className="contents lg:block lg:space-y-0.5">
+              <Row item={item} active={isActive(item)} />
+              {item.children?.map((c) => <Row key={c.href} item={c} active={isActive(c)} sub />)}
+            </div>
+          ))}
         </div>
       ))}
     </nav>
