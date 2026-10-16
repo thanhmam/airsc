@@ -195,7 +195,7 @@ export default async function AdminSocial({ params }: PageProps<"/[lang]/admin/s
           {t.hour}
           <select name="x_post_hour_vn" defaultValue={s.x_post_hour_vn} className={select}>
             {Array.from({ length: 24 }, (_, h) => (
-              <option key={h} value={h}>{`${String(h).padStart(2, "0")}:05`}</option>
+              <option key={h} value={h}>{`${String(h).padStart(2, "0")}:30`}</option>
             ))}
           </select>
         </label>
