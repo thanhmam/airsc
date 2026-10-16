@@ -1,0 +1,578 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Airsc System Architecture",
+    "output": ".archify/architecture-airsc-system-20261016-142658/airsc-system.html",
+    "quality_profile": "showcase",
+    "locale": "en",
+    "repository": {
+      "url": "https://github.com/thanhmam/airsc",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "aa0701e0bf49d1c5d41678dcbad365ddca8712ba"
+    }
+  },
+  "components": [
+    {
+      "id": "visitor",
+      "type": "external",
+      "label": "Visitor",
+      "sublabel": "browser EN / VI",
+      "pos": [
+        40,
+        180
+      ],
+      "size": [
+        130,
+        64
+      ]
+    },
+    {
+      "id": "agent_client",
+      "type": "external",
+      "label": "AI agent client",
+      "sublabel": "Claude / Cursor / Grok",
+      "pos": [
+        40,
+        320
+      ],
+      "size": [
+        130,
+        64
+      ]
+    },
+    {
+      "id": "kofi",
+      "type": "external",
+      "label": "Ko-fi",
+      "sublabel": "donations",
+      "pos": [
+        40,
+        460
+      ],
+      "size": [
+        130,
+        64
+      ]
+    },
+    {
+      "id": "vercel_cron",
+      "type": "cloud",
+      "label": "Vercel Cron",
+      "sublabel": "pipeline :00 · social :05",
+      "pos": [
+        40,
+        600
+      ],
+      "size": [
+        130,
+        64
+      ],
+      "sources": [
+        {
+          "path": "vercel.ts",
+          "line": 6,
+          "end_line": 11,
+          "label": "two hourly crons"
+        }
+      ]
+    },
+    {
+      "id": "x_api",
+      "type": "external",
+      "label": "X API v2",
+      "sublabel": "media upload + post",
+      "tag": "OAuth 1.0a",
+      "pos": [
+        40,
+        760
+      ],
+      "size": [
+        130,
+        64
+      ],
+      "sources": [
+        {
+          "path": "src/lib/social/x.ts",
+          "line": 86,
+          "end_line": 103,
+          "label": "uploadImage + createPost"
+        }
+      ]
+    },
+    {
+      "id": "supabase_auth",
+      "type": "security",
+      "label": "Supabase Auth",
+      "sublabel": "magic link + OAuth",
+      "pos": [
+        270,
+        40
+      ],
+      "size": [
+        180,
+        64
+      ],
+      "sources": [
+        {
+          "path": "src/app/auth/callback/route.ts",
+          "line": 4,
+          "end_line": 16,
+          "label": "code to session"
+        }
+      ]
+    },
+    {
+      "id": "proxy",
+      "type": "security",
+      "label": "proxy.ts",
+      "sublabel": "locale + session refresh",
+      "pos": [
+        270,
+        180
+      ],
+      "size": [
+        180,
+        64
+      ],
+      "sources": [
+        {
+          "path": "src/proxy.ts",
+          "line": 8,
+          "end_line": 42,
+          "label": "locale rewrite + getUser"
+        }
+      ]
+    },
+    {
+      "id": "mcp_route",
+      "type": "backend",
+      "label": "/api/mcp",
+      "sublabel": "5 tools · CORS",
+      "tag": "airsc_ key optional",
+      "pos": [
+        270,
+        320
+      ],
+      "size": [
+        180,
+        64
+      ],
+      "sources": [
+        {
+          "path": "src/app/api/mcp/route.ts",
+          "line": 15,
+          "end_line": 150,
+          "label": "registered tools"
+        },
+        {
+          "path": "src/app/api/mcp/route.ts",
+          "line": 152,
+          "end_line": 158,
+          "label": "airsc_ key auth"
+        },
+        {
+          "path": "src/app/api/mcp/route.ts",
+          "line": 163,
+          "end_line": 188,
+          "label": "CORS for browser clients"
+        }
+      ]
+    },
+    {
+      "id": "kofi_hook",
+      "type": "security",
+      "label": "/api/webhooks/kofi",
+      "sublabel": "verification token",
+      "pos": [
+        270,
+        460
+      ],
+      "size": [
+        180,
+        64
+      ],
+      "sources": [
+        {
+          "path": "src/app/api/webhooks/kofi/route.ts",
+          "line": 7,
+          "end_line": 35,
+          "label": "verify + record"
+        }
+      ]
+    },
+    {
+      "id": "triggers",
+      "type": "backend",
+      "label": "Cron + admin routes",
+      "sublabel": "cron/pipeline · cron/social",
+      "tag": "CRON_SECRET / admin",
+      "pos": [
+        270,
+        600
+      ],
+      "size": [
+        180,
+        64
+      ],
+      "sources": [
+        {
+          "path": "src/app/api/cron/pipeline/route.ts",
+          "line": 8,
+          "end_line": 17,
+          "label": "engine once per VN day"
+        },
+        {
+          "path": "src/app/api/cron/social/route.ts",
+          "line": 12,
+          "end_line": 28,
+          "label": "post today's draft"
+        },
+        {
+          "path": "src/lib/social/publish.ts",
+          "line": 12,
+          "end_line": 37,
+          "label": "claim, card, X"
+        }
+      ]
+    },
+    {
+      "id": "pages",
+      "type": "frontend",
+      "label": "Next.js 16 app",
+      "sublabel": "[lang] pages · admin · search",
+      "pos": [
+        550,
+        180
+      ],
+      "size": [
+        200,
+        64
+      ],
+      "sources": [
+        {
+          "path": "src/lib/data.ts",
+          "line": 85,
+          "end_line": 116,
+          "label": "search"
+        },
+        {
+          "path": "src/lib/data.ts",
+          "line": 149,
+          "end_line": 152,
+          "label": "Today's picks"
+        },
+        {
+          "path": "src/app/api/search/route.ts",
+          "line": 5,
+          "end_line": 27,
+          "label": "instant search"
+        }
+      ]
+    },
+    {
+      "id": "engine",
+      "type": "messagebus",
+      "label": "Content Engine",
+      "sublabel": "Vercel Workflow · 7 agents",
+      "tag": "checkpointed steps",
+      "pos": [
+        550,
+        600
+      ],
+      "size": [
+        200,
+        64
+      ],
+      "sources": [
+        {
+          "path": "src/workflows/content-engine.ts",
+          "line": 44,
+          "end_line": 140,
+          "label": "workflow body"
+        },
+        {
+          "path": "src/lib/engine/start.ts",
+          "line": 31,
+          "end_line": 35,
+          "label": "startEngine"
+        }
+      ]
+    },
+    {
+      "id": "postgres",
+      "type": "database",
+      "label": "Supabase Postgres",
+      "sublabel": "resources · picks · social_posts",
+      "tag": "RLS + token RPCs",
+      "pos": [
+        1020,
+        180
+      ],
+      "size": [
+        170,
+        484
+      ],
+      "sources": [
+        {
+          "path": "supabase/migrations/20261006000500_content_engine.sql",
+          "line": 1,
+          "end_line": 8,
+          "label": "engine schema + RPCs"
+        },
+        {
+          "path": "supabase/migrations/20261014000100_daily_picks.sql",
+          "line": 4,
+          "end_line": 8,
+          "label": "daily_picks"
+        },
+        {
+          "path": "supabase/migrations/20261015000100_social_posts.sql",
+          "line": 5,
+          "end_line": 21,
+          "label": "social_posts"
+        }
+      ]
+    },
+    {
+      "id": "ai_gateway",
+      "type": "cloud",
+      "label": "Vercel AI Gateway",
+      "sublabel": "Sonnet / Opus / Gemini",
+      "tag": "budget brake",
+      "pos": [
+        550,
+        800
+      ],
+      "size": [
+        200,
+        64
+      ],
+      "sources": [
+        {
+          "path": "src/lib/engine/ai.ts",
+          "line": 8,
+          "end_line": 40,
+          "label": "tiers + fallback"
+        },
+        {
+          "path": "src/lib/engine/credits.ts",
+          "line": 4,
+          "end_line": 11,
+          "label": "balance check"
+        }
+      ]
+    },
+    {
+      "id": "sources_ext",
+      "type": "external",
+      "label": "GitHub + registries",
+      "sublabel": "GitHub API, MCP Registry, npm",
+      "pos": [
+        790,
+        800
+      ],
+      "size": [
+        190,
+        64
+      ],
+      "sources": [
+        {
+          "path": "src/lib/engine/agents/scout.ts",
+          "line": 74,
+          "end_line": 106,
+          "label": "discover sources"
+        },
+        {
+          "path": "src/lib/crawler/github.ts",
+          "line": 41,
+          "end_line": 41,
+          "label": "GitHub client"
+        }
+      ]
+    },
+    {
+      "id": "sandbox",
+      "type": "cloud",
+      "label": "Vercel Sandbox",
+      "sublabel": "node24 VM, npx MCP",
+      "pos": [
+        1020,
+        800
+      ],
+      "size": [
+        170,
+        64
+      ],
+      "sources": [
+        {
+          "path": "src/lib/engine/agents/demo.ts",
+          "line": 60,
+          "end_line": 70,
+          "label": "demoMcp"
+        }
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Vercel · sin1",
+      "wraps": [
+        "proxy",
+        "mcp_route",
+        "kofi_hook",
+        "triggers",
+        "pages",
+        "engine"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "visit",
+      "from": "visitor",
+      "to": "proxy",
+      "label": "HTTPS",
+      "variant": "emphasis"
+    },
+    {
+      "id": "rewrite",
+      "from": "proxy",
+      "to": "pages",
+      "label": "rewrite /en",
+      "variant": "emphasis"
+    },
+    {
+      "id": "session",
+      "from": "proxy",
+      "to": "supabase_auth",
+      "label": "getUser()",
+      "variant": "security"
+    },
+    {
+      "id": "read",
+      "from": "pages",
+      "to": "postgres",
+      "label": "resources · daily_picks",
+      "variant": "emphasis"
+    },
+    {
+      "id": "mcp_call",
+      "from": "agent_client",
+      "to": "mcp_route",
+      "label": "MCP + airsc_",
+      "variant": "default"
+    },
+    {
+      "id": "mcp_db",
+      "from": "mcp_route",
+      "to": "postgres",
+      "label": "search · mcp_download",
+      "variant": "default"
+    },
+    {
+      "id": "kofi_post",
+      "from": "kofi",
+      "to": "kofi_hook",
+      "label": "POST form",
+      "variant": "default"
+    },
+    {
+      "id": "kofi_db",
+      "from": "kofi_hook",
+      "to": "postgres",
+      "label": "rpc record_supporter",
+      "variant": "security"
+    },
+    {
+      "id": "cron_call",
+      "from": "vercel_cron",
+      "to": "triggers",
+      "label": "GET hourly",
+      "variant": "security"
+    },
+    {
+      "id": "start",
+      "from": "triggers",
+      "to": "engine",
+      "label": "start()",
+      "variant": "emphasis"
+    },
+    {
+      "id": "post_x",
+      "from": "triggers",
+      "to": "x_api",
+      "label": "card + post",
+      "variant": "default"
+    },
+    {
+      "id": "engine_db",
+      "from": "engine",
+      "to": "postgres",
+      "label": "ingest · picks · draft",
+      "variant": "emphasis"
+    },
+    {
+      "id": "engine_ai",
+      "from": "engine",
+      "to": "ai_gateway",
+      "label": "generateObject",
+      "variant": "default"
+    },
+    {
+      "id": "engine_src",
+      "from": "engine",
+      "to": "sources_ext",
+      "label": "discover + analyse",
+      "variant": "default"
+    },
+    {
+      "id": "engine_demo",
+      "from": "engine",
+      "to": "sandbox",
+      "label": "boot MCP",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Request paths",
+      "items": [
+        "proxy.ts serves EN at / (rewritten to /en) and VI at /vi",
+        "Public reads use the anon key; RLS shows only published rows",
+        "/go/[slug] counts opens via track_source_open, then redirects to GitHub"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Content Engine",
+      "items": [
+        "Cron fires hourly; the run starts once per Vietnam day at the hour set in /admin",
+        "Writes go through RPCs guarded by AIRSC_INGEST_TOKEN",
+        "Previewer copies README images to Vercel Blob; picks and the X draft come last",
+        "AI work stops when the gateway balance or run cap is hit"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "Daily X post",
+      "items": [
+        "/api/cron/social posts today's draft from the hour set in /admin/social",
+        "The draft row is claimed (draft to posting) so it can never go out twice",
+        "Card rendered with next/og, then POST /2/media/upload and /2/tweets"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Code vs README",
+      "items": [
+        "README lists Polar checkout routes; no /api/checkout exists at this commit",
+        "README says the engine runs at 02:00 UTC; the hour is a setting in /admin",
+        "/api/cron/crawl exists but vercel.ts does not schedule it"
+      ]
+    }
+  ]
+}

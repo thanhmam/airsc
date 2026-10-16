@@ -1,0 +1,331 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Today's Picks to X: Daily Sequence",
+    "output": ".archify/sequence-x-daily-post-20261016-142658/x-daily-post.html",
+    "viewBox": [
+      1000,
+      620
+    ],
+    "column_fit": "spread",
+    "quality_profile": "showcase",
+    "locale": "en",
+    "repository": {
+      "url": "https://github.com/thanhmam/airsc",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "aa0701e0bf49d1c5d41678dcbad365ddca8712ba"
+    }
+  },
+  "participants": [
+    {
+      "id": "engine",
+      "type": "messagebus",
+      "label": "Content Engine",
+      "sublabel": "picks + draft",
+      "sources": [
+        {
+          "path": "src/workflows/content-engine.ts",
+          "line": 338,
+          "end_line": 370,
+          "label": "picksStep"
+        },
+        {
+          "path": "src/workflows/content-engine.ts",
+          "line": 372,
+          "end_line": 388,
+          "label": "socialDraftStep"
+        },
+        {
+          "path": "src/lib/social/draft.ts",
+          "line": 11,
+          "end_line": 33,
+          "label": "makeDraft"
+        }
+      ]
+    },
+    {
+      "id": "ai",
+      "type": "cloud",
+      "label": "AI Gateway",
+      "sublabel": "Sonnet 5.5",
+      "sources": [
+        {
+          "path": "src/lib/social/compose.ts",
+          "line": 121,
+          "end_line": 140,
+          "label": "writePost"
+        }
+      ]
+    },
+    {
+      "id": "db",
+      "type": "database",
+      "label": "Postgres",
+      "sublabel": "picks · posts",
+      "sources": [
+        {
+          "path": "supabase/migrations/20261014000100_daily_picks.sql",
+          "line": 4,
+          "end_line": 8,
+          "label": "daily_picks"
+        },
+        {
+          "path": "supabase/migrations/20261015000100_social_posts.sql",
+          "line": 5,
+          "end_line": 21,
+          "label": "social_posts"
+        },
+        {
+          "path": "src/lib/engine/db.ts",
+          "line": 57,
+          "end_line": 61,
+          "label": "claim + finish RPCs"
+        }
+      ]
+    },
+    {
+      "id": "cron",
+      "type": "cloud",
+      "label": "Vercel Cron",
+      "sublabel": "hourly at :05",
+      "sources": [
+        {
+          "path": "vercel.ts",
+          "line": 8,
+          "end_line": 11,
+          "label": "social cron"
+        }
+      ]
+    },
+    {
+      "id": "social",
+      "type": "backend",
+      "label": "Social cron",
+      "sublabel": "/api/cron/social",
+      "sources": [
+        {
+          "path": "src/app/api/cron/social/route.ts",
+          "line": 12,
+          "end_line": 28,
+          "label": "hour + draft checks"
+        },
+        {
+          "path": "src/lib/social/publish.ts",
+          "line": 12,
+          "end_line": 37,
+          "label": "publishPost"
+        }
+      ]
+    },
+    {
+      "id": "card",
+      "type": "frontend",
+      "label": "renderCard",
+      "sublabel": "next/og PNG",
+      "sources": [
+        {
+          "path": "src/lib/social/card.tsx",
+          "line": 325,
+          "end_line": 339,
+          "label": "renderCard"
+        }
+      ]
+    },
+    {
+      "id": "x",
+      "type": "external",
+      "label": "X API v2",
+      "sublabel": "OAuth 1.0a",
+      "sources": [
+        {
+          "path": "src/lib/social/x.ts",
+          "line": 86,
+          "end_line": 103,
+          "label": "upload + post"
+        }
+      ]
+    }
+  ],
+  "segments": [
+    {
+      "from": 150,
+      "to": 274,
+      "label": "Engine run: picks + draft"
+    },
+    {
+      "from": 284,
+      "to": 344,
+      "label": "Posting hour: claim"
+    },
+    {
+      "from": 354,
+      "to": 510,
+      "label": "Card, upload, post"
+    }
+  ],
+  "messages": [
+    {
+      "id": "set-picks",
+      "from": "engine",
+      "to": "db",
+      "y": 165,
+      "label": "set_daily_picks (4 slugs)",
+      "variant": "emphasis"
+    },
+    {
+      "id": "write-copy",
+      "from": "engine",
+      "to": "ai",
+      "y": 197,
+      "label": "intro + one line per pick",
+      "variant": "default"
+    },
+    {
+      "id": "copy-back",
+      "from": "ai",
+      "to": "engine",
+      "y": 227,
+      "label": "text, headline",
+      "variant": "return"
+    },
+    {
+      "id": "save-draft",
+      "from": "engine",
+      "to": "db",
+      "y": 259,
+      "label": "save draft (keeps admin edits)",
+      "variant": "emphasis"
+    },
+    {
+      "id": "cron-hit",
+      "from": "cron",
+      "to": "social",
+      "y": 299,
+      "label": "GET + CRON_SECRET",
+      "variant": "security"
+    },
+    {
+      "id": "claim",
+      "from": "social",
+      "to": "db",
+      "y": 331,
+      "label": "claim draft to posting (row)",
+      "variant": "security"
+    },
+    {
+      "id": "render",
+      "from": "social",
+      "to": "card",
+      "y": 371,
+      "label": "render card PNG",
+      "variant": "default"
+    },
+    {
+      "id": "upload",
+      "from": "social",
+      "to": "x",
+      "y": 403,
+      "label": "POST /2/media/upload",
+      "variant": "emphasis"
+    },
+    {
+      "id": "media-id",
+      "from": "x",
+      "to": "social",
+      "y": 433,
+      "label": "media id",
+      "variant": "return"
+    },
+    {
+      "id": "tweet",
+      "from": "social",
+      "to": "x",
+      "y": 465,
+      "label": "POST /2/tweets",
+      "variant": "emphasis"
+    },
+    {
+      "id": "finish",
+      "from": "social",
+      "to": "db",
+      "y": 497,
+      "label": "finish: posted or failed",
+      "variant": "dashed"
+    }
+  ],
+  "activations": [
+    {
+      "participant": "engine",
+      "from": 160,
+      "to": 265,
+      "type": "messagebus"
+    },
+    {
+      "participant": "db",
+      "from": 160,
+      "to": 171,
+      "type": "database"
+    },
+    {
+      "participant": "ai",
+      "from": 192,
+      "to": 233,
+      "type": "cloud"
+    },
+    {
+      "participant": "social",
+      "from": 294,
+      "to": 503,
+      "type": "backend"
+    },
+    {
+      "participant": "db",
+      "from": 326,
+      "to": 337,
+      "type": "database"
+    },
+    {
+      "participant": "card",
+      "from": 366,
+      "to": 377,
+      "type": "frontend"
+    },
+    {
+      "participant": "x",
+      "from": 398,
+      "to": 471,
+      "type": "external"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "When it runs",
+      "items": [
+        "The engine writes the draft at the end of its daily run (hour set in /admin)",
+        "The cron posts from the hour set in /admin/social, once per Vietnam day",
+        "Without a draft the cron writes one first; no picks means no post"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Never twice",
+      "items": [
+        "The claim moves draft to posting, so only one caller can post it",
+        "A failure is stored on the row; nothing retries on its own",
+        "Post now in /admin/social retries a draft or failed post"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Keys",
+      "items": [
+        "X_API_KEY, X_API_SECRET, X_ACCESS_TOKEN, X_ACCESS_TOKEN_SECRET",
+        "Set for Production only, so previews can never post",
+        "Test connection in /admin/social calls GET /2/users/me"
+      ]
+    }
+  ]
+}

@@ -8,6 +8,7 @@ import { getDict, hasLocale, href } from "@/lib/i18n";
 import { RESOURCE_TYPES } from "@/lib/types";
 import { adminCopy } from "./copy";
 import { AdminNav, type NavItem } from "./nav";
+import { pmCopy } from "./pm/content";
 
 export const metadata: Metadata = { title: "Admin", robots: { index: false } };
 
@@ -16,6 +17,7 @@ export default async function AdminLayout({ children, params }: LayoutProps<"/[l
   if (!hasLocale(lang)) notFound();
   if (!(await requireAdmin())) redirect(href(lang, `/login?next=${encodeURIComponent(href(lang, "/admin"))}`));
   const c = adminCopy(lang);
+  const p = pmCopy(lang);
   const t = getDict(lang);
   const [counts, credits] = await Promise.all([db.navCounts(), aiCredits()]);
   const res = href(lang, "/admin/resources");
@@ -41,12 +43,26 @@ export default async function AdminLayout({ children, params }: LayoutProps<"/[l
     { href: href(lang, "/admin/social"), label: c.tabs.social, icon: "social" },
   ];
 
+  const pm = href(lang, "/admin/pm");
+  const pmItems: NavItem[] = [
+    { href: `${pm}/architecture`, label: p.tabs.architecture, icon: "architecture" },
+    { href: `${pm}/stack`, label: p.tabs.stack, icon: "stack" },
+    { href: `${pm}/roadmap`, label: p.tabs.roadmap, icon: "roadmap" },
+    { href: `${pm}/changelog`, label: p.tabs.changelog, icon: "changelog" },
+    { href: `${pm}/features`, label: p.tabs.features, icon: "features" },
+    { href: `${pm}/picks`, label: p.tabs.picks, icon: "picks" },
+  ];
+
   return (
     <div className="mx-auto grid max-w-[1400px] gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[230px_1fr]">
-      <aside className="lg:sticky lg:top-20 lg:self-start">
-        <p className="mb-3 hidden px-2.5 text-xs font-semibold uppercase tracking-wide text-muted lg:block">{c.title}</p>
+      <aside className="lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:self-start lg:overflow-y-auto">
         <Suspense>
-          <AdminNav items={items} />
+          <AdminNav
+            sections={[
+              { title: c.title, items },
+              { title: p.section, items: pmItems },
+            ]}
+          />
         </Suspense>
         <div className="mt-4 hidden rounded-xl border border-line bg-card p-3 text-xs lg:block">
           <p className="text-muted">{c.kpi.credit}</p>
