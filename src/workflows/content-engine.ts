@@ -56,7 +56,7 @@ export async function contentEngine(opts: EngineOptions = {}) {
       const { fresh, refresh } = select(candidates, opts.maxNew ?? 150, opts.maxRefresh ?? 150);
       add("discovered_new", fresh.length);
       add("refresh", refresh.length);
-      for (const batch of chunks([...fresh, ...refresh], 20)) add("analysed", await analyzeStep(batch));
+      for (const batch of chunks([...fresh, ...refresh], 20)) add("analysed", await analyzeStep(logId, batch));
     }
 
     // Budget brake: skip AI agents when the AI Gateway balance is low, stop when this run hits its cap
@@ -163,12 +163,28 @@ async function metadataStep(batch: Parameters<typeof metadata>[0]) {
   return metadata(batch);
 }
 
-async function analyzeStep(batch: Candidate[]) {
+async function analyzeStep(logId: number, batch: Candidate[]) {
   "use step";
   const gh = new GitHub();
-  const rows = (await pool(batch, 6, (c) => analyse(gh, c.repo, c.type).catch(() => null))).filter((r): r is Row => !!r);
+  let rows = (await pool(batch, 6, (c) => analyse(gh, c.repo, c.type).catch(() => null))).filter((r): r is Row => !!r);
   if (!rows.length) return 0;
-  await db.ingest(rows);
+  try {
+    await db.ingest(rows);
+  } catch (e) {
+    // one bad row fails the whole insert: ingest one by one and skip the rows that still fail,
+    // so a single repo cannot stop today's picks; if none go in, rethrow so the step retries
+    const ok: Row[] = [];
+    for (const r of rows) {
+      try {
+        await db.ingest([r]);
+        ok.push(r);
+      } catch (err) {
+        await log(logId, `analyst · skipped ${r.full_name}: ${(err as Error).message.slice(0, 200)}`);
+      }
+    }
+    if (!ok.length) throw e;
+    rows = ok;
+  }
   const sources = new Map(batch.map((c) => [c.repo.full_name, c.sources]));
   await db.patch(rows.map((r) => ({ full_name: r.full_name, sources: sources.get(r.full_name) ?? [] })));
   return rows.length;
