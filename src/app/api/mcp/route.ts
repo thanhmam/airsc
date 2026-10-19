@@ -1,7 +1,10 @@
+import { AsyncLocalStorage } from "node:async_hooks";
+import { createHash } from "node:crypto";
 import { createMcpHandler, withMcpAuth } from "mcp-handler";
 import { z } from "zod";
 import { getKit, getKits, getResource, searchResources } from "@/lib/data";
 import { agentPrompt } from "@/lib/install-links";
+import { LIMITS, quota } from "@/lib/quota";
 import { anonClient } from "@/lib/supabase/anon";
 import { RESOURCE_TYPES } from "@/lib/types";
 
@@ -9,6 +12,30 @@ const site = process.env.NEXT_PUBLIC_SITE_URL ?? "https://airsc.vercel.app";
 const text = (value: unknown) => ({
   content: [{ type: "text" as const, text: typeof value === "string" ? value : JSON.stringify(value, null, 2) }],
 });
+
+/** Salted hash of the caller's IP, set per request: the Free limit of a caller without a key */
+const caller = new AsyncLocalStorage<string>();
+const hashIp = (req: Request) => {
+  const ip = (req.headers.get("x-forwarded-for") ?? "").split(",")[0].trim() || req.headers.get("x-real-ip") || "";
+  return ip ? createHash("sha256").update(ip + (process.env.AIRSC_INGEST_TOKEN ?? "")).digest("hex").slice(0, 32) : undefined;
+};
+
+type Ctx = { http?: { authInfo?: { token?: string } } };
+
+/**
+ * Free tier limits (Pro is unlimited). Returns a message for the agent to relay when the limit is reached.
+ * "mcp" counts every tool call; "install" counts resources whose install instructions are handed out.
+ */
+async function gate(ctx: Ctx, kind: "mcp" | "install", slug?: string): Promise<string | null> {
+  const apiKey = ctx.http?.authInfo?.token || undefined;
+  const q = await quota(kind, { apiKey, anon: caller.getStore() }, { slug });
+  if (q.allowed) return null;
+  const what = kind === "install" ? "install instructions for new resources" : "Airsc requests";
+  const rest = q.signed_in
+    ? `It resets at midnight (Vietnam time). Airsc Pro is unlimited: ${site}/pricing`
+    : `Create a free key at ${site}/account to get ${LIMITS.free[kind]} a day, or go Pro for unlimited use: ${site}/pricing`;
+  return `Daily limit reached: ${q.used} of ${q.limit} ${what} used today. ${rest} Tell the user this.`;
+}
 
 const handler = createMcpHandler(
   (server) => {
@@ -27,7 +54,9 @@ const handler = createMcpHandler(
           limit: z.number().int().min(1).max(20).optional(),
         }),
       },
-      async ({ query, type, safe_only, limit }) => {
+      async ({ query, type, safe_only, limit }, ctx) => {
+        const denied = await gate(ctx, "mcp");
+        if (denied) return text(denied);
         const { items, total } = await searchResources({
           q: query,
           type: type as (typeof RESOURCE_TYPES)[number] | undefined,
@@ -55,10 +84,12 @@ const handler = createMcpHandler(
       {
         title: "Resource details",
         annotations: { readOnlyHint: true, openWorldHint: false },
-        description: "Get full details for one resource: GitHub source, summary, safety notes, license, level, use cases and exact install instructions. Free.",
+        description: "Get details for one resource: GitHub source, summary, safety notes, license, level and use cases. Use install_resource for the install instructions. Free (daily limit without Pro).",
         inputSchema: z.object({ slug: z.string() }),
       },
-      async ({ slug }) => {
+      async ({ slug }, ctx) => {
+        const denied = await gate(ctx, "mcp");
+        if (denied) return text(denied);
         const r = await getResource(slug);
         if (!r) return text(`No resource with slug "${slug}".`);
         return text({
@@ -73,8 +104,7 @@ const handler = createMcpHandler(
           safety: r.safety,
           safety_notes: r.safety_notes.map((n) => `${n.level}: ${n.en}${n.file ? ` (${n.file})` : ""}`),
           license: r.license,
-          install: r.install,
-          install_instructions: agentPrompt(r),
+          next: `Call install_resource with slug "${r.slug}" for the exact install instructions.`,
           url: `${site}/r/${r.slug}`,
         });
       },
@@ -88,7 +118,9 @@ const handler = createMcpHandler(
         description: "List goal-based kits (bundles of the best resources for payments, auth, landing pages, SEO, etc.).",
         inputSchema: z.object({}),
       },
-      async () => {
+      async (_input, ctx) => {
+        const denied = await gate(ctx, "mcp");
+        if (denied) return text(denied);
         const kits = await getKits();
         return text(kits.map((k) => ({ slug: k.slug, title: k.title, description: k.description, items: k.count })));
       },
@@ -102,7 +134,9 @@ const handler = createMcpHandler(
         description: "List the resources inside one kit.",
         inputSchema: z.object({ slug: z.string() }),
       },
-      async ({ slug }) => {
+      async ({ slug }, ctx) => {
+        const denied = await gate(ctx, "mcp");
+        if (denied) return text(denied);
         const data = await getKit(slug);
         if (!data) return text(`No kit with slug "${slug}".`);
         return text({
@@ -119,10 +153,12 @@ const handler = createMcpHandler(
         title: "Install a resource",
         annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
         description:
-          "Get the GitHub source and step-by-step install instructions for a resource, ready to follow. Free, no key needed (an optional Airsc API key keeps a history in the user's account). Always tell the user the safety rating before installing anything rated caution or danger.",
+          "Get the GitHub source and step-by-step install instructions for a resource, ready to follow. Free with a daily limit (no key needed: an optional free Airsc API key raises the limit and keeps a history in the user's account; Pro is unlimited). Always tell the user the safety rating before installing anything rated caution or danger.",
         inputSchema: z.object({ slug: z.string() }),
       },
       async ({ slug }, ctx) => {
+        const denied = (await gate(ctx, "mcp")) ?? (await gate(ctx, "install", slug));
+        if (denied) return text(denied);
         const key = ctx.http?.authInfo?.token ?? "";
         const { data, error } = await anonClient().rpc("mcp_download", { p_api_key: key, p_slug: slug });
         if (error) return text(`Install failed: ${error.message}`);
@@ -145,7 +181,8 @@ const handler = createMcpHandler(
       "Use it whenever the user wants to add a capability to their agent or project (e.g. payments, auth, database, landing page design, SEO, deploy, email, charts, a chatbot), " +
       "asks for a skill/MCP/plugin/rule/subagent, or asks 'is there a tool for X'. " +
       "Workflow: search_resources (free) -> get_resource for the best match (free, shows safety notes) -> tell the user the safety label -> install_resource (free) and follow its instructions. " +
-      "For a whole goal, try list_kits / get_kit first. Prefer resources rated 'safe'; ask before installing anything rated 'caution' or 'danger'.",
+      "For a whole goal, try list_kits / get_kit first. Prefer resources rated 'safe'; ask before installing anything rated 'caution' or 'danger'. " +
+      "Free use has a daily limit: if a tool says the limit is reached, pass that message on to the user as it is.",
   },
 );
 
@@ -172,7 +209,8 @@ const CORS: Record<string, string> = {
 };
 
 const withCors = (h: (req: Request) => Promise<Response>) => async (req: Request) => {
-  const res = await h(req);
+  const ip = hashIp(req);
+  const res = ip ? await caller.run(ip, () => h(req)) : await h(req);
   // a fresh Response keeps the (streamed) body and lets us add headers
   const out = new Response(res.body, res);
   for (const [k, v] of Object.entries(CORS)) out.headers.set(k, v);
