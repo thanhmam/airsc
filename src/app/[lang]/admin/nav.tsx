@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Blocks, Bot, CalendarDays, EyeOff, ExternalLink, FileCode2, History, Inbox, Layers, LayoutDashboard, Library, ListChecks, Milestone, Network, Plug, Send, Sparkles, Users, type LucideIcon } from "lucide-react";
+import { Blocks, Bot, CalendarDays, EyeOff, ExternalLink, CreditCard, FileCode2, History, Inbox, Layers, LayoutDashboard, Library, ListChecks, Milestone, Network, Plug, Send, Sparkles, Users, UsersRound, Wallet, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export type NavItem = {
@@ -17,7 +17,7 @@ export type NavItem = {
   tone?: "warn";
 };
 
-const ICONS = { overview: LayoutDashboard, library: Library, skill: Sparkles, mcp: Plug, plugin: Blocks, agent: Users, rule: FileCode2, review: Inbox, hidden: EyeOff, agents: Bot, social: Send, site: ExternalLink, architecture: Network, stack: Layers, roadmap: Milestone, changelog: History, features: ListChecks, picks: CalendarDays } satisfies Record<string, LucideIcon>;
+const ICONS = { overview: LayoutDashboard, library: Library, skill: Sparkles, mcp: Plug, plugin: Blocks, agent: Users, rule: FileCode2, review: Inbox, hidden: EyeOff, agents: Bot, social: Send, site: ExternalLink, architecture: Network, stack: Layers, roadmap: Milestone, changelog: History, features: ListChecks, picks: CalendarDays, billing: Wallet, accounts: UsersRound, payments: CreditCard } satisfies Record<string, LucideIcon>;
 
 function useActive() {
   const path = usePathname();

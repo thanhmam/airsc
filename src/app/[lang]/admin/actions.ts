@@ -1,8 +1,12 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { getRun } from "workflow/api";
+import { z } from "zod";
 import { requireAdmin } from "@/lib/admin";
+import { hasLocale, href } from "@/lib/i18n";
+import { syncPolarOrders } from "@/lib/polar";
 import { db } from "@/lib/engine/db";
 import { CARD_STYLES, CARD_THEMES, type CardStyle, type CardTheme, MODEL_CHOICES, type EngineSettings, PREVIEW_DEFAULT, socialSettings } from "@/lib/engine/settings";
 import { startEngine, type Preset } from "@/lib/engine/start";
@@ -172,4 +176,26 @@ export async function testXConnection(): Promise<SocialResult & { username?: str
   } catch (e) {
     return { ok: false, error: String((e as Error)?.message ?? e).slice(0, 300) };
   }
+}
+
+/** Give or take away Pro by hand (a gift, or a refund handled outside Polar). A Polar payment re-syncs on its own */
+export async function setUserPro(userId: string, enabled: boolean) {
+  await guard();
+  await db.setPro(z.uuid().parse(userId), enabled);
+  refresh();
+}
+
+/** Pull every order from Polar into /admin/payments, then come back with the count */
+export async function syncOrders(lang: string) {
+  await guard();
+  const back = href(hasLocale(lang) ? lang : "en", "/admin/payments");
+  let result: string;
+  try {
+    result = String(await syncPolarOrders());
+  } catch (e) {
+    console.error("polar order sync failed", e);
+    result = "error";
+  }
+  refresh();
+  redirect(`${back}?synced=${result}`);
 }

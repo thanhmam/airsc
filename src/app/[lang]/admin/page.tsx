@@ -1,21 +1,11 @@
 import Link from "next/link";
 import { BarChart } from "@/components/admin/bar-chart";
+import { Tile } from "@/components/admin/tile";
 import { aiCredits } from "@/lib/engine/credits";
 import { db } from "@/lib/engine/db";
 import { href, type Locale } from "@/lib/i18n";
 import { fmtDate, fmtDateTime } from "@/lib/time";
-import { cn } from "@/lib/utils";
 import { adminCopy } from "./copy";
-
-function Tile({ label, value, sub, tone }: { label: string; value: string; sub?: string; tone?: "accent" | "warn" }) {
-  return (
-    <div className={cn("rounded-2xl border bg-card p-4", tone === "accent" ? "border-accent/60" : tone === "warn" ? "border-caution/60" : "border-line")}>
-      <p className="text-xs text-muted">{label}</p>
-      <p className="mt-1 text-2xl font-semibold tabular-nums">{value}</p>
-      {sub && <p className="mt-0.5 text-xs text-muted">{sub}</p>}
-    </div>
-  );
-}
 
 const pct = (a: number, b: number) => (b ? `${Math.round((a / b) * 100)}%` : "0%");
 
