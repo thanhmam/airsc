@@ -35,7 +35,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
     <html lang={lang} className={`${geistSans.variable} ${geistMono.variable} h-full`}>
       <body className="flex min-h-full flex-col">
         <div className="sticky top-0 z-40">
-          <DonateBar text={t.support.bar} cta={t.support.cta} supportHref={href(lang, "/support")} />
+          <DonateBar text={t.pricing.bar} cta={t.pricing.cta} pricingHref={href(lang, "/pricing")} />
           <SiteHeader lang={lang} t={t} />
         </div>
         <main className="flex-1">{children}</main>

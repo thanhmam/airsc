@@ -23,7 +23,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     db.from("pages").select("slug,generated_at"),
   ]);
   return [
-    ...["/", "/browse", "/kits", "/guides", "/mcp", "/support"].map((p) => both(p)),
+    ...["/", "/browse", "/kits", "/guides", "/mcp", "/pricing"].map((p) => both(p)),
     ...(pages ?? []).map((p) => both(`/guides/${p.slug}`, p.generated_at)),
     ...(kits ?? []).map((k) => both(`/kits/${k.slug}`)),
     ...resources.map((r) => both(`/r/${r.slug}`, r.crawled_at)),

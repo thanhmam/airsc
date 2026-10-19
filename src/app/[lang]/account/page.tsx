@@ -58,7 +58,7 @@ export default async function Account({ params, searchParams }: PageProps<"/[lan
           ) : (
             <>
               <p className="mt-1 mb-4 text-sm text-muted">{t.account.proDesc}</p>
-              <form action={startProCheckout.bind(null, lang)}>
+              <form action={startProCheckout.bind(null, lang, "/account")}>
                 <button className="h-9 rounded-lg bg-accent px-4 text-sm font-medium text-accent-fg hover:opacity-90">{t.account.proUpgrade}</button>
               </form>
             </>

@@ -1,13 +1,13 @@
+import Link from "next/link";
 import { ExternalLink } from "lucide-react";
 import { CopyButton } from "@/components/copy-button";
-import { DonateAmounts } from "@/components/donate";
 import { href, type Dict, type Locale } from "@/lib/i18n";
 import { agentPrompt, claudeDesktopConfig, cursorDeeplink } from "@/lib/install-links";
 import type { Resource } from "@/lib/types";
 
 /**
  * "Get resource" card: the original GitHub source first (users follow the project's own README),
- * a small donation nudge, then optional install shortcuts.
+ * a small nudge to Pro, then optional install shortcuts.
  */
 export function GetResource({ r, lang, t }: { r: Resource; lang: Locale; t: Dict }) {
   const mcp = r.install.mcp;
@@ -28,7 +28,9 @@ export function GetResource({ r, lang, t }: { r: Resource; lang: Locale; t: Dict
 
       <div className="rounded-xl bg-accent-soft/50 p-3">
         <p className="mb-2 text-xs text-muted">{t.resource.donateNudge}</p>
-        <DonateAmounts supportHref={href(lang, "/support")} />
+        <Link href={href(lang, "/pricing")} className="block rounded-lg border border-line bg-card py-1.5 text-center text-sm font-medium hover:border-accent hover:text-accent">
+          {t.pricing.pro.name} · {t.pricing.pro.price} {t.pricing.pro.per} →
+        </Link>
       </div>
 
       <p className="border-t border-line pt-4 text-xs text-muted">{t.resource.followReadme}</p>

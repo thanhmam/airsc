@@ -56,18 +56,22 @@ export async function signInWithProvider(form: FormData) {
 }
 
 /** Signed-in user only: the Polar customer is the Airsc user id, so the webhook knows whose Pro it is */
-async function billingUser(lang: Locale) {
+async function billingUser(lang: Locale, from: BillingPage = "/account") {
   const supabase = await serverClient();
   const { data } = await supabase.auth.getUser();
-  if (!data.user) redirect(href(lang, `/login?next=${encodeURIComponent(href(lang, "/account"))}`));
+  if (!data.user) redirect(href(lang, `/login?next=${encodeURIComponent(href(lang, from))}`));
   return data.user;
 }
 
-export async function startProCheckout(lang: Locale) {
-  const user = await billingUser(lang);
+/** Pages that can start a checkout; where Polar's "back" link and a failed start return to */
+type BillingPage = "/account" | "/pricing";
+
+export async function startProCheckout(lang: Locale, from: BillingPage = "/account") {
+  const user = await billingUser(lang, from);
   const product = proProductId();
   const account = href(lang, "/account");
-  if (!product) redirect(account);
+  const back = href(lang, from === "/pricing" ? "/pricing" : "/account");
+  if (!product) redirect(back);
   const base = await origin();
   let url: string;
   try {
@@ -76,12 +80,12 @@ export async function startProCheckout(lang: Locale) {
       external_customer_id: user.id,
       customer_email: user.email,
       success_url: `${base}${account}?upgraded=1`,
-      return_url: `${base}${account}`,
+      return_url: `${base}${back}`,
     });
     url = checkout.url;
   } catch (e) {
     console.error("polar checkout failed", e);
-    redirect(`${account}?billing=error`);
+    redirect(`${back}?billing=error`);
   }
   redirect(url);
 }

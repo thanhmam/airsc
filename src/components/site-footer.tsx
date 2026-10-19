@@ -19,7 +19,7 @@ export function SiteFooter({ lang, t }: { lang: Locale; t: Dict }) {
             <li><Link href={href(lang, "/mcp")} className="hover:text-fg">{t.nav.mcp}</Link></li>
           </ul>
           <ul className="space-y-2">
-            <li><Link href={href(lang, "/support")} className="hover:text-fg">{t.nav.pricing}</Link></li>
+            <li><Link href={href(lang, "/pricing")} className="hover:text-fg">{t.nav.pricing}</Link></li>
             <li><Link href={href(lang, "/account")} className="hover:text-fg">{t.nav.account}</Link></li>
           </ul>
         </div>
