@@ -78,4 +78,4 @@ GITHUB_TOKEN=$(gh auth token) pnpm crawl --limit 20   # quick test
 | `POLAR_ACCESS_TOKEN`, `POLAR_WEBHOOK_SECRET`, `POLAR_SERVER` | Polar.sh (`sandbox` or `production`) |
 | `POLAR_PRODUCT_PRO`, `POLAR_BENEFIT_PRO` | Polar Pro product id; id of the feature-flag benefit attached to it (the upgrade button stays hidden until `POLAR_PRODUCT_PRO` is set) |
 
-Polar webhook: URL `https://airsc.vercel.app/api/webhooks/polar`, format Raw, API version 2026-04, event `customer.state_changed` only. Customers are Airsc user ids (`external_customer_id`); the webhook re-reads the customer's state and sets `profiles.fulltime` (Pro) through the `set_pro` RPC.
+Polar webhook: URL `https://airsc.vercel.app/api/webhooks/polar`, format Raw, API version 2026-04, events `customer.state_changed` (Pro on/off), `order.paid` and `order.refunded` (payments in `/admin/payments`; the Sync from Polar button backfills). Customers are Airsc user ids (`external_customer_id`); the webhook re-reads the customer's state and sets `profiles.fulltime` (Pro) through the `set_pro` RPC.

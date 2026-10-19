@@ -43,6 +43,12 @@ export default async function AdminLayout({ children, params }: LayoutProps<"/[l
     { href: href(lang, "/admin/social"), label: c.tabs.social, icon: "social" },
   ];
 
+  const bizItems: NavItem[] = [
+    { href: href(lang, "/admin/billing"), label: c.tabs.billing, icon: "billing" },
+    { href: href(lang, "/admin/users"), label: c.tabs.users, icon: "accounts" },
+    { href: href(lang, "/admin/payments"), label: c.tabs.payments, icon: "payments" },
+  ];
+
   const pm = href(lang, "/admin/pm");
   const pmItems: NavItem[] = [
     { href: `${pm}/architecture`, label: p.tabs.architecture, icon: "architecture" },
@@ -60,6 +66,7 @@ export default async function AdminLayout({ children, params }: LayoutProps<"/[l
           <AdminNav
             sections={[
               { title: c.title, items },
+              { title: c.biz.section, items: bizItems },
               { title: p.section, items: pmItems },
             ]}
           />

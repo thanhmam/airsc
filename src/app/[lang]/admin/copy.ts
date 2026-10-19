@@ -1,6 +1,6 @@
 const en = {
   title: "Airsc admin",
-  tabs: { overview: "Overview", resources: "Resources", agents: "Agents & costs", social: "Social posts", allResources: "All resources", queued: "Waiting for agents", hidden: "Filtered out", site: "View site" },
+  tabs: { overview: "Overview", resources: "Resources", agents: "Agents & costs", social: "Social posts", allResources: "All resources", queued: "Waiting for agents", hidden: "Filtered out", site: "View site", billing: "Revenue", users: "Users", payments: "Payments" },
   reasons: {
     not_relevant: "Not an agent resource (app, library or framework)",
     low_quality: "Quality score under 40",
@@ -29,13 +29,45 @@ const en = {
   runs: "Runs", run: "Run now", runFull: "Full run (find new)", runContent: "Content only (skip Scout)",
   limits: "Limits per run", models: "Models", costByAgent: "Cost by agent · 30 days", log: "Latest run log",
   cols: { started: "Started", trigger: "Trigger", status: "Status", duration: "Duration", results: "Results", cost: "Cost" },
+  biz: {
+    section: "Business",
+    dashboard: {
+      title: "Revenue & users",
+      net: "Net revenue", gross: "Gross", refunded: "refunded", orders30d: "orders in 30 days", net30d: "net in 30 days",
+      pro: "Pro users", conversion: "of all users", newPro30: "new in 30 days",
+      payers: "Paying customers", avg: "average per customer",
+      users: "Users", new7d: "new in 7 days",
+      charts: { revenue: "Net revenue per day (USD)", signups: "New users per day", pro: "New Pro per day" },
+      byProduct: "By product", latest: "Latest payments", all: "All payments →",
+      manual: "Pro without a payment on file: gifted by hand, or a payment not synced yet.", sync: "Sync from Polar →",
+    },
+    users: {
+      title: "Users", search: "Search email",
+      filters: { all: "All users", pro: "Pro", free: "Free", paid: "Has paid" } as Record<string, string>,
+      sorts: { newest: "Newest", active: "Last active", spent: "Most paid" } as Record<string, string>,
+      cols: { user: "User", joined: "Joined", active: "Last active", plan: "Plan", paid: "Paid", usage: "Opens", key: "MCP key" },
+      pro: "Pro", free: "Free", never: "never", yes: "yes", founding: "Founding",
+      give: "Give Pro", take: "Remove Pro",
+      note: "Pro paid through Polar comes back by itself: refund it in Polar instead. Pro given here has no payment.",
+    },
+    payments: {
+      title: "Payments", status: { all: "All", paid: "Paid", refunded: "Refunded" } as Record<string, string>,
+      cols: { date: "Date", customer: "Customer", product: "Product", amount: "Net", refunded: "Refunded", status: "Status", order: "Polar order" },
+      statusName: { paid: "Paid", partially_refunded: "Partly refunded", refunded: "Refunded" } as Record<string, string>,
+      sync: "Sync from Polar", synced: "Synced {n} orders from Polar.", syncError: "Sync failed. Check POLAR_ACCESS_TOKEN and POLAR_SERVER.",
+      openPolar: "Open Polar (refunds)", unlinked: "Not linked to a user",
+      empty: "No payments yet. Press Sync from Polar to load the ones that already exist.",
+      hook: "New payments arrive by webhook when order.paid and order.refunded are ticked on the Polar webhook.",
+    },
+    prev: "Previous", next: "Next", page: "Page",
+  },
 };
 
 export type AdminCopy = typeof en;
 
 const vi: AdminCopy = {
   title: "Quản trị Airsc",
-  tabs: { overview: "Tổng quan", resources: "Tài nguyên", agents: "Agent & chi phí", social: "Bài đăng mạng xã hội", allResources: "Tất cả", queued: "Chờ agent xử lý", hidden: "Agent đã lọc bỏ", site: "Xem trang web" },
+  tabs: { overview: "Tổng quan", resources: "Tài nguyên", agents: "Agent & chi phí", social: "Bài đăng mạng xã hội", allResources: "Tất cả", queued: "Chờ agent xử lý", hidden: "Agent đã lọc bỏ", site: "Xem trang web", billing: "Doanh thu", users: "Người dùng", payments: "Thanh toán" },
   reasons: {
     not_relevant: "Không phải tài nguyên cho agent (app, thư viện, framework)",
     low_quality: "Điểm chất lượng dưới 40",
@@ -64,6 +96,38 @@ const vi: AdminCopy = {
   runs: "Các lần chạy", run: "Chạy ngay", runFull: "Chạy đầy đủ (tìm mới)", runContent: "Chỉ nội dung (bỏ Scout)",
   limits: "Giới hạn mỗi lần chạy", models: "Model", costByAgent: "Chi phí theo agent · 30 ngày", log: "Log lần chạy gần nhất",
   cols: { started: "Bắt đầu", trigger: "Kích hoạt", status: "Trạng thái", duration: "Thời gian", results: "Kết quả", cost: "Chi phí" },
+  biz: {
+    section: "Kinh doanh",
+    dashboard: {
+      title: "Doanh thu & người dùng",
+      net: "Doanh thu ròng", gross: "Tổng thu", refunded: "đã hoàn", orders30d: "đơn trong 30 ngày", net30d: "ròng trong 30 ngày",
+      pro: "Người dùng Pro", conversion: "trên tổng người dùng", newPro30: "mới trong 30 ngày",
+      payers: "Khách đã trả tiền", avg: "trung bình mỗi khách",
+      users: "Người dùng", new7d: "mới trong 7 ngày",
+      charts: { revenue: "Doanh thu ròng mỗi ngày (USD)", signups: "Người dùng mới mỗi ngày", pro: "Pro mới mỗi ngày" },
+      byProduct: "Theo sản phẩm", latest: "Thanh toán gần nhất", all: "Tất cả thanh toán →",
+      manual: "Pro không có giao dịch: do admin tặng, hoặc giao dịch chưa được đồng bộ.", sync: "Đồng bộ từ Polar →",
+    },
+    users: {
+      title: "Người dùng", search: "Tìm theo email",
+      filters: { all: "Mọi người dùng", pro: "Pro", free: "Miễn phí", paid: "Đã trả tiền" },
+      sorts: { newest: "Mới nhất", active: "Hoạt động gần nhất", spent: "Trả nhiều nhất" },
+      cols: { user: "Người dùng", joined: "Tham gia", active: "Hoạt động gần nhất", plan: "Gói", paid: "Đã trả", usage: "Lượt mở", key: "Khoá MCP" },
+      pro: "Pro", free: "Miễn phí", never: "chưa", yes: "có", founding: "Sáng lập",
+      give: "Tặng Pro", take: "Gỡ Pro",
+      note: "Pro mua qua Polar tự được bật lại: muốn thu hồi thì hoàn tiền trên Polar. Pro tặng ở đây không có giao dịch.",
+    },
+    payments: {
+      title: "Thanh toán", status: { all: "Tất cả", paid: "Đã thanh toán", refunded: "Đã hoàn tiền" },
+      cols: { date: "Ngày", customer: "Khách hàng", product: "Sản phẩm", amount: "Ròng", refunded: "Đã hoàn", status: "Trạng thái", order: "Đơn Polar" },
+      statusName: { paid: "Đã thanh toán", partially_refunded: "Hoàn một phần", refunded: "Đã hoàn tiền" },
+      sync: "Đồng bộ từ Polar", synced: "Đã đồng bộ {n} đơn từ Polar.", syncError: "Đồng bộ lỗi. Kiểm tra POLAR_ACCESS_TOKEN và POLAR_SERVER.",
+      openPolar: "Mở Polar (hoàn tiền)", unlinked: "Chưa gắn với người dùng",
+      empty: "Chưa có thanh toán nào. Bấm Đồng bộ từ Polar để tải các giao dịch đã có.",
+      hook: "Thanh toán mới về qua webhook khi webhook Polar có tick order.paid và order.refunded.",
+    },
+    prev: "Trước", next: "Sau", page: "Trang",
+  },
 };
 
 export const adminCopy = (lang: string) => (lang === "vi" ? vi : en);

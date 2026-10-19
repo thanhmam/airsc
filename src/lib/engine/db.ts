@@ -87,6 +87,24 @@ export const db = {
     }),
   overview: () => rpc<AdminOverview>("admin_overview", {}),
   donations: () => rpc<{ count: number; usd: number; count_30d: number }>("admin_donations", {}),
+  adminUsers: (f: { q?: string; filter?: string; sort?: string; limit?: number; offset?: number }) =>
+    rpc<{ total: number; rows: AdminUserRow[] }>("admin_users", {
+      p_q: f.q ?? null,
+      p_filter: f.filter ?? "all",
+      p_sort: f.sort ?? "newest",
+      p_limit: f.limit ?? 50,
+      p_offset: f.offset ?? 0,
+    }),
+  adminPayments: (f: { status?: string; limit?: number; offset?: number }) =>
+    rpc<{ total: number; rows: AdminPaymentRow[] }>("admin_payments", {
+      p_status: f.status ?? "all",
+      p_limit: f.limit ?? 50,
+      p_offset: f.offset ?? 0,
+    }),
+  adminBilling: () => rpc<AdminBilling>("admin_billing", {}),
+  /** idempotent on provider_order_id */
+  recordOrder: (row: OrderRecord) => rpc<void>("record_order", { p_row: row }),
+  setPro: (userId: string, enabled: boolean) => rpc<boolean>("set_pro", { p_user: userId, p_enabled: enabled }),
   settings: () => rpc<EngineSettings>("get_engine_settings", {}),
   saveSettings: (value: EngineSettings) => rpc<EngineSettings>("set_engine_settings", { p_value: value }),
   cronRanToday: () => rpc<boolean>("cron_ran_today_vn", {}),
@@ -152,6 +170,43 @@ export type AdminResourceRow = {
   demo_ok: "true" | "false" | null;
   demo_error: string | null;
   demo_tools: number;
+};
+
+/** One Polar order as stored in public.orders (migration 20261019000400); amounts in cents, USD */
+export type OrderRecord = {
+  provider_order_id: string;
+  user_id: string | null;
+  email: string | null;
+  product: string;
+  amount_cents: number;
+  refunded_cents: number;
+  currency: string;
+  status: "paid" | "partially_refunded" | "refunded";
+  created_at: string;
+};
+
+export type AdminUserRow = {
+  id: string;
+  email: string | null;
+  created_at: string;
+  last_sign_in_at: string | null;
+  provider: string | null;
+  fulltime: boolean;
+  fulltime_at: string | null;
+  founding: boolean;
+  downloads: number;
+  has_key: boolean;
+  orders: number;
+  paid_cents: number;
+};
+
+export type AdminPaymentRow = Omit<OrderRecord, "created_at"> & { id: number; created_at: string };
+
+export type AdminBilling = {
+  revenue: { gross: number; refunded: number; net: number; orders: number; orders_30d: number; net_30d: number; payers: number };
+  users: { total: number; new_7d: number; pro: number; new_pro_30d: number; pro_without_order: number };
+  by_product: { product: string; orders: number; net: number }[];
+  daily: { day: string; revenue: number; signups: number; pro: number }[];
 };
 
 export type AdminOverview = {

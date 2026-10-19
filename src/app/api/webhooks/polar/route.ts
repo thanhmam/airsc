@@ -1,13 +1,16 @@
 import { webhooks } from "@polar-sh/sdk/2026-04";
 import { z } from "zod";
-import { polar, polarEnv } from "@/lib/polar";
+import { db } from "@/lib/engine/db";
+import { orderRecord, polar, polarEnv } from "@/lib/polar";
 import { anonClient } from "@/lib/supabase/anon";
 
 /**
- * Polar webhook (Polar → Settings → Webhooks, format Raw, API version 2026-04, event customer.state_changed).
- * A customer is the Airsc user id (external_customer_id set at checkout). On any change we re-read the
- * customer's current state from Polar and set Pro to match, so retried or out-of-order deliveries cannot
- * leave the wrong value behind. Pro = the POLAR_BENEFIT_PRO benefit (a feature flag on the Pro product).
+ * Polar webhook (Polar → Settings → Webhooks, format Raw, API version 2026-04, events customer.state_changed,
+ * order.paid and order.refunded).
+ * order.* events are stored for /admin/payments. A customer is the Airsc user id (external_customer_id set
+ * at checkout). On customer.state_changed we re-read the customer's current state from Polar and set Pro to
+ * match, so retried or out-of-order deliveries cannot leave the wrong value behind. Pro = the
+ * POLAR_BENEFIT_PRO benefit (a feature flag on the Pro product).
  */
 export async function POST(req: Request) {
   const secret = polarEnv("POLAR_WEBHOOK_SECRET");
@@ -33,6 +36,18 @@ export async function POST(req: Request) {
     throw e;
   }
 
+  // payments for /admin/payments; refunds arrive as order.refunded
+  if (event.type === "order.paid" || event.type === "order.updated" || event.type === "order.refunded") {
+    const row = orderRecord(event.data);
+    if (row) {
+      try {
+        await db.recordOrder(row);
+      } catch {
+        return Response.json({ error: "Failed" }, { status: 500 }); // Polar retries
+      }
+    }
+    return Response.json({ received: true });
+  }
   if (event.type !== "customer.state_changed") return Response.json({ received: true }, { status: 202 });
   const userId = z.uuid().safeParse(event.data.external_id);
   if (!userId.success) return Response.json({ received: true, ignored: "no Airsc user" }, { status: 202 });
