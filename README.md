@@ -76,6 +76,7 @@ GITHUB_TOKEN=$(gh auth token) pnpm crawl --limit 20   # quick test
 | `ADMIN_EMAILS` | Comma-separated emails allowed into `/admin` |
 | `CRON_SECRET` | Vercel cron auth |
 | `POLAR_ACCESS_TOKEN`, `POLAR_WEBHOOK_SECRET`, `POLAR_SERVER` | Polar.sh (`sandbox` or `production`) |
+| `SENDGRID_API_KEY`, `EMAIL_FROM`, `EMAIL_REPLY_TO` | Daily alert emails for saved resources (`/api/cron/notify`, 09:30 Vietnam time). SendGrid key with the Mail Send permission; `EMAIL_FROM` like `Airsc <alerts@thanhmam.com>` on a domain authenticated in SendGrid; optional reply-to. Without the key, alerts still show in the account and no email is sent |
 | `POLAR_DISCOUNT_PRO` | Polar id of the launch discount (percentage off, limited redemptions). Applied at checkout while it is running; the pricing page reads price and seats left from Polar |
 | `POLAR_PRODUCT_PRO`, `POLAR_BENEFIT_PRO` | Polar Pro product id; id of the feature-flag benefit attached to it (the upgrade button stays hidden until `POLAR_PRODUCT_PRO` is set). The product's price in Polar is the regular price |
 

@@ -7,9 +7,12 @@ import { anonClient } from "@/lib/supabase/anon";
  * Start generous and tune from /admin once there is real usage.
  */
 export const LIMITS = {
-  free: { install: 5, mcp: 30 },
+  free: { install: 5, mcp: 30, saved: 10 },
   anon: { install: 2, mcp: 10 },
 } as const;
+
+/** Alerts for saved resources are a Pro feature (a free account can still save up to LIMITS.free.saved) */
+export const ALERTS_PRO_ONLY = true;
 
 export type Quota = { allowed: boolean; used: number; limit: number | null; pro: boolean; signed_in: boolean; unlocked: boolean };
 

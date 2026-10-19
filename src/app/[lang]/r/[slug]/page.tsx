@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/r/[slug]">
   };
 }
 
-export default async function ResourcePage({ params }: PageProps<"/[lang]/r/[slug]">) {
+export default async function ResourcePage({ params, searchParams }: PageProps<"/[lang]/r/[slug]">) {
   const { lang, slug } = await params;
   if (!hasLocale(lang)) notFound();
   const t = getDict(lang);
@@ -208,7 +208,7 @@ export default async function ResourcePage({ params }: PageProps<"/[lang]/r/[slu
         </div>
 
         <aside className="min-w-0 space-y-4 lg:sticky lg:top-20 lg:self-start">
-          <GetResource r={r} lang={lang} t={t} />
+          <GetResource r={r} lang={lang} t={t} saveLimit={(await searchParams).saved === "limit"} />
 
           {kits.length > 0 && (
             <div className="rounded-2xl border border-line bg-card p-5">

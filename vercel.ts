@@ -9,5 +9,7 @@ export const config: VercelConfig = {
   crons: [
     { path: "/api/cron/pipeline", schedule: "0 * * * *" },
     { path: "/api/cron/social", schedule: "30 * * * *" },
+    // alerts for saved resources: 09:30 Vietnam time, after the engine run (default 08:00, about 10 minutes)
+    { path: "/api/cron/notify", schedule: "30 2 * * *" },
   ],
 };
