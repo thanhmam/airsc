@@ -3,8 +3,10 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
+import { getResource } from "@/lib/data";
 import { href, type Locale } from "@/lib/i18n";
-import { polar, proProductId } from "@/lib/polar";
+import { polar, proDiscountId, proOffer, proProductId } from "@/lib/polar";
+import { quota } from "@/lib/quota";
 import { anonClient } from "@/lib/supabase/anon";
 import { serverClient } from "@/lib/supabase/server";
 
@@ -73,10 +75,13 @@ export async function startProCheckout(lang: Locale, from: BillingPage = "/accou
   const back = href(lang, from === "/pricing" ? "/pricing" : "/account");
   if (!product) redirect(back);
   const base = await origin();
+  // the launch discount only while it is running, so a sold-out or ended offer cannot break checkout
+  const discount = (await proOffer())?.launchCents != null ? proDiscountId() : null;
   let url: string;
   try {
     const checkout = await polar().checkouts.create({
       products: [product],
+      ...(discount ? { discount_id: discount } : {}),
       external_customer_id: user.id,
       customer_email: user.email,
       success_url: `${base}${account}?upgraded=1`,
@@ -105,6 +110,17 @@ export async function openBillingPortal(lang: Locale) {
     redirect(`${account}?billing=error`);
   }
   redirect(url);
+}
+
+/** Spends one of the Free tier's daily unlocks on a resource's install options, then shows the page again */
+export async function unlockInstall(lang: Locale, slug: string) {
+  const here = href(lang, `/r/${slug}`);
+  const supabase = await serverClient();
+  const { data } = await supabase.auth.getUser();
+  if (!data.user) redirect(href(lang, `/login?next=${encodeURIComponent(here)}`));
+  if (!(await getResource(slug))) redirect(href(lang, "/browse"));
+  await quota("install", { user: data.user.id }, { slug });
+  redirect(here);
 }
 
 export async function signOut(lang: Locale) {
