@@ -307,7 +307,7 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
       <section className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-x-5 gap-y-3 px-4 pb-6 pt-6 text-center sm:px-6">
         <p className="text-muted">{h.freeLine}</p>
         <Link
-          href={href(lang, "/support")}
+          href={href(lang, "/pricing")}
           className="inline-flex h-11 items-center rounded-xl border border-line-strong bg-card px-4 text-sm font-medium hover:border-accent hover:text-accent"
         >
           {h.support} →
