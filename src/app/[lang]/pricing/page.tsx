@@ -45,7 +45,7 @@ export default async function Pricing({ params, searchParams }: PageProps<"/[lan
     new Intl.NumberFormat("en-US", { style: "currency", currency: (offer?.currency ?? "usd").toUpperCase(), minimumFractionDigits: cents % 100 ? 2 : 0, maximumFractionDigits: 2 }).format(cents / 100);
   const launch = offer?.launchCents ?? null;
   const price = offer ? money(launch ?? offer.regularCents) : p.pro.price;
-  const limits = { install: LIMITS.free.install, mcp: LIMITS.free.mcp, anon: LIMITS.anon.mcp };
+  const limits = { install: LIMITS.free.install, mcp: LIMITS.free.mcp, anon: LIMITS.anon.mcp, saved: LIMITS.free.saved };
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-14 sm:px-6">

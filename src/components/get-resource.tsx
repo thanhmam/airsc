@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { ExternalLink, Lock } from "lucide-react";
-import { unlockInstall } from "@/app/actions";
+import { Bookmark, BookmarkCheck, ExternalLink, Lock } from "lucide-react";
+import { saveResource, unlockInstall, unsaveResource } from "@/app/actions";
 import { CopyButton } from "@/components/copy-button";
 import { href, type Dict, type Locale } from "@/lib/i18n";
 import { agentPrompt, claudeDesktopConfig, cursorDeeplink } from "@/lib/install-links";
-import { quota } from "@/lib/quota";
+import { LIMITS, quota } from "@/lib/quota";
 import { currentUser } from "@/lib/supabase/server";
 import type { Resource } from "@/lib/types";
 
@@ -13,8 +13,10 @@ import type { Resource } from "@/lib/types";
  * a small nudge to Pro, then the install shortcuts. The shortcuts are the Free tier's daily allowance: Pro sees
  * them straight away, a Free account unlocks a resource's options (a few a day), a visitor is asked to sign in.
  */
-export async function GetResource({ r, lang, t }: { r: Resource; lang: Locale; t: Dict }) {
-  const { user } = await currentUser();
+export async function GetResource({ r, lang, t, saveLimit = false }: { r: Resource; lang: Locale; t: Dict; saveLimit?: boolean }) {
+  const { supabase, user } = await currentUser();
+  // saved by this user? (their own row, through RLS); stays false before the saved-resources migration
+  const saved = user ? !!(await supabase.from("saved_resources").select("resource_id").eq("resource_id", r.id).maybeSingle()).data : false;
   const q = user ? await quota("install", { user: user.id }, { slug: r.slug, consume: false }) : null;
   const open = !!q && (q.pro || q.unlocked);
   const mcp = r.install.mcp;
@@ -34,6 +36,28 @@ export async function GetResource({ r, lang, t }: { r: Resource; lang: Locale; t
         {t.resource.openGithub} <ExternalLink className="size-4" aria-hidden />
       </a>
       <p className="-mt-2 truncate text-center font-mono text-xs text-muted">{r.full_name}</p>
+
+      <div className="space-y-1.5">
+        {!user ? (
+          <Link href={href(lang, `/login?next=${encodeURIComponent(here)}`)} className="flex w-full items-center justify-center gap-2 rounded-xl border border-line px-4 py-2 text-sm font-medium hover:border-accent hover:text-accent">
+            <Bookmark className="size-4" aria-hidden /> {t.alerts.signInToSave}
+          </Link>
+        ) : saved ? (
+          <form action={unsaveResource.bind(null, lang, r.slug, "resource")}>
+            <button className="flex w-full items-center justify-center gap-2 rounded-xl border border-accent bg-accent-soft px-4 py-2 text-sm font-medium text-accent hover:opacity-90">
+              <BookmarkCheck className="size-4" aria-hidden /> {t.alerts.saved} · {t.alerts.remove}
+            </button>
+          </form>
+        ) : (
+          <form action={saveResource.bind(null, lang, r.slug)}>
+            <button className="flex w-full items-center justify-center gap-2 rounded-xl border border-line px-4 py-2 text-sm font-medium hover:border-accent hover:text-accent">
+              <Bookmark className="size-4" aria-hidden /> {t.alerts.save}
+            </button>
+          </form>
+        )}
+        {saveLimit && !saved ? <p role="alert" className="text-center text-xs text-caution">{t.alerts.limit.replace("{n}", String(LIMITS.free.saved))}</p> : null}
+        {user ? <p className="text-center text-xs text-muted">{q?.pro ? t.alerts.hintPro : t.alerts.hintFree}</p> : null}
+      </div>
 
       <p className="border-t border-line pt-4 text-xs text-muted">{t.resource.followReadme}</p>
 

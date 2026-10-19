@@ -102,6 +102,11 @@ export const db = {
       p_offset: f.offset ?? 0,
     }),
   adminBilling: () => rpc<AdminBilling>("admin_billing", {}),
+  /** saved-resource alerts (migration 20261020000200): turn the day's changes into notifications, then email them */
+  generateNotifications: (proOnly: boolean) => rpc<number>("generate_notifications", { p_pro_only: proOnly }),
+  pendingDigests: () => rpc<Digest[]>("pending_digests", {}),
+  markNotificationsEmailed: (ids: number[]) => rpc<void>("mark_notifications_emailed", { p_ids: ids }),
+  setEmailAlertsFor: (userId: string, on: boolean) => rpc<void>("set_email_alerts_for", { p_user: userId, p_on: on }),
   /** idempotent on provider_order_id */
   recordOrder: (row: OrderRecord) => rpc<void>("record_order", { p_row: row }),
   setPro: (userId: string, enabled: boolean) => rpc<boolean>("set_pro", { p_user: userId, p_enabled: enabled }),
@@ -183,6 +188,14 @@ export type OrderRecord = {
   currency: string;
   status: "paid" | "partially_refunded" | "refunded";
   created_at: string;
+};
+
+/** One user's alerts waiting to be emailed */
+export type Digest = {
+  user_id: string;
+  email: string;
+  locale: "en" | "vi" | null;
+  items: { id: number; slug: string; name: string; kind: "update" | "safety"; old: string | null; new: string | null; at: string }[];
 };
 
 export type AdminUserRow = {

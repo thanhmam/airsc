@@ -6,7 +6,7 @@ import { z } from "zod";
 import { getResource } from "@/lib/data";
 import { href, type Locale } from "@/lib/i18n";
 import { polar, proDiscountId, proOffer, proProductId } from "@/lib/polar";
-import { quota } from "@/lib/quota";
+import { LIMITS, quota } from "@/lib/quota";
 import { anonClient } from "@/lib/supabase/anon";
 import { serverClient } from "@/lib/supabase/server";
 
@@ -121,6 +121,34 @@ export async function unlockInstall(lang: Locale, slug: string) {
   if (!(await getResource(slug))) redirect(href(lang, "/browse"));
   await quota("install", { user: data.user.id }, { slug });
   redirect(here);
+}
+
+/** Save a resource (alerts follow for Pro); a free account keeps up to LIMITS.free.saved */
+export async function saveResource(lang: Locale, slug: string) {
+  const here = href(lang, `/r/${slug}`);
+  const supabase = await serverClient();
+  const { data: auth } = await supabase.auth.getUser();
+  if (!auth.user) redirect(href(lang, `/login?next=${encodeURIComponent(here)}`));
+  const { data } = await supabase.rpc("save_resource", { p_slug: slug, p_lang: lang, p_free_limit: LIMITS.free.saved });
+  redirect(data?.reason === "limit" ? `${here}?saved=limit` : here);
+}
+
+export async function unsaveResource(lang: Locale, slug: string, back: "resource" | "account" = "resource") {
+  const supabase = await serverClient();
+  await supabase.rpc("unsave_resource", { p_slug: slug });
+  redirect(back === "account" ? href(lang, "/account") : href(lang, `/r/${slug}`));
+}
+
+export async function markNotificationsRead(lang: Locale) {
+  const supabase = await serverClient();
+  await supabase.rpc("mark_notifications_read");
+  redirect(href(lang, "/account"));
+}
+
+export async function setEmailAlerts(lang: Locale, on: boolean) {
+  const supabase = await serverClient();
+  await supabase.rpc("set_my_email_alerts", { p_on: on });
+  redirect(href(lang, "/account"));
 }
 
 export async function signOut(lang: Locale) {

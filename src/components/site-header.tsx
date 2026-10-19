@@ -5,7 +5,9 @@ import { href, type Dict, type Locale } from "@/lib/i18n";
 import { currentUser } from "@/lib/supabase/server";
 
 export async function SiteHeader({ lang, t }: { lang: Locale; t: Dict }) {
-  const { user } = await currentUser();
+  const { supabase, user } = await currentUser();
+  // unread alerts: a dot on Account; 0 until the notifications migration is applied
+  const unread = user ? ((await supabase.from("notifications").select("id", { count: "exact", head: true }).is("read_at", null)).count ?? 0) : 0;
   const nav = [
     { label: t.nav.browse, path: "/browse" },
     { label: t.nav.kits, path: "/kits" },
@@ -34,7 +36,7 @@ export async function SiteHeader({ lang, t }: { lang: Locale; t: Dict }) {
               className="inline-flex items-center gap-1.5 rounded-lg border border-line px-3 py-1.5 text-sm font-medium hover:border-fg/30"
             >
               <span>{t.nav.account}</span>
-
+              {unread > 0 && <span className="rounded-full bg-accent px-1.5 text-[11px] font-medium leading-4 text-accent-fg tabular-nums">{unread > 9 ? "9+" : unread}</span>}
             </Link>
           ) : (
             <Link
