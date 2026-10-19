@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { notFound } from "next/navigation";
+import Script from "next/script";
 import { DonateBar } from "@/components/donate";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -41,6 +42,12 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
         <main className="flex-1">{children}</main>
         <SiteFooter lang={lang} t={t} />
       </body>
+      <Script
+        data-website-id="dfid_IlVYqOw2MyYNMvYkCMpR0"
+        data-domain="airsc.vercel.app"
+        src="https://datafa.st/js/script.js"
+        strategy="afterInteractive"
+      />
     </html>
   );
 }
