@@ -71,13 +71,10 @@ export default async function Pricing({ params, searchParams }: PageProps<"/[lan
         <section className="flex flex-col rounded-2xl border-2 border-accent bg-card p-6">
           <div className="flex items-center justify-between gap-3">
             <h2 className="font-semibold">{p.pro.name}</h2>
-            {launch !== null && offer?.percentOff ? (
-              <span className="rounded-full bg-accent-soft px-2.5 py-0.5 text-xs font-medium text-accent">{p.pro.badge} · {fill(p.pro.off, { percent: offer.percentOff })}</span>
-            ) : null}
+            {launch !== null ? <span className="rounded-full bg-accent-soft px-2.5 py-0.5 text-xs font-medium text-accent">{p.pro.badge}</span> : null}
           </div>
           <p className="mt-3 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
             <span className="text-4xl font-semibold tracking-tight tabular-nums">{price}</span>
-            {launch !== null && offer ? <span className="text-lg text-muted tabular-nums line-through">{money(offer.regularCents)}</span> : null}
             <span className="text-sm text-muted">{p.pro.per}</span>
           </p>
           {launch !== null && offer ? (
