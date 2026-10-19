@@ -1,6 +1,6 @@
 import { webhooks } from "@polar-sh/sdk/2026-04";
 import { z } from "zod";
-import { polar } from "@/lib/polar";
+import { polar, polarEnv } from "@/lib/polar";
 import { anonClient } from "@/lib/supabase/anon";
 
 /**
@@ -10,8 +10,8 @@ import { anonClient } from "@/lib/supabase/anon";
  * leave the wrong value behind. Pro = the POLAR_BENEFIT_PRO benefit (a feature flag on the Pro product).
  */
 export async function POST(req: Request) {
-  const secret = process.env.POLAR_WEBHOOK_SECRET;
-  const benefit = process.env.POLAR_BENEFIT_PRO;
+  const secret = polarEnv("POLAR_WEBHOOK_SECRET");
+  const benefit = polarEnv("POLAR_BENEFIT_PRO");
   if (!secret || !benefit) return Response.json({ error: "Not configured" }, { status: 500 });
 
   let event;
