@@ -11,7 +11,7 @@ export async function SiteHeader({ lang, t }: { lang: Locale; t: Dict }) {
     { label: t.nav.kits, path: "/kits" },
     { label: t.nav.guides, path: "/guides" },
     { label: t.nav.mcp, path: "/mcp" },
-    { label: t.nav.pricing, path: "/support" },
+    { label: t.nav.pricing, path: "/pricing" },
   ];
   return (
     <header className="border-b border-line/80 bg-bg/80 backdrop-blur-md">

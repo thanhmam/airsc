@@ -24,6 +24,58 @@ export const polarDashboardUrl = () => (isSandbox() ? "https://sandbox.polar.sh/
 /** The Pro upgrade is only offered once the product is configured */
 export const proProductId = () => polarEnv("POLAR_PRODUCT_PRO");
 
+/** The launch discount in Polar (percentage off, limited seats), applied automatically at checkout */
+export const proDiscountId = () => polarEnv("POLAR_DISCOUNT_PRO");
+
+export type ProOffer = {
+  currency: string;
+  /** the regular price, in cents: what Pro costs once the launch is over */
+  regularCents: number;
+  /** price with the launch discount, or null when it is not running (no discount, ended, or sold out) */
+  launchCents: number | null;
+  percentOff: number | null;
+  /** launch seats: how many in total and how many are left; null when the discount has no limit */
+  seats: { total: number; left: number } | null;
+};
+
+let offerCache: { at: number; value: ProOffer | null } | null = null;
+
+/**
+ * What Pro costs right now, read from Polar so the page can never promise a price or a number of seats
+ * that checkout will not honour. Cached for a minute; null when Polar cannot be reached.
+ */
+export async function proOffer(): Promise<ProOffer | null> {
+  if (offerCache && Date.now() - offerCache.at < 60_000) return offerCache.value;
+  let value: ProOffer | null = null;
+  try {
+    const productId = proProductId();
+    if (productId) {
+      const client = polar();
+      const product = await client.products.get(productId);
+      const price = product.prices.find((p) => "price_amount" in p && p.amount_type === "fixed" && !p.is_archived);
+      if (price && "price_amount" in price) {
+        value = { currency: price.price_currency ?? "usd", regularCents: price.price_amount, launchCents: null, percentOff: null, seats: null };
+        const discountId = proDiscountId();
+        if (discountId) {
+          const d = await client.discounts.get(discountId);
+          const now = Date.now();
+          const running = (!d.starts_at || new Date(d.starts_at).getTime() <= now) && (!d.ends_at || new Date(d.ends_at).getTime() > now);
+          const left = d.max_redemptions == null ? null : d.max_redemptions - d.redemptions_count;
+          if (running && (left === null || left > 0) && "basis_points" in d) {
+            value.percentOff = Math.round(d.basis_points / 100);
+            value.launchCents = Math.round((price.price_amount * (10_000 - d.basis_points)) / 10_000);
+            if (left !== null && d.max_redemptions != null) value.seats = { total: d.max_redemptions, left };
+          }
+        }
+      }
+    }
+  } catch (e) {
+    console.error("polar offer failed", e);
+  }
+  offerCache = { at: Date.now(), value };
+  return value;
+}
+
 const STORED = ["paid", "partially_refunded", "refunded"] as const;
 
 /**

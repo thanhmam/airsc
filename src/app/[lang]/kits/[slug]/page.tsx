@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { Lock } from "lucide-react";
 import { KIT_ICON } from "@/components/icons";
 import { ResourceCard } from "@/components/resource-card";
 import { getKit } from "@/lib/data";
@@ -8,6 +9,7 @@ import { getDict, hasLocale, href } from "@/lib/i18n";
 import { agentPrompt } from "@/lib/install-links";
 import { CopyButton } from "@/components/copy-button";
 import { getResource } from "@/lib/data";
+import { currentPlan } from "@/lib/pro";
 
 export async function generateMetadata({ params }: PageProps<"/[lang]/kits/[slug]">): Promise<Metadata> {
   const { lang, slug } = await params;
@@ -25,7 +27,9 @@ export default async function KitPage({ params }: PageProps<"/[lang]/kits/[slug]
   const { kit, items } = data;
   const vi = lang === "vi";
   const Icon = KIT_ICON[kit.icon] ?? KIT_ICON.box;
-  const full = await Promise.all(items.map((i) => getResource(i.slug)));
+  // installing the whole kit with one prompt is a Pro feature; the list of resources stays open
+  const { user, pro } = await currentPlan();
+  const full = pro ? await Promise.all(items.map((i) => getResource(i.slug))) : [];
   const kitPrompt = [
     vi ? `Cài bộ "${kit.title_vi}" gồm các tài nguyên sau, từng cái một:` : `Install the "${kit.title}" kit, one item at a time:`,
     ...full.filter(Boolean).map((r, i) => `${i + 1}. ${agentPrompt(r!)}`),
@@ -55,13 +59,28 @@ export default async function KitPage({ params }: PageProps<"/[lang]/kits/[slug]
               {items.length} {t.kits.items}
             </p>
             <p className="text-sm text-muted">{t.kits.kitCost}</p>
-            <div className="space-y-2 border-t border-line pt-4">
-              <p className="text-xs text-muted">{t.resource.promptIntro}</p>
-              <div className="relative rounded-xl bg-soft">
-                <pre className="max-h-64 overflow-auto whitespace-pre-wrap p-3 pr-10 font-mono text-xs leading-relaxed">{kitPrompt}</pre>
-                <CopyButton text={kitPrompt} copiedLabel={t.resource.copied} className="absolute right-1.5 top-1.5" />
+            {pro ? (
+              <div className="space-y-2 border-t border-line pt-4">
+                <p className="text-xs text-muted">{t.resource.promptIntro}</p>
+                <div className="relative rounded-xl bg-soft">
+                  <pre className="max-h-64 overflow-auto whitespace-pre-wrap p-3 pr-10 font-mono text-xs leading-relaxed">{kitPrompt}</pre>
+                  <CopyButton text={kitPrompt} copiedLabel={t.resource.copied} className="absolute right-1.5 top-1.5" />
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="space-y-3 rounded-xl border border-dashed border-line-strong p-4 text-center">
+                <p className="flex items-center justify-center gap-1.5 text-sm font-medium">
+                  <Lock className="size-4 text-accent" aria-hidden /> {t.kits.proTitle}
+                </p>
+                <p className="text-xs text-muted">{t.kits.proText}</p>
+                <Link
+                  href={user ? href(lang, "/pricing") : href(lang, `/login?next=${encodeURIComponent(href(lang, "/pricing"))}`)}
+                  className="block rounded-xl bg-accent px-4 py-2.5 text-sm font-medium text-accent-fg hover:opacity-90"
+                >
+                  {t.kits.proCta}
+                </Link>
+              </div>
+            )}
           </div>
         </aside>
       </div>

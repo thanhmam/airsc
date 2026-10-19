@@ -365,7 +365,7 @@ export const FEATURES: FeatureGroup[] = [
       { name: { en: "Guides", vi: "Hướng dẫn" }, desc: { en: "Best-of pages per category and a weekly digest, written by the Editor", vi: "Trang tổng hợp tốt nhất theo danh mục và bản tin tuần, do Editor viết" }, status: "live", code: "/guides" },
       { name: { en: "English and Vietnamese", vi: "Tiếng Anh và tiếng Việt" }, desc: { en: "EN at /, VI at /vi, every string in both", vi: "EN ở /, VI ở /vi, mọi chuỗi đều có hai thứ tiếng" }, status: "live", code: "src/proxy.ts · src/lib/i18n.ts" },
       { name: { en: "Accounts", vi: "Tài khoản" }, desc: { en: "Magic link, Google, GitHub; personal airsc_ key for MCP; open history", vi: "Magic link, Google, GitHub; khóa airsc_ riêng cho MCP; lịch sử mở" }, status: "live", code: "/login · /account" },
-      { name: { en: "Support", vi: "Ủng hộ" }, desc: { en: "Ko-fi donations, pinned donate bar, supporters with masked emails", vi: "Ủng hộ qua Ko-fi, thanh ủng hộ ghim, danh sách người ủng hộ với email đã che" }, status: "live", code: "/support · /api/webhooks/kofi" },
+      { name: { en: "Pricing", vi: "Bảng giá" }, desc: { en: "Free and Pro ($5 once, for life) via Polar; the old Support page redirects here, the Ko-fi webhook still records gifts", vi: "Miễn phí và Pro ($5 một lần, trọn đời) qua Polar; trang Ủng hộ cũ chuyển về đây, webhook Ko-fi vẫn ghi nhận quà tặng" }, status: "live", code: "/pricing · /api/webhooks/polar · /api/webhooks/kofi" },
     ],
   },
   {

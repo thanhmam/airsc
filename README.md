@@ -76,6 +76,7 @@ GITHUB_TOKEN=$(gh auth token) pnpm crawl --limit 20   # quick test
 | `ADMIN_EMAILS` | Comma-separated emails allowed into `/admin` |
 | `CRON_SECRET` | Vercel cron auth |
 | `POLAR_ACCESS_TOKEN`, `POLAR_WEBHOOK_SECRET`, `POLAR_SERVER` | Polar.sh (`sandbox` or `production`) |
-| `POLAR_PRODUCT_PRO`, `POLAR_BENEFIT_PRO` | Polar Pro product id; id of the feature-flag benefit attached to it (the upgrade button stays hidden until `POLAR_PRODUCT_PRO` is set) |
+| `POLAR_DISCOUNT_PRO` | Polar id of the launch discount (percentage off, limited redemptions). Applied at checkout while it is running; the pricing page reads price and seats left from Polar |
+| `POLAR_PRODUCT_PRO`, `POLAR_BENEFIT_PRO` | Polar Pro product id; id of the feature-flag benefit attached to it (the upgrade button stays hidden until `POLAR_PRODUCT_PRO` is set). The product's price in Polar is the regular price |
 
 Polar webhook: URL `https://airsc.vercel.app/api/webhooks/polar`, format Raw, API version 2026-04, events `customer.state_changed` (Pro on/off), `order.paid` and `order.refunded` (payments in `/admin/payments`; the Sync from Polar button backfills). Customers are Airsc user ids (`external_customer_id`); the webhook re-reads the customer's state and sets `profiles.fulltime` (Pro) through the `set_pro` RPC.
