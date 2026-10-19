@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { href, type Locale } from "@/lib/i18n";
+import { polar, proProductId } from "@/lib/polar";
 import { anonClient } from "@/lib/supabase/anon";
 import { serverClient } from "@/lib/supabase/server";
 
@@ -52,6 +53,54 @@ export async function signInWithProvider(form: FormData) {
   });
   if (error || !data.url) redirect(`${href(lang, "/login")}?error=provider`);
   redirect(data.url);
+}
+
+/** Signed-in user only: the Polar customer is the Airsc user id, so the webhook knows whose Pro it is */
+async function billingUser(lang: Locale) {
+  const supabase = await serverClient();
+  const { data } = await supabase.auth.getUser();
+  if (!data.user) redirect(href(lang, `/login?next=${encodeURIComponent(href(lang, "/account"))}`));
+  return data.user;
+}
+
+export async function startProCheckout(lang: Locale) {
+  const user = await billingUser(lang);
+  const product = proProductId();
+  const account = href(lang, "/account");
+  if (!product) redirect(account);
+  const base = await origin();
+  let url: string;
+  try {
+    const checkout = await polar().checkouts.create({
+      products: [product],
+      external_customer_id: user.id,
+      customer_email: user.email,
+      success_url: `${base}${account}?upgraded=1`,
+      return_url: `${base}${account}`,
+    });
+    url = checkout.url;
+  } catch (e) {
+    console.error("polar checkout failed", e);
+    redirect(`${account}?billing=error`);
+  }
+  redirect(url);
+}
+
+/** Polar's customer portal: change card, see invoices, cancel */
+export async function openBillingPortal(lang: Locale) {
+  const user = await billingUser(lang);
+  const account = href(lang, "/account");
+  const base = await origin();
+  let url: string;
+  try {
+    const session = await polar().customerSessions.create({ external_customer_id: user.id, return_url: `${base}${account}` });
+    url = session.customer_portal_url;
+  } catch (e) {
+    // e.g. Pro granted by hand, so there is no Polar customer yet
+    console.error("polar portal failed", e);
+    redirect(`${account}?billing=error`);
+  }
+  redirect(url);
 }
 
 export async function signOut(lang: Locale) {

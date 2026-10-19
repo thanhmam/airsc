@@ -15,7 +15,7 @@ Production: https://airsc.vercel.app
 | Crawler | GitHub search + tree + raw files → safety scan → install config → AI summary/translation (`src/lib/crawler`) |
 | AI (internal only) | Vercel AI Gateway, `AIRSC_ENRICH_MODEL` (default `anthropic/claude-sonnet-5.5`) |
 | Airsc MCP | `src/app/api/mcp/route.ts` (mcp-handler), key via `Authorization: Bearer airsc_…` or `?key=` |
-| Payments | Polar.sh checkout + webhook (`src/app/api/checkout`, `src/app/api/webhooks/polar`) |
+| Payments | Ko-fi donations (`src/app/api/webhooks/kofi`) and Pro membership via Polar.sh: checkout and billing portal are server actions in `src/app/actions.ts`, webhook in `src/app/api/webhooks/polar` |
 | Content Engine | Vercel Workflow `src/workflows/content-engine.ts`, daily 02:00 UTC via `/api/cron/pipeline` |
 
 ## Brand and UI
@@ -76,6 +76,6 @@ GITHUB_TOKEN=$(gh auth token) pnpm crawl --limit 20   # quick test
 | `ADMIN_EMAILS` | Comma-separated emails allowed into `/admin` |
 | `CRON_SECRET` | Vercel cron auth |
 | `POLAR_ACCESS_TOKEN`, `POLAR_WEBHOOK_SECRET`, `POLAR_SERVER` | Polar.sh (`sandbox` or `production`) |
-| `POLAR_PRODUCT_CREDITS_100`, `POLAR_PRODUCT_CREDITS_1000`, `POLAR_PRODUCT_FULLTIME`, `POLAR_PRODUCT_FOUNDING` | Polar product IDs |
+| `POLAR_PRODUCT_PRO`, `POLAR_BENEFIT_PRO` | Polar Pro product id; id of the feature-flag benefit attached to it (the upgrade button stays hidden until `POLAR_PRODUCT_PRO` is set) |
 
-Polar webhook URL: `https://airsc.vercel.app/api/webhooks/polar` (event: `order.paid`).
+Polar webhook: URL `https://airsc.vercel.app/api/webhooks/polar`, format Raw, API version 2026-04, event `customer.state_changed` only. Customers are Airsc user ids (`external_customer_id`); the webhook re-reads the customer's state and sets `profiles.fulltime` (Pro) through the `set_pro` RPC.
