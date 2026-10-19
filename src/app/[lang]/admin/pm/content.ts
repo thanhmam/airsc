@@ -143,7 +143,7 @@ export const STACK: StackGroup[] = [
       { name: "X API v2", role: { en: "Daily post with card (OAuth 1.0a, src/lib/social/x.ts)", vi: "Bài đăng hằng ngày kèm card (OAuth 1.0a, src/lib/social/x.ts)" } },
       { name: "next/og + sharp", pkg: "sharp", role: { en: "Renders the X card PNG", vi: "Vẽ ảnh card PNG cho X" } },
       { name: "Ko-fi webhook", role: { en: "Donations and the supporters list", vi: "Ủng hộ và danh sách người ủng hộ" } },
-      { name: "Polar.sh", pkg: "@polar-sh/nextjs", unused: true, role: { en: "Left from the credits model; payments were replaced by Ko-fi donations", vi: "Còn lại từ mô hình credit; thanh toán đã thay bằng ủng hộ qua Ko-fi" } },
+      { name: "Polar.sh", pkg: "@polar-sh/sdk", role: { en: "Pro membership: checkout, billing portal and the customer.state_changed webhook", vi: "Gói Pro: thanh toán, cổng quản lý và webhook customer.state_changed" } },
     ],
   },
   {
@@ -240,7 +240,6 @@ export const PHASES: Phase[] = [
     when: "",
     status: "idea",
     items: [
-      { en: "Remove the unused @polar-sh/nextjs dependency", vi: "Gỡ dependency @polar-sh/nextjs không còn dùng" },
       { en: "Schedule or remove /api/cron/crawl (exists, not in vercel.ts)", vi: "Lên lịch hoặc gỡ /api/cron/crawl (có route, chưa có trong vercel.ts)" },
     ],
   },

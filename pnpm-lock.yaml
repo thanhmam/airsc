@@ -169,9 +169,9 @@ importers:
       '@modelcontextprotocol/server':
         specifier: ^2.3.0
         version: 2.3.0
-      '@polar-sh/nextjs':
-        specifier: ^1.0.1
-        version: 1.0.1(next@16.3.8(@babel/core@7.29.7(supports-color@8.1.1))(@types/node@20.19.43)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))
+      '@polar-sh/sdk':
+        specifier: 1.0.2
+        version: 1.0.2
       '@remotion/player':
         specifier: ^4.0.533
         version: 4.0.533(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -1078,16 +1078,6 @@ packages:
   '@oclif/plugin-help@6.2.37':
     resolution: {integrity: sha512-5N/X/FzlJaYfpaHwDC0YHzOzKDWa41s9t+4FpCDu4f9OMReds4JeNBaaWk9rlIzdKjh2M6AC5Q18ORfECRkHGA==}
     engines: {node: '>=18.0.0'}
-
-  '@polar-sh/adapter-utils@1.0.1':
-    resolution: {integrity: sha512-iF0Qo2Aj7yxvZ+hzqbSO4tLmKg2vWrPN4mqUv2hc5Hu7WgsATjjLUKuAaabGOxoBgspK3DyRrMOrA+cXCyTRdA==}
-    engines: {node: '>=24'}
-
-  '@polar-sh/nextjs@1.0.1':
-    resolution: {integrity: sha512-ULy3E0QDRIjIepoJdgZO77sByojBni5InL4aEaBiNgE+G7xzYPpjzeCi4xTdoY9x5MP+/LrJ1DsfXJXswHi2Mg==}
-    engines: {node: '>=24'}
-    peerDependencies:
-      next: ^15.0.0 || ^16.0.0
 
   '@polar-sh/sdk@1.0.2':
     resolution: {integrity: sha512-c3jdqYloVfcejKsAqYfYcW4bG7KkXj5bXkgdsdx4GHlJPzHFV5tysfeZGf9V7dJReLBirAluchsuHWiAIBco8w==}
@@ -5182,16 +5172,6 @@ snapshots:
   '@oclif/plugin-help@6.2.37':
     dependencies:
       '@oclif/core': 4.11.4
-
-  '@polar-sh/adapter-utils@1.0.1':
-    dependencies:
-      '@polar-sh/sdk': 1.0.2
-
-  '@polar-sh/nextjs@1.0.1(next@16.3.8(@babel/core@7.29.7(supports-color@8.1.1))(@types/node@20.19.43)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))':
-    dependencies:
-      '@polar-sh/adapter-utils': 1.0.1
-      '@polar-sh/sdk': 1.0.2
-      next: 16.3.8(@babel/core@7.29.7(supports-color@8.1.1))(@types/node@20.19.43)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
 
   '@polar-sh/sdk@1.0.2': {}
 
