@@ -40,39 +40,23 @@ export const db = {
   resetPreviews: (slug: string) => rpc<void>("reset_previews", { p_slug: slug }),
   /** first call of the Vietnam day wins; returns the picks in effect */
   setDailyPicks: (slugs: string[]) => rpc<string[]>("set_daily_picks", { p_slugs: slugs }),
-  /** first draft of the day wins unless forced (Regenerate); returns the row in effect */
-  saveSocialDraft: async (d: { day: string; channel: string; text: string; highlight: string | null; slugs: string[]; image_alt: string }, force = false) =>
-    (
-      await rpc<SocialPost[]>("save_social_draft", {
-        p_day: d.day,
-        p_channel: d.channel,
-        p_text: d.text,
-        p_highlight: d.highlight,
-        p_slugs: d.slugs,
-        p_image_alt: d.image_alt,
-        p_force: force,
-      })
-    )[0],
-  updateSocialText: (id: number, text: string) => rpc<void>("update_social_text", { p_id: id, p_text: text }),
   /** moves the post to 'posting' if it is in one of `from`; null when someone else has it */
   claimSocialPost: async (id: number, from: SocialStatus[]) =>
     (await rpc<SocialPost[]>("claim_social_post", { p_id: id, p_from: from }))[0] ?? null,
-  finishSocialPost: (id: number, status: "posted" | "failed", r: { post_id?: string; post_url?: string; error?: string }) =>
-    rpc<void>("finish_social_post", { p_id: id, p_status: status, p_post_id: r.post_id ?? null, p_post_url: r.post_url ?? null, p_error: r.error ?? null }),
-  setSocialStatus: (id: number, status: "skipped" | "posted" | "failed" | "draft") => rpc<void>("set_social_status", { p_id: id, p_status: status }),
+  setSocialStatus: (id: number, status: "skipped" | "posted" | "failed" | "draft" | "approved") => rpc<void>("set_social_status", { p_id: id, p_status: status }),
   socialPosts: (limit = 14) => rpc<SocialPost[]>("admin_social_posts", { p_limit: limit }),
-  socialPost: async (day: string, channel = "x") => (await rpc<SocialPost[]>("get_social_post", { p_day: day, p_channel: channel }))[0] ?? null,
-  /** card art direction for a post that has not gone out yet; null when it already has */
-  setSocialCard: async (id: number, c: { highlight: string | null; headline: string; card_style: CardStyle; image_alt: string }) =>
-    (
-      await rpc<SocialPost[]>("set_social_card", {
-        p_id: id,
-        p_highlight: c.highlight,
-        p_headline: c.headline,
-        p_card_style: c.card_style,
-        p_image_alt: c.image_alt,
-      })
-    )[0] ?? null,
+  /** an existing post for (day, channel, slot) wins unless forced (Write again); returns the row in effect */
+  upsertSocial: async (row: SocialDraft, force = false) => (await rpc<SocialPost[]>("social_upsert", { p_row: row, p_force: force }))[0] ?? null,
+  /** edits a post that has not gone out; null when it has */
+  updateSocial: async (id: number, patch: Partial<Pick<SocialPost, SocialEditable>>) =>
+    (await rpc<SocialPost[]>("social_update", { p_id: id, p_patch: patch }))[0] ?? null,
+  finishSocial: (id: number, patch: { status: "posted" | "failed"; post_id?: string; post_url?: string; reply_post_id?: string; error?: string | null }) =>
+    rpc<void>("social_finish", { p_id: id, p_patch: patch }),
+  setSocialMetrics: (rows: ({ id: number } & SocialMetrics)[]) => rpc<number>("social_set_metrics", { p_rows: rows }),
+  xHandles: (owners: string[]) => rpc<{ owner: string; handle: string | null; checked_at: string }[]>("x_handles_get", { p_owners: owners }),
+  setXHandles: (rows: { owner: string; handle: string | null }[]) => rpc<void>("x_handles_set", { p_rows: rows }),
+  addSocialReview: async (row: Omit<SocialReview, "id" | "created_at">) => (await rpc<SocialReview[]>("social_review_add", { p_row: row }))[0],
+  socialReviews: (limit = 5) => rpc<SocialReview[]>("social_reviews_list", { p_limit: limit }),
   adminResources: (f: AdminFilter) =>
     rpc<{ total: number; rows: AdminResourceRow[] }>("admin_resources", {
       p_q: f.q ?? null,
@@ -124,15 +108,74 @@ export type AdminFilter = {
   offset?: number;
 };
 
-export type SocialStatus = "draft" | "posting" | "posted" | "skipped" | "failed";
+export type SocialStatus = "draft" | "approved" | "posting" | "posted" | "skipped" | "failed";
 
-/** One announcement of Today's picks on a social channel (migration 20261015000100) */
-export type SocialPost = {
+/** picks: the v1 Today's picks digest; spotlight: one resource; applied: how the admin used one in a project */
+export type SocialKind = "picks" | "spotlight" | "applied";
+
+export type SocialMetrics = {
+  impressions: number | null;
+  likes: number | null;
+  reposts: number | null;
+  replies: number | null;
+  quotes: number | null;
+  bookmarks: number | null;
+  profile_clicks: number | null;
+  link_clicks: number | null;
+};
+
+export type SocialEditable = "text" | "reply_text" | "mentions" | "scheduled_at" | "highlight" | "headline" | "card_style" | "image_alt" | "images" | "note";
+
+export type SocialDraft = {
+  day: string;
+  channel?: string;
+  slot: number;
+  kind: SocialKind;
+  text: string;
+  reply_text: string | null;
+  highlight: string | null;
+  slugs: string[];
+  mentions: string[];
+  image_alt: string | null;
+  images?: string[];
+  note?: string | null;
+  scheduled_at: string;
+  headline?: string | null;
+  card_style?: CardStyle | null;
+};
+
+/** What the three-day review found (migration 20261022000100) */
+export type SocialReview = {
+  id: number;
+  period_start: string;
+  period_end: string;
+  stats: Record<string, unknown>;
+  summary: string;
+  guidance: string | null;
+  model: string | null;
+  cost_usd: number | null;
+  created_at: string;
+};
+
+/** One X post (migrations 20261015000100, 20261022000100) */
+export type SocialPost = SocialMetrics & {
   id: number;
   day: string;
   channel: string;
+  slot: number;
+  kind: SocialKind;
   status: SocialStatus;
   text: string;
+  /** the first reply, which carries the link (so the post itself has none) */
+  reply_text: string | null;
+  reply_post_id: string | null;
+  /** X handles tagged in `text`; posted as written only once an admin approves the post */
+  mentions: string[];
+  /** applied posts: the admin's notes and screenshots (Blob URLs) */
+  note: string | null;
+  images: string[];
+  scheduled_at: string | null;
+  metrics_at: string | null;
   highlight: string | null;
   /** big line on the card, written by Sonnet for the highlight (editable in /admin/social) */
   headline: string | null;

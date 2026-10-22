@@ -1,5 +1,6 @@
 "use server";
 
+import { put } from "@vercel/blob";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getRun } from "workflow/api";
@@ -10,9 +11,11 @@ import { syncPolarOrders } from "@/lib/polar";
 import { db } from "@/lib/engine/db";
 import { CARD_STYLES, CARD_THEMES, type CardStyle, type CardTheme, MODEL_CHOICES, type EngineSettings, PREVIEW_DEFAULT, socialSettings } from "@/lib/engine/settings";
 import { startEngine, type Preset } from "@/lib/engine/start";
-import { loadPicks } from "@/lib/social/compose";
-import { artDirect, makeDraft } from "@/lib/social/draft";
+import { slotTime, vnDay } from "@/lib/social/compose";
+import { makeApplied, makeDrafts, rewriteSpotlight } from "@/lib/social/draft";
+import { refreshMetrics } from "@/lib/social/metrics";
 import { publishPost } from "@/lib/social/publish";
+import { runReview } from "@/lib/social/review";
 import { whoAmI } from "@/lib/social/x";
 
 async function guard() {
@@ -94,12 +97,19 @@ export async function saveSocialSettings(form: FormData) {
   await guard();
   const cur = await db.settings();
   const s = socialSettings(cur);
+  const slots = form
+    .getAll("x_slot")
+    .map(String)
+    .filter((v) => v !== "")
+    .map(Number);
   await db.saveSettings({
     ...cur,
     social: {
+      ...s,
       x_enabled: form.get("x_enabled") === "on",
       x_auto: form.get("x_auto") === "on",
-      x_post_hour_vn: clamp(form.get("x_post_hour_vn"), 0, 23, s.x_post_hour_vn),
+      x_slots_vn: slots,
+      x_guidance: String(form.get("x_guidance") ?? s.x_guidance).trim().slice(0, 1500),
       x_card_style: cardStyle(form.get("x_card_style")) ?? s.x_card_style,
       x_card_theme: cardTheme(form.get("x_card_theme")) ?? s.x_card_theme,
     },
@@ -112,59 +122,143 @@ export type SocialResult = { ok: boolean; error?: string; url?: string };
 const cardStyle = (v: unknown) => (CARD_STYLES.includes(v as CardStyle) ? (v as CardStyle) : null);
 const cardTheme = (v: unknown) => (CARD_THEMES.includes(v as CardTheme) ? (v as CardTheme) : null);
 
-export type CardInput = { style: string; theme: string; highlight: string; headline: string };
+const fail = (e: unknown): SocialResult => ({ ok: false, error: String((e as Error)?.message ?? e).slice(0, 300) });
 
-/**
- * Saves the card's style, featured pick and headline. Without a headline (Regenerate image) Sonnet
- * writes a new one for the featured pick, different from the current one.
- */
-export async function saveSocialCard(day: string, c: CardInput, regenerate = false): Promise<SocialResult> {
+/** Every @handle the admin left in the text: a person wrote or approved it, so it may tag */
+const handlesIn = (text: string) => [...new Set([...text.matchAll(/(?:^|[^\w@])@(\w{1,15})\b/g)].map((m) => m[1]))];
+
+/** Saves the post and its link reply as edited */
+export async function saveSocialPost(id: number, p: { text: string; reply_text: string }): Promise<SocialResult> {
   await guard();
-  const post = await db.socialPost(day);
-  if (!post) return { ok: false, error: "no draft for this day" };
-  const settings = await db.settings();
-  const s = socialSettings(settings);
-  // light or dark is one setting for every card, saved from the card's toggle too
-  const theme = cardTheme(c.theme);
-  if (theme && theme !== s.x_card_theme) await db.saveSettings({ ...settings, social: { ...s, x_card_theme: theme } });
-  const r = await artDirect(day, await loadPicks(day), post, {
-    style: cardStyle(c.style) ?? s.x_card_style,
-    highlight: c.highlight || null,
-    headline: regenerate ? null : c.headline.trim().slice(0, 90),
-  });
+  const text = p.text.trim();
+  if (!text) return { ok: false, error: "empty" };
+  const saved = await db.updateSocial(id, { text, reply_text: p.reply_text.trim() || null, mentions: handlesIn(text) });
   refresh();
-  return r.post ? { ok: true } : { ok: false, error: "this post has already gone out" };
+  return saved ? { ok: true } : { ok: false, error: "this post has already gone out" };
 }
 
-export async function saveSocialText(id: number, text: string): Promise<SocialResult> {
+/** Moves a post to another hour of its day (Vietnam time, :30) */
+export async function setSocialTime(id: number, hourVn: number): Promise<SocialResult> {
   await guard();
-  if (!text.trim()) return { ok: false, error: "empty" };
-  await db.updateSocialText(id, text.trim());
+  const post = (await db.socialPosts(200)).find((p) => p.id === id);
+  if (!post || !Number.isInteger(hourVn) || hourVn < 0 || hourVn > 23) return { ok: false, error: "bad post or hour" };
+  const saved = await db.updateSocial(id, { scheduled_at: slotTime(post.day, hourVn) });
   refresh();
-  return { ok: true };
+  return saved ? { ok: true } : { ok: false, error: "this post has already gone out" };
 }
 
-/** Writes (or rewrites) the draft for `day` from its picks */
-export async function regenerateSocial(day: string): Promise<SocialResult> {
-  await guard();
-  const r = await makeDraft(day, { force: true });
-  refresh();
-  return r.post ? { ok: true } : { ok: false, error: r.reason ?? "no picks" };
-}
-
-export async function postSocialNow(id: number): Promise<SocialResult> {
-  await guard();
-  const r = await publishPost({ id }, ["draft", "failed"]);
-  refresh();
-  return r.ok ? { ok: true, url: r.url } : { ok: false, error: r.error };
-}
-
-/** Skip today's post, or settle one stuck in 'posting' after checking X by hand */
-export async function setSocialStatus(id: number, status: "skipped" | "posted" | "failed" | "draft"): Promise<SocialResult> {
+/** approved: goes out at its time as written (with its @mentions); draft: back to waiting */
+export async function setSocialStatus(id: number, status: "skipped" | "posted" | "failed" | "draft" | "approved"): Promise<SocialResult> {
   await guard();
   await db.setSocialStatus(id, status);
   refresh();
   return { ok: true };
+}
+
+export async function postSocialNow(id: number): Promise<SocialResult> {
+  await guard();
+  const r = await publishPost({ id }, ["draft", "approved", "failed"], { asWritten: true });
+  refresh();
+  return r.ok ? { ok: true, url: r.url, ...(r.replyError ? { error: r.replyError } : {}) } : { ok: false, error: r.error };
+}
+
+/** Write again: a new take on the spotlight's resource, or on `slug` instead */
+export async function rewriteSocial(id: number, slug?: string): Promise<SocialResult> {
+  await guard();
+  const post = (await db.socialPosts(200)).find((p) => p.id === id);
+  if (!post || post.kind !== "spotlight") return { ok: false, error: "only spotlights are written again" };
+  try {
+    const r = await rewriteSpotlight(post, slug?.trim() || null);
+    refresh();
+    return r.post ? { ok: true } : { ok: false, error: r.error ?? "error" };
+  } catch (e) {
+    return fail(e);
+  }
+}
+
+export type CardInput = { style: string; theme: string; headline: string };
+
+/** The card's style and headline; light or dark is one setting for every card */
+export async function saveSocialCard(id: number, c: CardInput): Promise<SocialResult> {
+  await guard();
+  const settings = await db.settings();
+  const s = socialSettings(settings);
+  const theme = cardTheme(c.theme);
+  if (theme && theme !== s.x_card_theme) await db.saveSettings({ ...settings, social: { ...s, x_card_theme: theme } });
+  const saved = await db.updateSocial(id, { card_style: cardStyle(c.style) ?? s.x_card_style, headline: c.headline.trim().slice(0, 90) || null });
+  refresh();
+  return saved ? { ok: true } : { ok: false, error: "this post has already gone out" };
+}
+
+/** Drafts today's spotlights now (the engine does it after the daily run) */
+export async function draftToday(): Promise<SocialResult> {
+  await guard();
+  try {
+    const r = await makeDrafts(vnDay());
+    refresh();
+    return r.posts.length ? { ok: true } : { ok: false, error: r.reason ?? "nothing to draft" };
+  } catch (e) {
+    return fail(e);
+  }
+}
+
+const IMAGE_TYPES = new Set(["image/png", "image/jpeg", "image/webp", "image/gif"]);
+
+/**
+ * A new applied post: the resource, the admin's notes, screenshots (uploaded to Blob, or a ready-made
+ * Airsc run's images) and the hour it should go out. Sonnet writes it up; it waits as a draft.
+ */
+export async function createApplied(form: FormData): Promise<SocialResult> {
+  await guard();
+  try {
+    const slug = String(form.get("slug") ?? "").trim();
+    const notes = String(form.get("notes") ?? "").trim();
+    if (!slug || notes.length < 20) return { ok: false, error: "pick a resource and write a few lines of notes" };
+    const day = /^\d{4}-\d{2}-\d{2}$/.test(String(form.get("day"))) ? String(form.get("day")) : vnDay();
+    const hourVn = clamp(form.get("hour"), 0, 23, 20);
+    const images = form
+      .getAll("image_url")
+      .map(String)
+      .filter((u) => /^https:\/\//.test(u));
+    for (const f of form.getAll("file")) {
+      if (!(f instanceof File) || !f.size) continue;
+      if (!IMAGE_TYPES.has(f.type) || f.size > 4_500_000) return { ok: false, error: `${f.name}: PNG, JPEG, WebP or GIF under 4.5 MB` };
+      const ext = f.type.split("/")[1].replace("jpeg", "jpg");
+      images.push((await put(`social/${day}/${crypto.randomUUID()}.${ext}`, f, { access: "public", contentType: f.type })).url);
+    }
+    if (images.length > 4) return { ok: false, error: "X takes at most 4 images" };
+    await makeApplied({ slug, notes, project: String(form.get("project") ?? "").trim() || undefined, images, day, hourVn });
+    refresh();
+    return { ok: true };
+  } catch (e) {
+    return fail(e);
+  }
+}
+
+/** The review of the last three days, now instead of on schedule */
+export async function reviewSocialNow(): Promise<SocialResult> {
+  await guard();
+  try {
+    const r = await runReview({ force: true });
+    refresh();
+    return r ? { ok: true } : { ok: false, error: "no post went out since the last review" };
+  } catch (e) {
+    return fail(e);
+  }
+}
+
+/** Reads the numbers of every post of the last eight days now */
+export async function refreshSocialMetrics(): Promise<SocialResult> {
+  await guard();
+  try {
+    const since = Date.now() - 8 * 86_400_000;
+    const posts = (await db.socialPosts(200)).filter((p) => p.status === "posted" && p.post_id && p.posted_at && new Date(p.posted_at).getTime() > since);
+    const r = await refreshMetrics(posts);
+    refresh();
+    return { ok: true, error: `${r.updated} posts · ${r.source}` };
+  } catch (e) {
+    return fail(e);
+  }
 }
 
 /** Reads the X account the four keys post as, so a 401 can be traced to the keys, not the post */

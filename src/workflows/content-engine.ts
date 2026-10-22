@@ -7,7 +7,7 @@ import { db } from "@/lib/engine/db";
 import { choosePicks, PICK_MIN_QUALITY, PICKS_PER_DAY, type PickCandidate, type PickDay } from "@/lib/engine/picks";
 import { socialSettings } from "@/lib/engine/settings";
 import { vnDay } from "@/lib/social/compose";
-import { makeDraft } from "@/lib/social/draft";
+import { makeDrafts } from "@/lib/social/draft";
 import { curate } from "@/lib/engine/agents/curator";
 import { demoable, demoMcp } from "@/lib/engine/agents/demo";
 import { categoryGuide, isoWeek, weeklyDigest } from "@/lib/engine/agents/editor";
@@ -385,18 +385,19 @@ async function picksStep(logId: number) {
   }
 }
 
-/** Drafts today's X post and card about the picks (Sonnet) when X posting is on; /api/cron/social publishes it */
+/** Drafts today's X spotlights and their cards (Sonnet) when X posting is on; /api/cron/social publishes them */
 async function socialDraftStep(logId: number, ai: boolean) {
   "use step";
   try {
     if (!socialSettings(await db.settings()).x_enabled) return { drafts: 0, cost_usd: 0 };
-    const r = await makeDraft(vnDay(), { ai });
-    if (!r.post) {
+    const r = await makeDrafts(vnDay(), { ai });
+    if (!r.posts.length) {
       await log(logId, `social skipped: ${r.reason}`);
       return { drafts: 0, cost_usd: 0 };
     }
-    await log(logId, `social · x draft ${r.post.status} · highlight ${r.post.highlight ?? "none"} · "${r.post.headline ?? ""}" · ${r.model} · $${r.cost.toFixed(4)}`);
-    return { drafts: 1, cost_usd: r.cost };
+    const list = r.posts.map((p) => `${p.highlight}${p.mentions.length ? ` @${p.mentions.join(" @")}` : ""}`).join(" · ");
+    await log(logId, `social · ${r.posts.length} x spotlight drafts · ${list} · ${r.model} · $${r.cost.toFixed(4)}`);
+    return { drafts: r.posts.length, cost_usd: r.cost };
   } catch (e) {
     await log(logId, `social skipped: ${(e as Error).message.slice(0, 160)}`);
     return { drafts: 0, cost_usd: 0 };

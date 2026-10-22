@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, RefreshCw } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useState, useTransition } from "react";
 import type { SocialPost } from "@/lib/engine/db";
@@ -13,55 +13,53 @@ export type CardCopy = {
   styles: Record<CardStyle, string>;
   theme: string;
   themes: Record<CardTheme, string>;
-  featured: string;
-  noImage: string;
   headline: string;
   headlineHint: string;
   save: string;
-  regenerate: string;
   working: string;
   saved: string;
 };
 
-export type PickOption = { slug: string; name: string; hasImage: boolean };
-
 const btn = "inline-flex h-9 items-center gap-1.5 rounded-lg border border-line px-3 text-sm font-medium transition hover:border-accent/60 disabled:cursor-not-allowed disabled:opacity-50";
 
-/** The day's card: preview a style instantly, pick the featured resource, edit or regenerate Sonnet's headline */
-export function CardControls({
-  day,
-  post,
-  picks,
-  defaults,
-  c,
-}: {
-  day: string;
-  post: SocialPost;
-  picks: PickOption[];
-  defaults: { style: CardStyle; theme: CardTheme };
-  c: CardCopy;
-}) {
-  const saved = { style: post.card_style ?? defaults.style, theme: defaults.theme, highlight: post.highlight ?? "", headline: post.headline ?? "" };
+/** A spotlight's card: preview a style instantly, edit Sonnet's headline (Write again gives a new one) */
+export function CardControls({ post, defaults, c }: { post: SocialPost; defaults: { style: CardStyle; theme: CardTheme }; c: CardCopy }) {
+  const saved = { style: post.card_style ?? defaults.style, theme: defaults.theme, headline: post.headline ?? "" };
   const [style, setStyle] = useState<CardStyle>(saved.style);
   const [theme, setTheme] = useState<CardTheme>(saved.theme);
-  const [highlight, setHighlight] = useState(saved.highlight);
   const [headline, setHeadline] = useState(saved.headline);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [pending, start] = useTransition();
-  const editable = post.status === "draft" || post.status === "failed";
-  const dirty = style !== saved.style || theme !== saved.theme || highlight !== saved.highlight || headline.trim() !== saved.headline;
+  const editable = post.status === "draft" || post.status === "approved" || post.status === "failed";
+  const dirty = style !== saved.style || theme !== saved.theme || headline.trim() !== saved.headline;
 
-  const run = (regenerate: boolean) =>
+  const save = () =>
     start(async () => {
-      const r = await saveSocialCard(day, { style, theme, highlight, headline }, regenerate);
+      const r = await saveSocialCard(post.id, { style, theme, headline });
       setMsg({ ok: r.ok, text: r.ok ? c.saved : (r.error ?? "error") });
     });
+
+  const toggle = <T extends string>(values: readonly T[], value: T, set: (v: T) => void, labels: Record<T, string>) => (
+    <div className="flex rounded-lg border border-line p-0.5">
+      {values.map((v) => (
+        <button
+          key={v}
+          type="button"
+          onClick={() => set(v)}
+          aria-pressed={value === v}
+          className={cn("h-8 rounded-md px-3 text-sm", value === v ? "bg-accent-soft font-medium text-accent" : "text-muted hover:text-fg")}
+        >
+          {labels[v]}
+        </button>
+      ))}
+    </div>
+  );
 
   return (
     <div className="flex flex-col gap-3">
       <div className="relative">
         <Image
-          src={`/api/social/card/${day}?v=${encodeURIComponent(post.updated_at)}&style=${style}&theme=${theme}`}
+          src={`/api/social/card/${post.id}?v=${encodeURIComponent(post.updated_at)}&style=${style}&theme=${theme}`}
           alt={post.image_alt ?? ""}
           width={1200}
           height={675}
@@ -78,45 +76,10 @@ export function CardControls({
         <>
           <div className="flex flex-wrap items-center gap-2 text-sm">
             <span className="text-muted">{c.style}</span>
-            <div className="flex rounded-lg border border-line p-0.5">
-              {CARD_STYLES.map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  onClick={() => setStyle(s)}
-                  aria-pressed={style === s}
-                  className={cn("h-8 rounded-md px-3 text-sm", style === s ? "bg-accent-soft font-medium text-accent" : "text-muted hover:text-fg")}
-                >
-                  {c.styles[s]}
-                </button>
-              ))}
-            </div>
+            {toggle(CARD_STYLES, style, setStyle, c.styles)}
             <span className="ml-2 text-muted">{c.theme}</span>
-            <div className="flex rounded-lg border border-line p-0.5">
-              {CARD_THEMES.map((k) => (
-                <button
-                  key={k}
-                  type="button"
-                  onClick={() => setTheme(k)}
-                  aria-pressed={theme === k}
-                  className={cn("h-8 rounded-md px-3 text-sm", theme === k ? "bg-accent-soft font-medium text-accent" : "text-muted hover:text-fg")}
-                >
-                  {c.themes[k]}
-                </button>
-              ))}
-            </div>
+            {toggle(CARD_THEMES, theme, setTheme, c.themes)}
           </div>
-          <label className="flex flex-wrap items-center gap-2 text-sm">
-            <span className="text-muted">{c.featured}</span>
-            <select value={highlight} onChange={(e) => setHighlight(e.target.value)} className="h-9 rounded-lg border border-line bg-bg px-2 text-sm">
-              {picks.map((p) => (
-                <option key={p.slug} value={p.slug}>
-                  {p.name}
-                  {p.hasImage ? "" : ` (${c.noImage})`}
-                </option>
-              ))}
-            </select>
-          </label>
           <label className="flex flex-col gap-1 text-sm">
             <span className="flex justify-between text-muted">
               {c.headline}
@@ -131,14 +94,9 @@ export function CardControls({
               className="h-10 rounded-lg border border-line bg-bg px-3 text-[15px] outline-none focus:border-accent"
             />
           </label>
-          <div className="flex flex-wrap gap-2">
-            <button className={cn(btn, "border-transparent bg-accent text-accent-fg hover:opacity-90")} disabled={pending || !dirty} onClick={() => run(false)}>
-              {c.save}
-            </button>
-            <button className={btn} disabled={pending} onClick={() => run(true)}>
-              <RefreshCw className="size-3.5" aria-hidden /> {c.regenerate}
-            </button>
-          </div>
+          <button className={cn(btn, "w-fit border-transparent bg-accent text-accent-fg hover:opacity-90")} disabled={pending || !dirty} onClick={save}>
+            {c.save}
+          </button>
         </>
       )}
       {msg && <p className={cn("text-sm", msg.ok ? "text-safe" : "text-danger")}>{msg.text}</p>}
