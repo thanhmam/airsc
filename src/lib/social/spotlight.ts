@@ -2,6 +2,7 @@ import { z } from "zod";
 import { generateObject } from "@/lib/engine/ai";
 import { SOCIAL_MODEL } from "@/lib/engine/settings";
 import { brief, clip, fallbackHeadline, keepMentions, oneLiner, type PickRow, scanLine, TYPE_LABEL, usable } from "./compose";
+import { POST_RULES } from "./rules";
 
 /** What a vibe coder building an app installs an agent resource for */
 const BUILDER = new Set([
@@ -68,7 +69,10 @@ Shape (plain text, line breaks between parts):
 3. The credit as its own short sentence: "Built by @handle." when an X handle is given, otherwise "Built by <github_owner>." Add the star count only if it is above 1,000, e.g. "Built by @handle, 87k stars on GitHub."
 Under 250 characters in total. A scan line is added after your text by code: do not write about safety yourself.
 
-Rules: English. Only facts from the data; never invent numbers, features or opinions. No links, no hashtags, no emoji, no other @mentions, no hype words (game-changer, revolutionary, supercharge, unleash, must-have, 10x), no "Today's picks", no "Check out", no "Meet".`;
+Rules: English. Only facts from the data; never invent numbers, features or opinions. No links, no hashtags, no emoji, no other @mentions, no hype words (game-changer, revolutionary, supercharge, unleash, must-have, 10x), no "Today's picks", no "Check out", no "Meet".
+You have not used this resource: never write "I used", "I tried" or "I ran", and never promise results the data does not show.
+
+${POST_RULES}`;
 
 const schema = z.object({
   text: z.string().describe("The post, under 250 characters, without the scan line"),

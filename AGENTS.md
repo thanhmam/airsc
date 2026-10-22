@@ -16,3 +16,4 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - Type: Geist and Geist Mono only; headings `font-semibold`.
 - Copy: every user-facing string lives in `src/lib/i18n.ts` with both `en` and `vi`.
 - Deploys: pushing to `main` deploys production on Vercel. Work on a branch and check the preview first.
+- X posts: follow `docs/x-posts.md` (the builder's problem first, facts only, one image, the link in the first reply). The rules the writers use are in `src/lib/social/rules.ts`.

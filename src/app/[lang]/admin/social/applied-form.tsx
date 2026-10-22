@@ -157,11 +157,10 @@ export function AppliedForm({
         <input
           type="file"
           accept="image/png,image/jpeg,image/webp,image/gif"
-          multiple
-          onChange={(e) => setFiles([...(e.target.files ?? [])].slice(0, 4))}
+          onChange={(e) => setFiles([...(e.target.files ?? [])].slice(0, 1))}
           className="text-sm file:mr-3 file:h-9 file:rounded-lg file:border file:border-line file:bg-bg file:px-3 file:text-sm"
         />
-        {total > 4 && <p className="text-xs text-danger">X: max 4</p>}
+        {total > 1 && <p className="text-xs text-danger">1 image per post</p>}
       </div>
       <div className="flex flex-wrap items-end gap-3">
         <label className="flex flex-col gap-1 text-sm">
@@ -177,7 +176,7 @@ export function AppliedForm({
           </select>
         </label>
         <button
-          disabled={pending || total > 4}
+          disabled={pending || total > 1}
           className="inline-flex h-10 items-center gap-2 rounded-lg bg-accent px-4 text-sm font-medium text-accent-fg hover:opacity-90 disabled:opacity-50"
         >
           {pending && <Loader2 className="size-4 animate-spin" aria-hidden />}
