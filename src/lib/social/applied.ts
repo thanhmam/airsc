@@ -11,7 +11,7 @@ Shape (plain text, short lines, a blank line between parts):
 1. Hook, one line: the problem or the result in the project, concrete. Not a question.
 2. What I did with the resource (name it, say what kind it is and where it ran), in one to three short lines.
 3. What came out or what it changed for the project; the builder's own takeaway if the notes have one.
-4. Credit: "by @handle" when an X handle is given, otherwise "by <github_owner> on GitHub".
+4. Credit as its own short sentence: "Built by @handle." when an X handle is given, otherwise "Built by <github_owner>."
 Under 520 characters in total.
 
 Rules: English, even when the notes are in Vietnamese. First person ("I"), plain and direct like a developer talking to peers. Only facts from the notes and the data: never invent numbers, results, features or feelings. No links, no hashtags, no emoji, no other @mentions, no hype words (game-changer, revolutionary, supercharge, unleash, must-have, 10x), no "Here's how", no thread markers.`;
