@@ -96,9 +96,58 @@ export async function uploadImage(png: Buffer, alt?: string) {
   return id;
 }
 
-export async function createPost(text: string, mediaIds: string[] = []) {
-  const r = await call<{ data: { id: string } }>("/tweets", { text, ...(mediaIds.length ? { media: { media_ids: mediaIds } } : {}) });
+/** Posts `text` with up to four images; `replyTo` makes it a reply (the link under a post) */
+export async function createPost(text: string, mediaIds: string[] = [], replyTo?: string) {
+  const r = await call<{ data: { id: string } }>("/tweets", {
+    text,
+    ...(mediaIds.length ? { media: { media_ids: mediaIds.slice(0, 4) } } : {}),
+    ...(replyTo ? { reply: { in_reply_to_tweet_id: replyTo } } : {}),
+  });
   return { id: r.data.id, url: `https://x.com/i/web/status/${r.data.id}` };
+}
+
+export type TweetMetrics = {
+  impressions: number | null;
+  likes: number;
+  reposts: number;
+  replies: number;
+  quotes: number;
+  bookmarks: number;
+  /** only for our own posts under 30 days old (non_public_metrics) */
+  profile_clicks: number | null;
+  link_clicks: number | null;
+};
+
+type ApiTweet = {
+  id: string;
+  public_metrics?: { retweet_count: number; reply_count: number; like_count: number; quote_count: number; bookmark_count?: number; impression_count?: number };
+  non_public_metrics?: { impression_count?: number; url_link_clicks?: number; user_profile_clicks?: number };
+};
+
+/**
+ * Metrics of up to 100 posts by id. Asks for the private ones (link and profile clicks) first; X refuses
+ * those for posts over 30 days old, so it falls back to the public counts.
+ */
+export async function tweetMetrics(ids: string[]): Promise<Map<string, TweetMetrics>> {
+  const out = new Map<string, TweetMetrics>();
+  if (!ids.length) return out;
+  const get = (fields: string) => call<{ data?: ApiTweet[] }>(`/tweets?ids=${ids.slice(0, 100).join(",")}&tweet.fields=${fields}`);
+  const r = await get("public_metrics,non_public_metrics").catch(() => get("public_metrics"));
+  for (const t of r.data ?? []) {
+    const p = t.public_metrics;
+    const n = t.non_public_metrics;
+    out.set(t.id, {
+      impressions: n?.impression_count ?? p?.impression_count ?? null,
+      likes: p?.like_count ?? 0,
+      reposts: p?.retweet_count ?? 0,
+      replies: p?.reply_count ?? 0,
+      quotes: p?.quote_count ?? 0,
+      bookmarks: p?.bookmark_count ?? 0,
+      profile_clicks: n?.user_profile_clicks ?? null,
+      link_clicks: n?.url_link_clicks ?? null,
+    });
+  }
+  return out;
 }
 
 /** Checks the four keys by reading the account they post as (GET /2/users/me): the admin's "Test connection" */

@@ -2,12 +2,18 @@ import { db } from "@/lib/engine/db";
 import { socialSettings } from "@/lib/engine/settings";
 import { vnHour } from "@/lib/engine/start";
 import { vnDay } from "@/lib/social/compose";
-import { makeDraft } from "@/lib/social/draft";
-import { publishPost } from "@/lib/social/publish";
+import { makeDrafts } from "@/lib/social/draft";
+import { refreshMetrics, staleMetrics } from "@/lib/social/metrics";
+import { duePosts, publishPost } from "@/lib/social/publish";
+import { runReview } from "@/lib/social/review";
+
+export const maxDuration = 300;
 
 /**
- * Hourly cron (vercel.ts). From the hour set in /admin/social (Vietnam time), posts today's draft about
- * Today's picks to X. Writes the draft first if the Content Engine has not (e.g. X was turned on later).
+ * Hourly cron at :30 (vercel.ts). Once the day's engine run is done it drafts today's spotlights if the
+ * engine has not; posts at most one post whose time has come (approved ones as written, spotlight drafts
+ * without @mentions when automatic posting is on); reads the numbers of recent posts; and every three
+ * days writes the review that updates the writing guidance. Each part fails on its own.
  */
 export async function GET(req: Request) {
   if (req.headers.get("authorization") !== `Bearer ${process.env.CRON_SECRET}`) {
@@ -15,14 +21,40 @@ export async function GET(req: Request) {
   }
   const settings = await db.settings();
   const s = socialSettings(settings);
-  if (!s.x_enabled) return Response.json({ skipped: "X posting is off" });
-  if (!s.x_auto) return Response.json({ skipped: "waiting for an admin to post" });
-  if (vnHour() < s.x_post_hour_vn) return Response.json({ skipped: "not the posting hour yet", hourVN: vnHour() });
-
+  const out: Record<string, unknown> = {};
   const day = vnDay();
-  let post = (await db.socialPosts(3)).find((p) => p.day === day && p.channel === "x") ?? null;
-  if (!post) post = (await makeDraft(day)).post;
-  if (!post) return Response.json({ skipped: "no picks today" });
-  if (post.status !== "draft") return Response.json({ skipped: `today's post is ${post.status}` });
-  return Response.json(await publishPost(post, ["draft"]));
+
+  if (s.x_enabled && vnHour() > settings.run_hour_vn) {
+    try {
+      const d = await makeDrafts(day);
+      out.drafts = d.posts.length ? d.posts.map((p) => p.highlight) : d.reason;
+    } catch (e) {
+      out.drafts = `error: ${(e as Error).message.slice(0, 200)}`;
+    }
+  }
+
+  let posts = await db.socialPosts(120);
+  if (s.x_enabled) {
+    const [next] = duePosts(posts, s.x_auto);
+    if (next) {
+      const r = await publishPost(next, [next.status], { asWritten: next.status === "approved" });
+      out.posted = { id: next.id, kind: next.kind, ...r };
+      posts = await db.socialPosts(120);
+    }
+  }
+
+  try {
+    out.metrics = await refreshMetrics(staleMetrics(posts));
+  } catch (e) {
+    out.metrics = `error: ${(e as Error).message.slice(0, 200)}`;
+  }
+
+  try {
+    const review = await runReview();
+    if (review) out.review = review.id;
+  } catch (e) {
+    out.review = `error: ${(e as Error).message.slice(0, 200)}`;
+  }
+
+  return Response.json(out);
 }

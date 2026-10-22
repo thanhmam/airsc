@@ -9,8 +9,20 @@ export type EngineSettings = {
   updated_at?: string;
 };
 
-/** Daily X post about Today's picks (src/lib/social) */
-export type SocialSettings = { x_enabled: boolean; x_auto: boolean; x_post_hour_vn: number; x_card_style?: CardStyle; x_card_theme?: CardTheme };
+/**
+ * X posts (src/lib/social). Each day the engine drafts one spotlight for each hour in `x_slots_vn`
+ * (Vietnam time, posted at :30); "applied" posts are added by hand. `x_guidance` is the writing guidance
+ * the three-day review rewrites (editable in /admin/social). `x_post_hour_vn` is the v1 hour, now unused.
+ */
+export type SocialSettings = {
+  x_enabled: boolean;
+  x_auto: boolean;
+  x_post_hour_vn?: number;
+  x_slots_vn?: number[];
+  x_guidance?: string;
+  x_card_style?: CardStyle;
+  x_card_theme?: CardTheme;
+};
 
 /** editorial: Sonnet's headline + real result; spotlight: the result full-bleed under the headline; list: the four picks */
 export const CARD_STYLES = ["editorial", "spotlight", "list"] as const;
@@ -20,13 +32,28 @@ export type CardStyle = (typeof CARD_STYLES)[number];
 export const CARD_THEMES = ["light", "dark"] as const;
 export type CardTheme = (typeof CARD_THEMES)[number];
 
-/** Social copy and card headlines: Sonnet 5.5 thinking hard, since one post a day is public and cheap */
+/** Social copy, card headlines and the three-day review: Sonnet 5.5 thinking hard, since every post is public and cheap */
 export const SOCIAL_MODEL = "anthropic/claude-sonnet-5.5";
 
-/** Off until turned on in /admin/social; 20:00 Vietnam is 9:00 on the US East Coast */
-export const SOCIAL_DEFAULT: Required<SocialSettings> = { x_enabled: false, x_auto: true, x_post_hour_vn: 20, x_card_style: "editorial", x_card_theme: "light" };
+/** Off until turned on in /admin/social; 20:30 and 22:30 Vietnam are the US East Coast morning */
+export const SOCIAL_DEFAULT: Required<SocialSettings> = {
+  x_enabled: false,
+  x_auto: true,
+  x_post_hour_vn: 20,
+  x_slots_vn: [20, 22],
+  x_guidance: "",
+  x_card_style: "editorial",
+  x_card_theme: "light",
+};
 
-export const socialSettings = (s: EngineSettings): Required<SocialSettings> => ({ ...SOCIAL_DEFAULT, ...s.social });
+/** At most this many engine-drafted spotlights a day (applied posts come on top) */
+export const MAX_SLOTS = 3;
+
+export const socialSettings = (s: EngineSettings): Required<SocialSettings> => {
+  const v = { ...SOCIAL_DEFAULT, ...s.social };
+  const slots = [...new Set((v.x_slots_vn ?? []).filter((h) => Number.isInteger(h) && h >= 0 && h <= 23))].sort((a, b) => a - b);
+  return { ...v, x_slots_vn: slots.slice(0, MAX_SLOTS) };
+};
 
 /** Previewer model until one is saved in /admin: a cheap vision model is enough */
 export const PREVIEW_DEFAULT = "google/gemini-3-flash";

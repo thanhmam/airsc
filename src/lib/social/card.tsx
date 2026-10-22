@@ -110,12 +110,11 @@ async function shot(r: PickRow, box: { w: number; h: number }, fit: "inside" | "
   }
 }
 
-type Layout = { day: string; rows: PickRow[]; hi: PickRow | null; img: Shot | null; headline: string; logo: string; c: Palette };
+/** `kicker` is the small line above the headline; a card with one row is about that resource alone (no strip of picks) */
+type Layout = { day: string; rows: PickRow[]; hi: PickRow | null; img: Shot | null; headline: string; kicker: string; logo: string; c: Palette };
 
-const Kicker = ({ day, c }: { day: string; c: Palette }) => (
-  <div style={{ display: "flex", fontFamily: "Geist Mono", fontSize: 18, letterSpacing: 2, color: c.accent }}>
-    {`TODAY'S PICKS · ${dayLabel(day).toUpperCase()}`}
-  </div>
+const Kicker = ({ text, c }: { text: string; c: Palette }) => (
+  <div style={{ display: "flex", fontFamily: "Geist Mono", fontSize: 18, letterSpacing: 2, color: c.accent }}>{text.toUpperCase()}</div>
 );
 
 const Safe = ({ c }: { c: Palette }) => (
@@ -136,7 +135,7 @@ const Meta = ({ r, c }: { r: PickRow; c: Palette }) => (
 );
 
 /** Sonnet's headline beside the real result, the four picks along the bottom */
-function Editorial({ day, rows, hi, img, headline, logo, c }: Layout) {
+function Editorial({ rows, hi, img, headline, kicker, logo, c }: Layout) {
   const size = img ? (headline.length > 44 ? 50 : 58) : headline.length > 44 ? 64 : 76;
   return (
     <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", background: c.bg, color: c.fg, fontFamily: "Geist", padding: "44px 56px 40px" }}>
@@ -147,7 +146,7 @@ function Editorial({ day, rows, hi, img, headline, logo, c }: Layout) {
       </div>
       <div style={{ display: "flex", flex: 1, alignItems: "center", gap: 44 }}>
         <div style={{ display: "flex", flexDirection: "column", width: img ? 500 : 1088 }}>
-          <Kicker day={day} c={c} />
+          <Kicker text={kicker} c={c} />
           <div style={{ display: "flex", marginTop: 18, fontSize: size, fontWeight: 600, lineHeight: 1.06, letterSpacing: -1.8 }}>{headline}</div>
           {hi && (
             <div style={{ display: "flex", marginTop: 24 }}>
@@ -172,15 +171,19 @@ function Editorial({ day, rows, hi, img, headline, logo, c }: Layout) {
           </div>
         )}
       </div>
-      <div style={{ display: "flex", height: 1, background: c.line, marginBottom: 20 }} />
-      <div style={{ display: "flex", justifyContent: "space-between" }}>
-        {rows.map((r, i) => (
-          <div key={r.slug} style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
-            <span style={{ fontFamily: "Geist Mono", fontSize: 16, color: r.slug === hi?.slug ? c.accent : c.muted }}>{`0${i + 1}`}</span>
-            <span style={{ fontSize: 21, fontWeight: 600, color: r.slug === hi?.slug ? c.fg : c.dim }}>{clip(r.name, rows.length > 4 ? 15 : 20)}</span>
+      {rows.length > 1 && (
+        <>
+          <div style={{ display: "flex", height: 1, background: c.line, marginBottom: 20 }} />
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            {rows.map((r, i) => (
+              <div key={r.slug} style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
+                <span style={{ fontFamily: "Geist Mono", fontSize: 16, color: r.slug === hi?.slug ? c.accent : c.muted }}>{`0${i + 1}`}</span>
+                <span style={{ fontSize: 21, fontWeight: 600, color: r.slug === hi?.slug ? c.fg : c.dim }}>{clip(r.name, rows.length > 4 ? 15 : 20)}</span>
+              </div>
+            ))}
           </div>
-        ))}
-      </div>
+        </>
+      )}
     </div>
   );
 }
@@ -189,7 +192,7 @@ function Editorial({ day, rows, hi, img, headline, logo, c }: Layout) {
 const SPOT_TOP = 92;
 
 /** The real result full-bleed under a solid logo bar, fading into the headline and the picks */
-function Spotlight({ day, rows, hi, img, headline, logo, c }: Layout) {
+function Spotlight({ rows, hi, img, headline, kicker, logo, c }: Layout) {
   const s = (a: number) => `rgba(${c.scrim},${a})`;
   return (
     <div style={{ width: "100%", height: "100%", display: "flex", position: "relative", background: c.bg, color: c.fg, fontFamily: "Geist" }}>
@@ -229,7 +232,7 @@ function Spotlight({ day, rows, hi, img, headline, logo, c }: Layout) {
         <Safe c={c} />
       </div>
       <div style={{ position: "absolute", left: 56, right: 56, bottom: 44, display: "flex", flexDirection: "column" }}>
-        <Kicker day={day} c={c} />
+        <Kicker text={kicker} c={c} />
         <div style={{ display: "flex", marginTop: 14, maxWidth: 980, fontSize: headline.length > 44 ? 56 : 64, fontWeight: 600, lineHeight: 1.04, letterSpacing: -2 }}>
           {headline}
         </div>
@@ -238,32 +241,34 @@ function Spotlight({ day, rows, hi, img, headline, logo, c }: Layout) {
             <Meta r={hi} c={c} />
           </div>
         )}
-        <div style={{ display: "flex", gap: 10, marginTop: 26 }}>
-          {rows.map((r, i) => (
-            <div
-              key={r.slug}
-              style={{
-                display: "flex",
-                alignItems: "baseline",
-                gap: 8,
-                padding: "8px 16px",
-                borderRadius: 999,
-                border: `1px solid ${r.slug === hi?.slug ? c.accent : c.chipLine}`,
-                background: c.chip,
-              }}
-            >
-              <span style={{ fontFamily: "Geist Mono", fontSize: 14, color: r.slug === hi?.slug ? c.accent : c.muted }}>{`0${i + 1}`}</span>
-              <span style={{ fontSize: 19, fontWeight: 600, color: c.fg }}>{clip(r.name, 22)}</span>
-            </div>
-          ))}
-        </div>
+        {rows.length > 1 && (
+          <div style={{ display: "flex", gap: 10, marginTop: 26 }}>
+            {rows.map((r, i) => (
+              <div
+                key={r.slug}
+                style={{
+                  display: "flex",
+                  alignItems: "baseline",
+                  gap: 8,
+                  padding: "8px 16px",
+                  borderRadius: 999,
+                  border: `1px solid ${r.slug === hi?.slug ? c.accent : c.chipLine}`,
+                  background: c.chip,
+                }}
+              >
+                <span style={{ fontFamily: "Geist Mono", fontSize: 14, color: r.slug === hi?.slug ? c.accent : c.muted }}>{`0${i + 1}`}</span>
+                <span style={{ fontSize: 19, fontWeight: 600, color: c.fg }}>{clip(r.name, 22)}</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
 /** The four picks on the left, the featured pick's real result on the right */
-function List({ day, rows, hi, img, logo, c }: Layout) {
+function List({ rows, hi, img, kicker, logo, c }: Layout) {
   const rowGap = rows.length > 4 ? 14 : 22;
   return (
     <div style={{ width: "100%", height: "100%", display: "flex", background: c.bg, color: c.fg, fontFamily: "Geist", padding: 56 }}>
@@ -271,7 +276,7 @@ function List({ day, rows, hi, img, logo, c }: Layout) {
         {/* eslint-disable-next-line @next/next/no-img-element -- Satori renders plain img */}
         <img src={logo} alt="" width={96} height={44} />
         <div style={{ display: "flex", marginTop: 34 }}>
-          <Kicker day={day} c={c} />
+          <Kicker text={kicker} c={c} />
         </div>
         <div style={{ display: "flex", flexDirection: "column", marginTop: 26, gap: rowGap }}>
           {rows.map((r, i) => {
@@ -319,9 +324,12 @@ const BOXES: Record<CardStyle, { w: number; h: number; fit: "inside" | "cover" }
   list: { w: 588, h: 470, fit: "inside" },
 };
 
-export type CardOptions = { style?: CardStyle | null; theme?: CardTheme | null; highlight?: string | null; headline?: string | null };
+export type CardOptions = { style?: CardStyle | null; theme?: CardTheme | null; highlight?: string | null; headline?: string | null; kicker?: string | null };
 
-/** The 1200×675 PNG attached to the day's post, in the style and theme chosen in /admin/social */
+/**
+ * The 1200×675 PNG attached to a post, in the style and theme chosen in /admin/social. With one row the
+ * card is about that resource alone (a spotlight); with several it shows the day's picks.
+ */
 export async function renderCard(day: string, rows: PickRow[], opts: CardOptions = {}): Promise<Buffer> {
   const { fonts, logos } = await loadAssets();
   const style = opts.style ?? "editorial";
@@ -331,7 +339,8 @@ export async function renderCard(day: string, rows: PickRow[], opts: CardOptions
   const box = BOXES[style];
   const img = hi ? await shot(hi, box, box.fit, c.panel) : null;
   const headline = opts.headline?.trim() || (hi ? fallbackHeadline(hi) : "Four AI agent resources worth installing today.");
-  const props: Layout = { day, rows, hi, img, headline, logo: logos[theme], c };
+  const kicker = opts.kicker ?? (rows.length > 1 ? `Today's picks · ${dayLabel(day)}` : hi ? `${TYPE_LABEL[hi.type]} · ${dayLabel(day)}` : dayLabel(day));
+  const props: Layout = { day, rows, hi, img, headline, kicker, logo: logos[theme], c };
   // a full-bleed card needs its image; without one the editorial layout reads better
   const el = style === "list" ? <List {...props} /> : style === "spotlight" && img ? <Spotlight {...props} /> : <Editorial {...props} />;
   const res = new ImageResponse(el, { ...CARD, fonts });
