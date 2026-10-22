@@ -2,6 +2,7 @@
 
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useState, useTransition } from "react";
 import { cn } from "@/lib/utils";
 import { createApplied } from "../actions";
@@ -44,8 +45,22 @@ async function shrink(file: File): Promise<File> {
   return new File([out], file.name.replace(/\.\w+$/, out.type === "image/png" ? ".png" : ".jpg"), { type: out.type });
 }
 
-/** A post about using a resource in a real project: notes + screenshots in, Sonnet's draft out (in the queue above) */
-export function AppliedForm({ presets, resources, today, c }: { presets: Preset[]; resources: { slug: string; name: string }[]; today: string; c: AppliedCopy }) {
+/** A post about using a resource in a real project: notes + screenshots in, Sonnet's draft out (in the queue) */
+export function AppliedForm({
+  presets,
+  resources,
+  today,
+  queueHref,
+  queueLabel,
+  c,
+}: {
+  presets: Preset[];
+  resources: { slug: string; name: string }[];
+  today: string;
+  queueHref: string;
+  queueLabel: string;
+  c: AppliedCopy;
+}) {
   const [preset, setPreset] = useState<Preset | null>(null);
   const [slug, setSlug] = useState("");
   const [notes, setNotes] = useState("");
@@ -82,10 +97,6 @@ export function AppliedForm({ presets, resources, today, c }: { presets: Preset[
 
   return (
     <form action={submit} className="flex flex-col gap-3 rounded-2xl border border-line bg-card p-4">
-      <div>
-        <h2 className="text-sm font-medium">{c.title}</h2>
-        <p className="mt-1 max-w-3xl text-sm text-muted">{c.intro}</p>
-      </div>
       <label className="flex flex-col gap-1 text-sm">
         <span className="text-muted">{c.preset}</span>
         <select value={preset?.slug ?? ""} onChange={(e) => choose(e.target.value)} className={input}>
@@ -173,7 +184,16 @@ export function AppliedForm({ presets, resources, today, c }: { presets: Preset[
           {pending ? c.working : c.submit}
         </button>
       </div>
-      {msg && <p className={cn("text-sm", msg.ok ? "text-safe" : "text-danger")}>{msg.text}</p>}
+      {msg && (
+        <p className={cn("text-sm", msg.ok ? "text-safe" : "text-danger")}>
+          {msg.text}{" "}
+          {msg.ok && (
+            <Link href={queueHref} className="text-accent underline">
+              {queueLabel}
+            </Link>
+          )}
+        </p>
+      )}
     </form>
   );
 }
