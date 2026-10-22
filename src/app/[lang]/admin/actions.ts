@@ -226,7 +226,7 @@ export async function createApplied(form: FormData): Promise<SocialResult> {
       const ext = f.type.split("/")[1].replace("jpeg", "jpg");
       images.push((await put(`social/${day}/${crypto.randomUUID()}.${ext}`, f, { access: "public", contentType: f.type })).url);
     }
-    if (images.length > 4) return { ok: false, error: "X takes at most 4 images" };
+    if (images.length > 1) return { ok: false, error: "One image per post: design a before/after (see docs/x-posts.md)" };
     await makeApplied({ slug, notes, project: String(form.get("project") ?? "").trim() || undefined, images, day, hourVn });
     refresh();
     return { ok: true };

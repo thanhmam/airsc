@@ -2,6 +2,7 @@ import { z } from "zod";
 import { generateObject } from "@/lib/engine/ai";
 import { SOCIAL_MODEL } from "@/lib/engine/settings";
 import { brief, clip, fallbackHeadline, keepMentions, oneLiner, type PickRow, scanLine, TYPE_LABEL, usable } from "./compose";
+import { POST_RULES } from "./rules";
 
 /** What a vibe coder building an app installs an agent resource for */
 const BUILDER = new Set([
@@ -64,10 +65,14 @@ Goal: a developer scrolling X stops, gets what they would have after installing 
 
 Shape (plain text, line breaks between parts):
 1. Hook, one line under 90 characters: the concrete outcome or the pain it removes, in the reader's words. Not a question, no product name.
-2. One or two short lines: what it is and where it runs (Claude Code, Cursor, any MCP client…), one specific detail from the data that makes it believable (a use case, a number of tools, what the screenshot shows), and the credit: "by @handle" when an X handle is given, otherwise "by <github_owner> on GitHub". Star count only if it is above 1,000.
+2. One or two short lines: what it is and where it runs (Claude Code, Cursor, any MCP client…) and one specific detail from the data that makes it believable (a use case, a number of tools, what it produced). The card image is attached to the post: you may use what it shows as a fact, but never write "the screenshot", "the image" or "pictured".
+3. The credit as its own short sentence: "Built by @handle." when an X handle is given, otherwise "Built by <github_owner>." Add the star count only if it is above 1,000, e.g. "Built by @handle, 87k stars on GitHub."
 Under 250 characters in total. A scan line is added after your text by code: do not write about safety yourself.
 
-Rules: English. Only facts from the data; never invent numbers, features or opinions. No links, no hashtags, no emoji, no other @mentions, no hype words (game-changer, revolutionary, supercharge, unleash, must-have, 10x), no "Today's picks", no "Check out", no "Meet".`;
+Rules: English. Only facts from the data; never invent numbers, features or opinions. No links, no hashtags, no emoji, no other @mentions, no hype words (game-changer, revolutionary, supercharge, unleash, must-have, 10x), no "Today's picks", no "Check out", no "Meet".
+You have not used this resource: never write "I used", "I tried" or "I ran", and never promise results the data does not show.
+
+${POST_RULES}`;
 
 const schema = z.object({
   text: z.string().describe("The post, under 250 characters, without the scan line"),
@@ -76,9 +81,9 @@ const schema = z.object({
 
 /** The resource's line in the post when the model is unavailable */
 function fallbackText(r: PickRow, handle: string | null) {
-  const credit = handle ? `by @${handle}` : `by ${r.owner} on GitHub`;
-  const stars = r.stars >= 1000 ? ` (${Math.round(r.stars / 100) / 10}k stars)` : "";
-  return `${clip(oneLiner(r), 120)}.\n\n${r.name}, a ${TYPE_LABEL[r.type]}${stars}, ${credit}.`;
+  const credit = handle ? `Built by @${handle}` : `Built by ${r.owner}`;
+  const stars = r.stars >= 1000 ? `, ${Math.round(r.stars / 100) / 10}k stars on GitHub` : "";
+  return `${clip(oneLiner(r), 120)}.\n\n${r.name} is a ${TYPE_LABEL[r.type]} for AI coding agents. ${credit}${stars}.`;
 }
 
 /**

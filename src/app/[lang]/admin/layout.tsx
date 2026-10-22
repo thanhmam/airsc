@@ -5,6 +5,7 @@ import { requireAdmin } from "@/lib/admin";
 import { aiCredits } from "@/lib/engine/credits";
 import { db } from "@/lib/engine/db";
 import { getDict, hasLocale, href } from "@/lib/i18n";
+import { vnDay } from "@/lib/social/compose";
 import { RESOURCE_TYPES } from "@/lib/types";
 import { adminCopy } from "./copy";
 import { AdminNav, type NavItem } from "./nav";
@@ -19,7 +20,10 @@ export default async function AdminLayout({ children, params }: LayoutProps<"/[l
   const c = adminCopy(lang);
   const p = pmCopy(lang);
   const t = getDict(lang);
-  const [counts, credits] = await Promise.all([db.navCounts(), aiCredits()]);
+  const [counts, credits, posts] = await Promise.all([db.navCounts(), aiCredits(), db.socialPosts(60).catch(() => [])]);
+  const social = href(lang, "/admin/social");
+  // posts that still need a look: drafts and failures from today on
+  const waiting = posts.filter((p) => p.day >= vnDay() && (p.status === "draft" || p.status === "failed")).length;
   const res = href(lang, "/admin/resources");
 
   const items: NavItem[] = [
@@ -40,7 +44,20 @@ export default async function AdminLayout({ children, params }: LayoutProps<"/[l
     { href: `${res}?stage=unclassified`, label: c.tabs.queued, icon: "review", count: counts.queued, match: { stage: "unclassified" } },
     { href: `${res}?status=hidden`, label: c.tabs.hidden, icon: "hidden", count: counts.hidden, match: { status: "hidden" } },
     { href: href(lang, "/admin/agents"), label: c.tabs.agents, icon: "agents", count: undefined },
-    { href: href(lang, "/admin/social"), label: c.tabs.social, icon: "social" },
+    {
+      href: social,
+      label: c.tabs.social,
+      icon: "social",
+      exact: true,
+      count: waiting,
+      tone: "warn",
+      children: [
+        { href: `${social}/new`, label: c.tabs.socialNew, icon: "write" },
+        { href: `${social}/performance`, label: c.tabs.socialPerformance, icon: "performance" },
+        { href: `${social}/reviews`, label: c.tabs.socialReviews, icon: "reviews" },
+        { href: `${social}/settings`, label: c.tabs.socialSettings, icon: "settings" },
+      ],
+    },
   ];
 
   const bizItems: NavItem[] = [

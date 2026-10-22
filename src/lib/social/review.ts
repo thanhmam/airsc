@@ -50,7 +50,8 @@ You get every post of the period with its text, time and numbers, the same summa
 
 Write for the account owner, in Vietnamese, plainly and briefly:
 - summary: markdown, at most about 200 words. Start with the headline numbers against the previous period, then what worked and what did not, pointing at specific posts (quote their first line), then at most three concrete changes for the next three days. Say clearly when there are too few posts or views to tell anything apart from noise (with a hundred followers, a difference of a few dozen views often is noise). Never invent numbers.
-- guidance: the writing guidance for the next posts, in English, at most 8 short bullet lines, each an instruction a writer can follow (hooks, length, angle, which kinds of resources, what to avoid). Keep what still holds from the current guidance, drop what the numbers contradict. Only things the writer controls: not posting times, not tagging.`;
+- guidance: the writing guidance for the next posts, in English, at most 8 short bullet lines, each an instruction a writer can follow (hooks, length, angle, which kinds of resources, what to avoid). Keep what still holds from the current guidance, drop what the numbers contradict. Only things the writer controls: not posting times, not tagging.
+The writers also follow fixed rules you cannot change: open with the builder's problem (losing control of a fast-growing product), not the tool; facts and numbers only from the data or notes; the author credited as its own sentence; one image per post; no link in the post. Your guidance only adds to them and never contradicts them.`;
 
 const schema = z.object({
   summary: z.string().describe("Markdown in Vietnamese, about 200 words at most"),
