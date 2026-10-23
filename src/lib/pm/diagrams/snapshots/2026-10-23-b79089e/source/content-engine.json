@@ -1,0 +1,501 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Airsc Content Engine Run",
+    "output": ".archify/workflow-content-engine-20261023-144129/content-engine.html",
+    "quality_profile": "showcase",
+    "locale": "en",
+    "repository": {
+      "url": "https://github.com/thanhmam/airsc",
+      "provider": "github",
+      "link_mode": "web",
+      "revision": "b79089e723b491b39213904d07ad2a2ca5cc1efc"
+    }
+  },
+  "lanes": [
+    {
+      "id": "run",
+      "label": "Trigger + run log"
+    },
+    {
+      "id": "discovery",
+      "label": "Data steps (no AI)"
+    },
+    {
+      "id": "ai",
+      "label": "AI agents (AI Gateway)"
+    },
+    {
+      "id": "build",
+      "label": "No-AI work + exits"
+    }
+  ],
+  "phases": [
+    {
+      "id": "p_discover",
+      "label": "Discover",
+      "fromCol": 0,
+      "toCol": 1
+    },
+    {
+      "id": "p_curate",
+      "label": "Curate + gate",
+      "fromCol": 2,
+      "toCol": 2,
+      "variant": "emphasis"
+    },
+    {
+      "id": "p_build",
+      "label": "Kits, slideshow, demo, previews",
+      "fromCol": 3,
+      "toCol": 4
+    },
+    {
+      "id": "p_publish",
+      "label": "Guides, picks, finish",
+      "fromCol": 5,
+      "toCol": 5,
+      "variant": "dashed"
+    }
+  ],
+  "mainPath": [
+    "trigger",
+    "scout",
+    "analyst",
+    "budget",
+    "curator",
+    "kits",
+    "producer",
+    "demo",
+    "previewer",
+    "editor",
+    "picks",
+    "finish"
+  ],
+  "nodes": [
+    {
+      "id": "trigger",
+      "lane": "run",
+      "col": 0,
+      "type": "backend",
+      "label": "Start run",
+      "sublabel": "cron VN hour / admin",
+      "sources": [
+        {
+          "path": "src/app/api/cron/pipeline/route.ts",
+          "line": 8,
+          "end_line": 17,
+          "label": "daily gate"
+        },
+        {
+          "path": "src/workflows/content-engine.ts",
+          "line": 144,
+          "end_line": 147,
+          "label": "startRun"
+        }
+      ],
+      "width": 140
+    },
+    {
+      "id": "picks",
+      "lane": "discovery",
+      "col": 5,
+      "type": "database",
+      "label": "Today's picks",
+      "sublabel": "+ X spotlights (Sonnet)",
+      "sources": [
+        {
+          "path": "src/workflows/content-engine.ts",
+          "line": 354,
+          "end_line": 386,
+          "label": "picksStep"
+        },
+        {
+          "path": "src/lib/engine/picks.ts",
+          "line": 26,
+          "end_line": 54,
+          "label": "choosePicks"
+        },
+        {
+          "path": "src/workflows/content-engine.ts",
+          "line": 389,
+          "end_line": 405,
+          "label": "socialDraftStep"
+        }
+      ],
+      "width": 140
+    },
+    {
+      "id": "finish",
+      "lane": "run",
+      "col": 5,
+      "type": "backend",
+      "label": "finishRun",
+      "sublabel": "completed / failed",
+      "sources": [
+        {
+          "path": "src/workflows/content-engine.ts",
+          "line": 134,
+          "end_line": 138,
+          "label": "finish + rethrow"
+        }
+      ],
+      "width": 140
+    },
+    {
+      "id": "scout",
+      "lane": "discovery",
+      "col": 0,
+      "type": "external",
+      "label": "Scout",
+      "sublabel": "topics, MCP Reg, npm",
+      "sources": [
+        {
+          "path": "src/lib/engine/agents/scout.ts",
+          "line": 74,
+          "end_line": 124,
+          "label": "discover"
+        },
+        {
+          "path": "src/workflows/content-engine.ts",
+          "line": 52,
+          "end_line": 60,
+          "label": "select fresh/refresh"
+        }
+      ],
+      "width": 140
+    },
+    {
+      "id": "analyst",
+      "lane": "discovery",
+      "col": 1,
+      "type": "security",
+      "label": "Analyst",
+      "sublabel": "tree, safety, install",
+      "sources": [
+        {
+          "path": "src/lib/crawler/run.ts",
+          "line": 44,
+          "end_line": 114,
+          "label": "analyse"
+        },
+        {
+          "path": "src/workflows/content-engine.ts",
+          "line": 166,
+          "end_line": 191,
+          "label": "analyzeStep"
+        }
+      ],
+      "width": 140
+    },
+    {
+      "id": "budget",
+      "lane": "ai",
+      "col": 1,
+      "type": "security",
+      "label": "Budget check",
+      "sublabel": "balance, run cap",
+      "sources": [
+        {
+          "path": "src/workflows/content-engine.ts",
+          "line": 62,
+          "end_line": 74,
+          "label": "budget brake"
+        }
+      ],
+      "width": 140
+    },
+    {
+      "id": "curator",
+      "lane": "ai",
+      "col": 2,
+      "type": "backend",
+      "label": "Curator",
+      "sublabel": "quality, EN/VI, gate",
+      "sources": [
+        {
+          "path": "src/lib/engine/agents/curator.ts",
+          "line": 54,
+          "end_line": 83,
+          "label": "curate"
+        },
+        {
+          "path": "src/lib/engine/agents/curator.ts",
+          "line": 47,
+          "end_line": 52,
+          "label": "gate()"
+        }
+      ],
+      "width": 140
+    },
+    {
+      "id": "producer",
+      "lane": "ai",
+      "col": 3,
+      "type": "backend",
+      "label": "Producer",
+      "sublabel": "6 scenes + prompts",
+      "sources": [
+        {
+          "path": "src/lib/engine/agents/producer.ts",
+          "line": 39,
+          "end_line": 66,
+          "label": "produce"
+        },
+        {
+          "path": "src/workflows/content-engine.ts",
+          "line": 85,
+          "end_line": 95,
+          "label": "unproduced"
+        }
+      ],
+      "width": 140
+    },
+    {
+      "id": "previewer",
+      "lane": "ai",
+      "col": 4,
+      "type": "backend",
+      "label": "Previewer",
+      "sublabel": "README images, Blob",
+      "sources": [
+        {
+          "path": "src/lib/engine/agents/previewer.ts",
+          "line": 176,
+          "end_line": 228,
+          "label": "preview"
+        },
+        {
+          "path": "src/workflows/content-engine.ts",
+          "line": 259,
+          "end_line": 292,
+          "label": "queue + step"
+        }
+      ],
+      "width": 140
+    },
+    {
+      "id": "editor",
+      "lane": "ai",
+      "col": 5,
+      "type": "backend",
+      "label": "Editor",
+      "sublabel": "guides + digest",
+      "sources": [
+        {
+          "path": "src/workflows/content-engine.ts",
+          "line": 296,
+          "end_line": 316,
+          "label": "plan: 7-day refresh"
+        },
+        {
+          "path": "src/workflows/content-engine.ts",
+          "line": 318,
+          "end_line": 352,
+          "label": "write page"
+        }
+      ],
+      "width": 140
+    },
+    {
+      "id": "ai_skipped",
+      "lane": "build",
+      "col": 1,
+      "type": "security",
+      "label": "AI skipped",
+      "sublabel": "kits + demo run",
+      "sources": [
+        {
+          "path": "src/workflows/content-engine.ts",
+          "line": 64,
+          "end_line": 67,
+          "label": "aiAllowed"
+        }
+      ],
+      "width": 140
+    },
+    {
+      "id": "hidden",
+      "lane": "build",
+      "col": 2,
+      "type": "security",
+      "label": "Hidden",
+      "sublabel": "q<40 or danger",
+      "sources": [
+        {
+          "path": "src/lib/engine/agents/curator.ts",
+          "line": 47,
+          "end_line": 52,
+          "label": "hidden_reason"
+        }
+      ],
+      "width": 140
+    },
+    {
+      "id": "kits",
+      "lane": "discovery",
+      "col": 2,
+      "type": "database",
+      "label": "Rebuild kits",
+      "sublabel": "published resources",
+      "sources": [
+        {
+          "path": "src/workflows/content-engine.ts",
+          "line": 215,
+          "end_line": 231,
+          "label": "kitsStep"
+        }
+      ],
+      "width": 140
+    },
+    {
+      "id": "demo",
+      "lane": "build",
+      "col": 4,
+      "type": "cloud",
+      "label": "Demo",
+      "sublabel": "npx MCP in Sandbox",
+      "sources": [
+        {
+          "path": "src/lib/engine/agents/demo.ts",
+          "line": 60,
+          "end_line": 107,
+          "label": "demoMcp"
+        },
+        {
+          "path": "src/workflows/content-engine.ts",
+          "line": 247,
+          "end_line": 256,
+          "label": "demoStep"
+        }
+      ],
+      "width": 140
+    }
+  ],
+  "edges": [
+    {
+      "id": "e_scout",
+      "from": "trigger",
+      "to": "scout",
+      "label": "unless skipScout",
+      "variant": "default"
+    },
+    {
+      "id": "e_analyse",
+      "from": "scout",
+      "to": "analyst",
+      "label": "batches of 20",
+      "variant": "emphasis"
+    },
+    {
+      "id": "e_budget",
+      "from": "analyst",
+      "to": "budget",
+      "variant": "default"
+    },
+    {
+      "id": "e_curate",
+      "from": "budget",
+      "to": "curator",
+      "label": "allowed",
+      "variant": "emphasis"
+    },
+    {
+      "id": "e_kits",
+      "from": "curator",
+      "to": "kits",
+      "label": "published",
+      "variant": "emphasis"
+    },
+    {
+      "id": "e_produce",
+      "from": "kits",
+      "to": "producer",
+      "variant": "default"
+    },
+    {
+      "id": "e_demo",
+      "from": "producer",
+      "to": "demo",
+      "variant": "default"
+    },
+    {
+      "id": "e_preview",
+      "from": "demo",
+      "to": "previewer",
+      "variant": "default"
+    },
+    {
+      "id": "e_editor",
+      "from": "previewer",
+      "to": "editor",
+      "variant": "default"
+    },
+    {
+      "id": "e_picks",
+      "from": "editor",
+      "to": "picks",
+      "label": "full runs",
+      "variant": "emphasis"
+    },
+    {
+      "id": "e_finish",
+      "from": "picks",
+      "to": "finish",
+      "variant": "emphasis"
+    },
+    {
+      "id": "e_low_balance",
+      "from": "budget",
+      "to": "ai_skipped",
+      "label": "balance low",
+      "variant": "security",
+      "role": "error"
+    },
+    {
+      "id": "e_hidden",
+      "from": "curator",
+      "to": "hidden",
+      "label": "fails gate",
+      "variant": "security",
+      "role": "error"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Durability",
+      "items": [
+        "Each step is a Vercel Workflow step: checkpointed and retried",
+        "A thrown error marks the run failed, then rethrows",
+        "Curator, Producer, Previewer and Editor failures are logged and skipped"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Budget brake",
+      "items": [
+        "Low AI Gateway balance skips the AI agents; kits and demo still run",
+        "The run cap (default $2) stops further AI batches; the spotlight drafts then use plain templates instead of Sonnet"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "Daily output",
+      "items": [
+        "Picks: 4 safe resources with a preview, quality 80+, not repeated recently",
+        "With X posting on, a spotlight is drafted for each posting hour; /api/cron/social sends them (docs/x-posts.md)"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Step details",
+      "items": [
+        "Scout skips repos it checked in the last 14 days",
+        "Producer gives the first 3 batches the smart model",
+        "Previewer needs a Blob store; Editor refreshes category guides every 7 days"
+      ]
+    }
+  ]
+}

@@ -10,6 +10,7 @@ import { isOverdue } from "@/lib/social/publish";
 import { RESOURCE_TYPES } from "@/lib/types";
 import { adminCopy } from "./copy";
 import { AdminNav, type NavItem } from "./nav";
+import { pmHealth } from "./pm/checks";
 import { pmCopy } from "./pm/content";
 
 export const metadata: Metadata = { title: "Admin", robots: { index: false } };
@@ -21,7 +22,7 @@ export default async function AdminLayout({ children, params }: LayoutProps<"/[l
   const c = adminCopy(lang);
   const p = pmCopy(lang);
   const t = getDict(lang);
-  const [counts, credits, posts] = await Promise.all([db.navCounts(), aiCredits(), db.socialPosts(60).catch(() => [])]);
+  const [counts, credits, posts, health] = await Promise.all([db.navCounts(), aiCredits(), db.socialPosts(60).catch(() => []), pmHealth().catch(() => ({ architecture: 0, changelog: 0 }))]);
   const social = href(lang, "/admin/social");
   // posts that still need a look: drafts, failures and overdue posts of the last two weeks
   const waiting = posts.filter((p) => p.kind !== "picks" && p.day >= daysAgo(14) && (p.status === "draft" || p.status === "failed" || isOverdue(p))).length;
@@ -68,10 +69,10 @@ export default async function AdminLayout({ children, params }: LayoutProps<"/[l
 
   const pm = href(lang, "/admin/pm");
   const pmItems: NavItem[] = [
-    { href: `${pm}/architecture`, label: p.tabs.architecture, icon: "architecture" },
+    { href: `${pm}/architecture`, label: p.tabs.architecture, icon: "architecture", count: health.architecture || undefined, tone: "warn" },
     { href: `${pm}/stack`, label: p.tabs.stack, icon: "stack" },
     { href: `${pm}/roadmap`, label: p.tabs.roadmap, icon: "roadmap" },
-    { href: `${pm}/changelog`, label: p.tabs.changelog, icon: "changelog" },
+    { href: `${pm}/changelog`, label: p.tabs.changelog, icon: "changelog", count: health.changelog || undefined, tone: "warn" },
     { href: `${pm}/features`, label: p.tabs.features, icon: "features" },
     { href: `${pm}/picks`, label: p.tabs.picks, icon: "picks" },
   ];

@@ -1,0 +1,41 @@
+{
+  "about": "The core tech stack, locked. `core` maps a package to the major version (0.x: the minor) it must stay on; `extra` lists the other packages we allow. scripts/check-stack.mjs fails the build when package.json adds a package that is in neither list, drops a core package, or moves one to another major. To change the stack: write the reason in docs/decisions, then update this file, the Tech stack list in src/app/[lang]/admin/pm/content.ts and package.json in the same pull request. An agent must not do this on its own.",
+  "packageManager": "pnpm@12",
+  "core": {
+    "next": "16",
+    "react": "19",
+    "react-dom": "19",
+    "typescript": "5",
+    "tailwindcss": "4",
+    "@tailwindcss/postcss": "4",
+    "@supabase/supabase-js": "2",
+    "@supabase/ssr": "0.12",
+    "ai": "7",
+    "workflow": "5",
+    "@vercel/sandbox": "3",
+    "@vercel/blob": "2",
+    "@vercel/config": "0.9",
+    "mcp-handler": "2",
+    "@modelcontextprotocol/server": "2",
+    "@polar-sh/sdk": "1",
+    "zod": "4",
+    "sharp": "0.35"
+  },
+  "extra": [
+    "@remotion/player",
+    "@types/node",
+    "@types/react",
+    "@types/react-dom",
+    "clsx",
+    "eslint",
+    "eslint-config-next",
+    "lucide-react",
+    "motion",
+    "react-markdown",
+    "remark-gfm",
+    "remotion",
+    "server-only",
+    "tailwind-merge",
+    "tsx"
+  ]
+}

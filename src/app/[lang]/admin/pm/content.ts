@@ -11,21 +11,41 @@ const en = {
   section: "Product Management",
   tabs: { architecture: "Architecture", stack: "Tech stack", roadmap: "Roadmap", changelog: "Changelog", features: "Features", picks: "Today's picks history" },
   architecture: {
-    intro: "Diagrams traced from the source with Archify. Every box links to the file and lines it comes from.",
+    intro: "Diagrams traced from the source with Archify, kept as dated snapshots. Every box links to the file and lines it comes from, and every earlier version stays in the history below.",
     traced: "Traced from commit",
     open: "Open full screen",
-    titles: { architecture: "System architecture", "content-engine": "Content Engine run", "x-daily-post": "Today's picks to X" } as Record<string, string>,
-    descs: {
-      architecture: "Request paths, the MCP server, webhooks, crons, the Content Engine and the services they call.",
-      "content-engine": "One daily run: discover, curate, build content, then choose the picks and draft the X post.",
-      "x-daily-post": "How the picks become a draft, and how the hourly cron claims it, renders the card and posts it.",
-    } as Record<string, string>,
+    version: "Version",
+    latest: "latest",
+    history: "History",
+    historyIntro: "Every update adds a snapshot; an older one is never changed or removed.",
+    olderNotice: "You are looking at an older snapshot.",
+    backToLatest: "Back to the latest",
+    fresh: "Up to date: nothing structural has changed since these diagrams were traced.",
+    stale: "These diagrams are out of date",
+    staleBody: "Since they were traced: {commits} commits and {prs} merged pull requests. Structural changes: {signals}.",
+    unknown: "Could not reach GitHub to compare with main. Try again in a few minutes.",
+    update: "Update architecture",
+    updating: "Starting…",
+    started: "Started. Claude runs Archify on the repository and opens a pull request in about 15 minutes; merge it to publish the new snapshot.",
+    lastRun: "Last update run",
+    runs: { queued: "queued", in_progress: "running", success: "done", failure: "failed", cancelled: "cancelled" } as Record<string, string>,
+    notConfigured: "Starting it from here is not set up yet (needs GITHUB_DISPATCH_TOKEN, see docs/architecture-snapshots.md). Meanwhile run this in Claude Code:",
+    diagrams: "diagrams",
   },
   stack: {
-    intro: "Versions are read from package.json at build time; conventions come from AGENTS.md, BRAND.md and README.md.",
+    intro: "Versions are read from package.json at build time. The core stack is locked in stack.lock.json: the build fails if a core package is added, removed or moved to another major version without updating the lock in the same change.",
     conventions: "Project conventions",
     version: "version",
     unused: "in package.json, not used in src",
+    core: "core",
+    coreHint: "locked: changing it needs a decision",
+    lockTitle: "Locked core stack",
+    lockIntro: "Changing one of these means changing how the product is built. Do not let an agent do it on its own: write the reason in docs/decisions, update stack.lock.json and the list below in the same pull request.",
+    lockedBy: "locked at major",
+    unlisted: "In package.json but not described above",
+    unlistedIntro: "Add each to the list above with its role, and to stack.lock.json (core or extra).",
+    noneUnlisted: "Every package in package.json is described above.",
+    checked: "Checked at every build",
   },
   roadmap: {
     intro: "The original goals, what shipped, and what is next. Dates are Vietnam time.",
@@ -34,7 +54,15 @@ const en = {
     requests: "Change requests",
     status: { done: "Done", doing: "In progress", next: "Next", idea: "Idea" },
   },
-  changelog: { intro: "Merged changes to production, newest first.", direct: "direct to main", open: "open PR" },
+  changelog: {
+    intro: "Merged changes to production, newest first. Every pull request adds its entry here (AGENTS.md); a check on GitHub fails a pull request that changes the product without touching this file.",
+    direct: "direct to main",
+    open: "open PR",
+    missingTitle: "Merged pull requests missing from the changelog",
+    missingBody: "Add an entry for each one in src/app/[lang]/admin/pm/content.ts (CHANGELOG), and the roadmap and features if they changed.",
+    allIn: "Every merged pull request has an entry.",
+    unknown: "Could not reach GitHub to compare with the merged pull requests.",
+  },
   features: { intro: "What the product does today, grouped by area, with the code that implements it.", status: { live: "Live", partial: "Partial", planned: "Planned" } },
   picks: {
     intro: "The four resources the Content Engine chose for the homepage each Vietnam day, and the X post about them.",
@@ -54,21 +82,41 @@ const vi: PmCopy = {
   section: "Quản lý sản phẩm",
   tabs: { architecture: "Kiến trúc", stack: "Tech stack", roadmap: "Lộ trình", changelog: "Nhật ký thay đổi", features: "Tính năng", picks: "Lịch sử Chọn lọc hôm nay" },
   architecture: {
-    intro: "Sơ đồ vẽ từ source bằng Archify. Mỗi khối có link tới file và dòng code tương ứng.",
+    intro: "Sơ đồ vẽ từ source bằng Archify, lưu thành các bản chụp theo ngày. Mỗi khối có link tới file và dòng code tương ứng, và mọi phiên bản trước đó vẫn nằm trong lịch sử bên dưới.",
     traced: "Vẽ từ commit",
     open: "Mở toàn màn hình",
-    titles: { architecture: "Kiến trúc hệ thống", "content-engine": "Một lần chạy Content Engine", "x-daily-post": "Chọn lọc hôm nay lên X" },
-    descs: {
-      architecture: "Đường đi của request, MCP server, webhook, cron, Content Engine và các dịch vụ được gọi.",
-      "content-engine": "Một lần chạy mỗi ngày: tìm, phân loại, làm nội dung, rồi chọn Chọn lọc hôm nay và viết nháp bài X.",
-      "x-daily-post": "Cách Chọn lọc hôm nay thành bản nháp, và cách cron hằng giờ nhận bài, vẽ card và đăng lên X.",
-    },
+    version: "Phiên bản",
+    latest: "mới nhất",
+    history: "Lịch sử",
+    historyIntro: "Mỗi lần cập nhật thêm một bản chụp; bản cũ không bao giờ bị sửa hay xóa.",
+    olderNotice: "Bạn đang xem một bản chụp cũ.",
+    backToLatest: "Về bản mới nhất",
+    fresh: "Còn mới: chưa có thay đổi cấu trúc nào kể từ khi vẽ các sơ đồ này.",
+    stale: "Các sơ đồ này đã cũ",
+    staleBody: "Kể từ lúc vẽ: {commits} commit và {prs} pull request đã merge. Thay đổi cấu trúc: {signals}.",
+    unknown: "Không kết nối được GitHub để so sánh với main. Hãy thử lại sau vài phút.",
+    update: "Cập nhật kiến trúc",
+    updating: "Đang khởi động…",
+    started: "Đã bắt đầu. Claude chạy Archify trên repo và mở một pull request sau khoảng 15 phút; merge pull request đó để đăng bản chụp mới.",
+    lastRun: "Lần cập nhật gần nhất",
+    runs: { queued: "đang chờ", in_progress: "đang chạy", success: "xong", failure: "lỗi", cancelled: "đã hủy" },
+    notConfigured: "Chưa thiết lập để bắt đầu từ đây (cần GITHUB_DISPATCH_TOKEN, xem docs/architecture-snapshots.md). Trong lúc đó hãy chạy lệnh này trong Claude Code:",
+    diagrams: "sơ đồ",
   },
   stack: {
-    intro: "Phiên bản đọc từ package.json lúc build; quy ước lấy từ AGENTS.md, BRAND.md và README.md.",
+    intro: "Phiên bản đọc từ package.json lúc build. Core stack được khóa trong stack.lock.json: build sẽ lỗi nếu thêm, bỏ hoặc nâng major một package core mà không cập nhật file khóa trong cùng thay đổi.",
     conventions: "Quy ước dự án",
     version: "phiên bản",
     unused: "có trong package.json, chưa dùng trong src",
+    core: "core",
+    coreHint: "đã khóa: muốn đổi phải có quyết định",
+    lockTitle: "Core stack đã khóa",
+    lockIntro: "Đổi một trong những thứ này là đổi cách xây sản phẩm. Đừng để agent tự làm: ghi lý do vào docs/decisions, cập nhật stack.lock.json và danh sách bên dưới trong cùng một pull request.",
+    lockedBy: "khóa ở major",
+    unlisted: "Có trong package.json nhưng chưa được mô tả ở trên",
+    unlistedIntro: "Thêm từng package vào danh sách trên kèm vai trò, và vào stack.lock.json (core hoặc extra).",
+    noneUnlisted: "Mọi package trong package.json đều đã được mô tả ở trên.",
+    checked: "Kiểm tra ở mỗi lần build",
   },
   roadmap: {
     intro: "Mục tiêu ban đầu, những gì đã ra mắt và việc tiếp theo. Ngày theo giờ Việt Nam.",
@@ -77,7 +125,15 @@ const vi: PmCopy = {
     requests: "Các lần cập nhật yêu cầu",
     status: { done: "Xong", doing: "Đang làm", next: "Tiếp theo", idea: "Ý tưởng" },
   },
-  changelog: { intro: "Các thay đổi đã lên production, mới nhất trước.", direct: "commit thẳng vào main", open: "PR đang mở" },
+  changelog: {
+    intro: "Các thay đổi đã lên production, mới nhất trước. Mỗi pull request thêm mục của nó vào đây (AGENTS.md); một bước kiểm tra trên GitHub sẽ báo lỗi pull request nào đổi sản phẩm mà không đụng tới file này.",
+    direct: "commit thẳng vào main",
+    open: "PR đang mở",
+    missingTitle: "Pull request đã merge nhưng chưa có trong changelog",
+    missingBody: "Thêm mục cho từng cái vào src/app/[lang]/admin/pm/content.ts (CHANGELOG), và cả lộ trình, tính năng nếu có đổi.",
+    allIn: "Mọi pull request đã merge đều có mục.",
+    unknown: "Không kết nối được GitHub để so với các pull request đã merge.",
+  },
   features: { intro: "Sản phẩm đang làm được gì, theo từng mảng, kèm code thực hiện.", status: { live: "Đang chạy", partial: "Một phần", planned: "Dự kiến" } },
   picks: {
     intro: "Bốn tài nguyên Content Engine chọn cho trang chủ mỗi ngày (giờ VN), và bài X về chúng.",
@@ -95,7 +151,8 @@ export const pmCopy = (lang: Locale) => (lang === "vi" ? vi : en);
 
 // ---------------------------------------------------------------- tech stack
 
-export type StackItem = { name: string; pkg?: string; role: L; unused?: boolean };
+/** `pkg` is the package whose version is shown; `also` lists other packages this entry describes, so none is reported as undescribed */
+export type StackItem = { name: string; pkg?: string; also?: string[]; role: L; unused?: boolean };
 export type StackGroup = { title: L; items: StackItem[] };
 
 export const STACK: StackGroup[] = [
@@ -103,20 +160,22 @@ export const STACK: StackGroup[] = [
     title: { en: "App", vi: "Ứng dụng" },
     items: [
       { name: "Next.js (App Router)", pkg: "next", role: { en: "Pages, route handlers, server actions; EN at /, VI at /vi via src/proxy.ts", vi: "Trang, route handler, server action; EN ở /, VI ở /vi qua src/proxy.ts" } },
-      { name: "React", pkg: "react", role: { en: "UI, server components by default", vi: "Giao diện, mặc định là server component" } },
-      { name: "TypeScript", pkg: "typescript", role: { en: "Whole codebase", vi: "Toàn bộ code" } },
+      { name: "React", pkg: "react", also: ["react-dom"], role: { en: "UI, server components by default", vi: "Giao diện, mặc định là server component" } },
+      { name: "TypeScript", pkg: "typescript", also: ["@types/node", "@types/react", "@types/react-dom"], role: { en: "Whole codebase", vi: "Toàn bộ code" } },
+      { name: "server-only", pkg: "server-only", role: { en: "Keeps server code (keys, database tokens) out of client bundles", vi: "Giữ code phía server (khóa, token database) không lọt vào bundle client" } },
       { name: "Zod", pkg: "zod", role: { en: "Schemas for AI output and inputs", vi: "Schema cho kết quả AI và dữ liệu vào" } },
     ],
   },
   {
     title: { en: "UI and brand", vi: "Giao diện và thương hiệu" },
     items: [
-      { name: "Tailwind CSS", pkg: "tailwindcss", role: { en: "Styling with the tokens in src/app/globals.css (light and dark)", vi: "Style bằng token trong src/app/globals.css (sáng và tối)" } },
+      { name: "Tailwind CSS", pkg: "tailwindcss", also: ["@tailwindcss/postcss"], role: { en: "Styling with the tokens in src/app/globals.css (light and dark)", vi: "Style bằng token trong src/app/globals.css (sáng và tối)" } },
       { name: "Geist / Geist Mono", role: { en: "The only typefaces; headings font-semibold (BRAND.md)", vi: "Font duy nhất; tiêu đề font-semibold (BRAND.md)" } },
       { name: "lucide-react", pkg: "lucide-react", role: { en: "Icons", vi: "Icon" } },
+      { name: "clsx + tailwind-merge", pkg: "clsx", also: ["tailwind-merge"], role: { en: "Conditional class names (cn helper)", vi: "Ghép class theo điều kiện (hàm cn)" } },
       { name: "Motion", pkg: "motion", role: { en: "Homepage animation", vi: "Hiệu ứng trang chủ" } },
-      { name: "react-markdown + remark-gfm", pkg: "react-markdown", role: { en: "Guides and README excerpts", vi: "Bài hướng dẫn và trích README" } },
-      { name: "Remotion Player", pkg: "@remotion/player", role: { en: "Slideshow of real results on resource pages", vi: "Slideshow kết quả thật trên trang tài nguyên" } },
+      { name: "react-markdown + remark-gfm", pkg: "react-markdown", also: ["remark-gfm"], role: { en: "Guides and README excerpts", vi: "Bài hướng dẫn và trích README" } },
+      { name: "Remotion", pkg: "@remotion/player", also: ["remotion"], role: { en: "Slideshow of real results on resource pages", vi: "Slideshow kết quả thật trên trang tài nguyên" } },
     ],
   },
   {
@@ -133,14 +192,15 @@ export const STACK: StackGroup[] = [
       { name: "Vercel Workflow", pkg: "workflow", role: { en: "The Content Engine as a durable, checkpointed run", vi: "Content Engine chạy bền vững, có checkpoint" } },
       { name: "Vercel Sandbox", pkg: "@vercel/sandbox", role: { en: "Demo agent boots MCP servers and records their tools", vi: "Agent Demo khởi động MCP server và ghi lại danh sách tool" } },
       { name: "Vercel Blob", pkg: "@vercel/blob", role: { en: "Preview images copied from READMEs", vi: "Ảnh xem trước chép từ README" } },
-      { name: "Vercel Cron", role: { en: "Hourly /api/cron/pipeline and /api/cron/social (vercel.ts)", vi: "/api/cron/pipeline và /api/cron/social mỗi giờ (vercel.ts)" } },
+      { name: "Vercel Cron", role: { en: "Hourly /api/cron/pipeline and /api/cron/social, and /api/cron/social?task=post every five minutes to send posts at their set minute (vercel.ts)", vi: "/api/cron/pipeline và /api/cron/social mỗi giờ, và /api/cron/social?task=post mỗi năm phút để đăng bài đúng phút đã đặt (vercel.ts)" } },
     ],
   },
   {
     title: { en: "Integrations", vi: "Tích hợp" },
     items: [
-      { name: "MCP (mcp-handler)", pkg: "mcp-handler", role: { en: "Airsc MCP server at /api/mcp: 5 tools, Streamable HTTP, CORS", vi: "MCP server của Airsc ở /api/mcp: 5 tool, Streamable HTTP, CORS" } },
-      { name: "X API v2", role: { en: "Daily post with card (OAuth 1.0a, src/lib/social/x.ts)", vi: "Bài đăng hằng ngày kèm card (OAuth 1.0a, src/lib/social/x.ts)" } },
+      { name: "MCP (mcp-handler)", pkg: "mcp-handler", also: ["@modelcontextprotocol/server"], role: { en: "Airsc MCP server at /api/mcp: 5 tools, Streamable HTTP, CORS", vi: "MCP server của Airsc ở /api/mcp: 5 tool, Streamable HTTP, CORS" } },
+      { name: "X API v2", role: { en: "Posts with an image and a link reply, and the numbers of each post (OAuth 1.0a, src/lib/social/x.ts)", vi: "Đăng bài kèm ảnh và reply chứa link, đọc số liệu từng bài (OAuth 1.0a, src/lib/social/x.ts)" } },
+      { name: "GitHub API", role: { en: "Crawler, the X handle of each resource's author, and the admin's comparison of main with the diagrams and the changelog (public reads)", vi: "Crawler, tài khoản X của tác giả từng tài nguyên, và việc admin so sánh main với sơ đồ và changelog (chỉ đọc công khai)" } },
       { name: "next/og + sharp", pkg: "sharp", role: { en: "Renders the X card PNG", vi: "Vẽ ảnh card PNG cho X" } },
       { name: "Ko-fi webhook", role: { en: "Donations and the supporters list", vi: "Ủng hộ và danh sách người ủng hộ" } },
       { name: "Polar.sh", pkg: "@polar-sh/sdk", role: { en: "Pro membership: checkout, billing portal and the customer.state_changed webhook", vi: "Gói Pro: thanh toán, cổng quản lý và webhook customer.state_changed" } },
@@ -149,8 +209,18 @@ export const STACK: StackGroup[] = [
   {
     title: { en: "Hosting", vi: "Hạ tầng" },
     items: [
-      { name: "Vercel (sin1)", role: { en: "Production on push to main, previews per branch", vi: "Production khi push lên main, preview cho từng nhánh" } },
+      { name: "Vercel (sin1)", role: { en: "Production on push to main, previews per branch; the build runs the stack check first", vi: "Production khi push lên main, preview cho từng nhánh; build chạy kiểm tra stack trước" } },
       { name: "pnpm", role: { en: "Package manager", vi: "Trình quản lý package" } },
+    ],
+  },
+  {
+    title: { en: "Tooling and guardrails", vi: "Công cụ và rào chắn" },
+    items: [
+      { name: "ESLint", pkg: "eslint", also: ["eslint-config-next"], role: { en: "Lint with the Next.js config", vi: "Lint với cấu hình của Next.js" } },
+      { name: "tsx", pkg: "tsx", role: { en: "Runs the scripts (crawl, rescore, dry runs)", vi: "Chạy các script (crawl, rescore, chạy thử)" } },
+      { name: "@vercel/config", pkg: "@vercel/config", role: { en: "Typed vercel.ts: regions and crons", vi: "vercel.ts có kiểu: vùng và cron" } },
+      { name: "Stack lock", role: { en: "stack.lock.json and scripts/check-stack.mjs: the build fails when the core stack drifts (docs/decisions)", vi: "stack.lock.json và scripts/check-stack.mjs: build lỗi khi core stack bị lệch (docs/decisions)" } },
+      { name: "Archify + Claude Code", role: { en: "Architecture snapshots (/refresh-architecture, docs/architecture-snapshots.md)", vi: "Các bản chụp kiến trúc (/refresh-architecture, docs/architecture-snapshots.md)" } },
     ],
   },
 ];
@@ -218,11 +288,38 @@ export const PHASES: Phase[] = [
   },
   {
     title: { en: "Operations", vi: "Vận hành" },
-    when: "2026-10-16",
-    status: "doing",
+    when: "2026-10-16 → 2026-10-19",
+    status: "done",
     items: [
       { en: "Engine at 8:00 and X post at 8:30 Vietnam time (PR #9)", vi: "Engine lúc 8:00 và đăng X lúc 8:30 giờ VN (PR #9)" },
-      { en: "Product Management in admin: architecture, stack, roadmap, changelog, features, picks history", vi: "Quản lý sản phẩm trong admin: kiến trúc, stack, lộ trình, changelog, tính năng, lịch sử chọn lọc" },
+      { en: "Product Management in admin: architecture, stack, roadmap, changelog, features, picks history (PR #10)", vi: "Quản lý sản phẩm trong admin: kiến trúc, stack, lộ trình, changelog, tính năng, lịch sử chọn lọc (PR #10)" },
+      { en: "The engine survives repos renamed in case (PR #11)", vi: "Engine không còn lỗi khi repo đổi chữ hoa/thường (PR #11)" },
+    ],
+  },
+  {
+    title: { en: "Pro and tiers", vi: "Gói Pro và các bậc" },
+    when: "2026-10-19",
+    status: "done",
+    items: [
+      { en: "Pro membership through Polar, with revenue, users and payments in admin (PR #13 to #16)", vi: "Gói Pro qua Polar, kèm doanh thu, người dùng và thanh toán trong admin (PR #13 đến #16)" },
+      { en: "Free and Pro: daily install and MCP limits, the whole-kit prompt for Pro, launch price from Polar (PR #17, #18)", vi: "Free và Pro: giới hạn cài đặt và MCP theo ngày, prompt cài cả kit cho Pro, giá ra mắt lấy từ Polar (PR #17, #18)" },
+    ],
+  },
+  {
+    title: { en: "X distribution v2", vi: "Phân phối X v2" },
+    when: "2026-10-22 → 2026-10-23",
+    status: "doing",
+    items: [
+      { en: "The first digests reached 27 to 72 views, so: one resource per post, authors tagged, applied stories, a link in the reply, numbers read back, a review every three days (PR #20 to #22)", vi: "Các bài tổng hợp đầu tiên chỉ đạt 27 đến 72 lượt xem, nên: mỗi bài một tài nguyên, tag tác giả, bài applied, link ở reply, đọc lại số liệu, đánh giá mỗi ba ngày (PR #20 đến #22)" },
+      { en: "Goal to check after a week: median views per post above 300 and authors reposting", vi: "Mục tiêu kiểm tra sau một tuần: trung vị lượt xem mỗi bài trên 300 và tác giả repost" },
+    ],
+  },
+  {
+    title: { en: "Guardrails", vi: "Rào chắn" },
+    when: "2026-10-23",
+    status: "doing",
+    items: [
+      { en: "Architecture snapshots with history and an out-of-date notice; a locked core stack (PR #23); the GitHub workflows that check the changelog on every pull request and refresh the architecture from the admin (next)", vi: "Bản chụp kiến trúc có lịch sử và thông báo khi đã cũ; khóa core stack (PR #23); các workflow GitHub kiểm tra changelog ở mỗi pull request và cập nhật kiến trúc từ admin (tiếp theo)" },
     ],
   },
   {
@@ -230,9 +327,11 @@ export const PHASES: Phase[] = [
     when: "",
     status: "next",
     items: [
-      { en: "30-second vertical short (Remotion, 3 hooks × EN/VI): ready on branch feat/airsc-short-video", vi: "Video dọc 30 giây (Remotion, 3 hook × EN/VI): đã có trên nhánh feat/airsc-short-video" },
+      { en: "Grow reach on X first (it is the distribution channel); only then add affiliate links for tools the library needs", vi: "Làm X có tiếp cận trước (đó là kênh phân phối); sau đó mới thêm link affiliate cho các công cụ mà thư viện cần" },
+      { en: "A custom domain and web analytics, so visits from X can be measured", vi: "Tên miền riêng và web analytics, để đo được lượt truy cập đến từ X" },
+      { en: "Bring README up to date: it still describes credits and Full-time Access; the tiers are now Free and Pro", vi: "Cập nhật README: vẫn còn mô tả credit và Full-time Access; hiện là Free và Pro" },
       { en: "Listing on the xAI marketplace (Grok Bot, Cursor) from docs/marketplaces/xai-grok.md", vi: "Lên marketplace của xAI (Grok Bot, Cursor) theo docs/marketplaces/xai-grok.md" },
-      { en: "Bring README up to date: no Polar checkout or credits, engine hour is a setting", vi: "Cập nhật README: không còn Polar checkout hay credit, giờ chạy engine là một thiết lập" },
+      { en: "30-second vertical short (Remotion, 3 hooks × EN/VI): ready on branch feat/airsc-short-video", vi: "Video dọc 30 giây (Remotion, 3 hook × EN/VI): đã có trên nhánh feat/airsc-short-video" },
     ],
   },
   {
@@ -240,6 +339,7 @@ export const PHASES: Phase[] = [
     when: "",
     status: "idea",
     items: [
+      { en: "Tutorials and applied posts as a section of the site (/learn), in English and Vietnamese", vi: "Hướng dẫn và bài applied thành một mục của site (/learn), song ngữ" },
       { en: "Schedule or remove /api/cron/crawl (exists, not in vercel.ts)", vi: "Lên lịch hoặc gỡ /api/cron/crawl (có route, chưa có trong vercel.ts)" },
     ],
   },
@@ -259,17 +359,114 @@ export const REQUESTS: Request[] = [
   { when: "2026-10-15", ref: "#7 #8", text: { en: "Submit to the xAI marketplace; fix multi-word search and MCP CORS", vi: "Nộp lên marketplace xAI; sửa tìm kiếm nhiều từ và CORS của MCP" } },
   { when: "2026-10-16", ref: "#9", text: { en: "Run the engine and post to X at 8:30 in the morning (Vietnam)", vi: "Chạy engine và đăng X lúc 8:30 sáng (giờ VN)" } },
   { when: "2026-10-16", text: { en: "Add Product Management to admin", vi: "Thêm phần Quản lý sản phẩm vào admin" } },
+  { when: "2026-10-19", ref: "#13 #16", text: { en: "Sell a Pro membership through Polar; see users, payments and revenue in admin", vi: "Bán gói Pro qua Polar; xem người dùng, thanh toán và doanh thu trong admin" } },
+  { when: "2026-10-19", ref: "#17 #18", text: { en: "A pricing page with Free and Pro, daily limits for Free and a launch price", vi: "Trang bảng giá với Free và Pro, giới hạn theo ngày cho Free và giá ra mắt" } },
+  { when: "2026-10-22", ref: "#20", text: { en: "The daily posts reach almost nobody: one resource per post, tag the authors, show how a resource is used in the real project, measure it and review every three days", vi: "Các bài hằng ngày gần như không ai thấy: mỗi bài một tài nguyên, tag tác giả, kể cách dùng tài nguyên trong dự án thật, đo kết quả và đánh giá mỗi ba ngày" } },
+  { when: "2026-10-22", ref: "#21 #22", text: { en: "Split the X admin into sub-pages, keep every open post in the queue, schedule by hour and minute, list all posts with their numbers", vi: "Tách admin X thành các trang con, giữ mọi bài chưa xong trong hàng đợi, hẹn giờ theo giờ và phút, liệt kê mọi bài kèm số liệu" } },
+  { when: "2026-10-23", ref: "#23", text: { en: "Keep the architecture current with a history, stop the core stack changing by accident, and make sure the changelog and roadmap are updated with every change", vi: "Giữ kiến trúc luôn mới và có lịch sử, ngăn core stack bị đổi ngoài ý muốn, và bảo đảm changelog, lộ trình luôn được cập nhật theo mỗi thay đổi" } },
 ];
 
 // ---------------------------------------------------------------- changelog
 
-export type Change = { when: string; pr?: number; open?: boolean; title: L; items: L[] };
+/** `pr` is the pull request; `also` lists others the same entry covers, so the admin does not call them missing */
+export type Change = { when: string; pr?: number; also?: number[]; open?: boolean; title: L; items: L[] };
 
 export const CHANGELOG: Change[] = [
   {
+    when: "2026-10-23",
+    pr: 23,
+    open: true,
+    title: { en: "Guardrails: architecture snapshots, locked core stack, changelog check", vi: "Rào chắn: bản chụp kiến trúc, khóa core stack, kiểm tra changelog" },
+    items: [
+      { en: "Architecture diagrams are dated snapshots with a history; the page says when main has moved past them and the nav shows a badge; /refresh-architecture in Claude Code adds a new snapshot (the Update architecture button starts the same recipe on GitHub once the workflow is added)", vi: "Sơ đồ kiến trúc là các bản chụp theo ngày, có lịch sử; trang báo khi main đã đi xa hơn sơ đồ và menu hiện huy hiệu; /refresh-architecture trong Claude Code thêm bản chụp mới (nút Cập nhật kiến trúc chạy cùng quy trình đó trên GitHub khi workflow được thêm vào)" },
+      { en: "stack.lock.json locks the core packages by major version and scripts/check-stack.mjs fails the build when package.json drifts; the Tech stack page shows the lock and any package nobody described", vi: "stack.lock.json khóa các package core theo major và scripts/check-stack.mjs làm build lỗi khi package.json bị lệch; trang Tech stack hiện file khóa và mọi package chưa được mô tả" },
+      { en: "Changelog: the page lists merged pull requests that have no entry and the nav shows a badge; PRs #10 to #22 backfilled; a pull request template with the checklist", vi: "Changelog: trang liệt kê các pull request đã merge mà chưa có mục và menu hiện huy hiệu; đã bổ sung PR #10 đến #22; có mẫu pull request kèm checklist" },
+      { en: "Rules in AGENTS.md; decisions in docs/decisions", vi: "Quy tắc trong AGENTS.md; quyết định trong docs/decisions" },
+    ],
+  },
+  {
+    when: "2026-10-23",
+    pr: 22,
+    title: { en: "X admin: Queue, All posts, post detail, hour and minute", vi: "Admin X: Hàng đợi, Tất cả bài đăng, chi tiết bài, giờ và phút" },
+    items: [
+      { en: "The queue keeps every open post, flags overdue ones and moves a leftover post to today when given a new time", vi: "Hàng đợi giữ mọi bài chưa xong, đánh dấu bài quá giờ và chuyển bài tồn sang hôm nay khi đặt giờ mới" },
+      { en: "All posts with numbers and a detail page per post; queue cards in two balanced columns; hour and minute in blocks of five, sent by a cron every five minutes", vi: "Tất cả bài đăng kèm số liệu và trang chi tiết từng bài; thẻ hàng đợi hai cột cân đối; giờ và phút theo bước năm phút, cron năm phút một lần để đăng" },
+    ],
+  },
+  {
+    when: "2026-10-22",
+    pr: 21,
+    title: { en: "Admin: X posts split into sub-pages", vi: "Admin: bài đăng X tách thành các trang con" },
+    items: [{ en: "Queue, New applied post, Performance, Three-day reviews and Settings, each a sub-item in the nav", vi: "Hàng đợi, Viết bài applied, Hiệu quả, Đánh giá ba ngày và Thiết lập, mỗi mục là một sub-item trong menu" }],
+  },
+  {
+    when: "2026-10-22",
+    pr: 20,
+    title: { en: "X posts v2: spotlights, applied stories, metrics, three-day review", vi: "Bài X v2: spotlight, bài applied, số liệu, đánh giá ba ngày" },
+    items: [
+      { en: "One resource per post with its author tagged, a scan line from the scanner and the link in the first reply; applied posts written from your notes and an image", vi: "Mỗi bài một tài nguyên, tag tác giả, dòng kết quả quét lấy từ scanner và link ở reply đầu tiên; bài applied viết từ ghi chú và ảnh của bạn" },
+      { en: "A tag goes out only after approval (X forbids automated mentions); views, likes and clicks are read back from X; every three days Sonnet reviews them and rewrites the writing guidance", vi: "Tag chỉ được đăng sau khi duyệt (X cấm mention tự động); số liệu xem, like, bấm được đọc lại từ X; mỗi ba ngày Sonnet đánh giá và viết lại hướng dẫn viết" },
+      { en: "Writing rules in docs/x-posts.md and src/lib/social/rules.ts", vi: "Quy tắc viết ở docs/x-posts.md và src/lib/social/rules.ts" },
+    ],
+  },
+  {
+    when: "2026-10-19",
+    pr: 18,
+    also: [17],
+    title: { en: "Free and Pro tiers, pricing page", vi: "Gói Free và Pro, trang bảng giá" },
+    items: [
+      { en: "Free: 5 install unlocks a day and 30 Airsc MCP calls a day (10 without a key); Pro: unlimited and the whole-kit prompt; limits in src/lib/quota.ts, counted per Vietnam day, failing open", vi: "Free: 5 lượt mở cài đặt mỗi ngày và 30 lần gọi MCP mỗi ngày (10 nếu không có khóa); Pro: không giới hạn và prompt cài cả kit; giới hạn ở src/lib/quota.ts, tính theo ngày Việt Nam, lỗi thì mở" },
+      { en: "/pricing with Free and Pro ($5, launch price and seats read from Polar); /support redirects to it", vi: "/pricing với Free và Pro ($5, giá ra mắt và số suất đọc từ Polar); /support chuyển về đó" },
+    ],
+  },
+  {
+    when: "2026-10-19",
+    pr: 16,
+    title: { en: "Admin: users, payments and revenue", vi: "Admin: người dùng, thanh toán và doanh thu" },
+    items: [
+      { en: "Business section: Revenue, Users (give or remove Pro by hand) and Payments (sync from Polar)", vi: "Mục Kinh doanh: Doanh thu, Người dùng (cấp hoặc gỡ Pro thủ công) và Thanh toán (đồng bộ từ Polar)" },
+      { en: "The Polar webhook records orders and refunds in public.orders", vi: "Webhook Polar ghi đơn hàng và hoàn tiền vào public.orders" },
+    ],
+  },
+  {
+    when: "2026-10-19",
+    pr: 15,
+    also: [14],
+    title: { en: "Polar: trimmed env values, set_pro server-side only", vi: "Polar: bỏ khoảng trắng của biến môi trường, set_pro chỉ ở server" },
+    items: [
+      { en: "Pasted Polar values are trimmed; a stray space no longer causes 401", vi: "Giá trị Polar dán vào được bỏ khoảng trắng; không còn lỗi 401 vì thừa dấu cách" },
+      { en: "set_pro cannot be called by a signed-in user (the PUBLIC grant is revoked too)", vi: "Người dùng đã đăng nhập không gọi được set_pro (cũng đã thu hồi quyền PUBLIC)" },
+    ],
+  },
+  {
+    when: "2026-10-19",
+    pr: 13,
+    title: { en: "Pro membership through Polar", vi: "Gói Pro qua Polar" },
+    items: [
+      { en: "Checkout and billing portal as server actions; the Polar webhook re-reads the customer state and sets Pro through the set_pro RPC", vi: "Thanh toán và cổng quản lý là server action; webhook Polar đọc lại trạng thái khách hàng và đặt Pro qua RPC set_pro" },
+      { en: "Pro section on the account page", vi: "Mục Pro trong trang tài khoản" },
+    ],
+  },
+  {
+    when: "2026-10-19",
+    pr: 11,
+    title: { en: "Engine: repos renamed in case no longer fail the run", vi: "Engine: repo đổi chữ hoa/thường không còn làm hỏng lần chạy" },
+    items: [
+      { en: "Unique index on lower(full_name); ingest takes the new spelling and keeps the slug", vi: "Index duy nhất trên lower(full_name); ingest nhận cách viết mới và giữ nguyên slug" },
+      { en: "If a batch fails, rows go in one by one and the bad ones are logged", vi: "Nếu cả lô lỗi, từng dòng được nhập riêng và dòng lỗi được ghi log" },
+    ],
+  },
+  {
+    when: "2026-10-16",
+    pr: 10,
+    title: { en: "Admin: Product Management", vi: "Admin: Quản lý sản phẩm" },
+    items: [
+      { en: "Architecture (Archify diagrams), Tech stack, Roadmap, Changelog, Features and Today's picks history", vi: "Kiến trúc (sơ đồ Archify), Tech stack, Lộ trình, Changelog, Tính năng và Lịch sử chọn lọc hôm nay" },
+    ],
+  },
+  {
     when: "2026-10-16",
     pr: 9,
-    open: true,
     title: { en: "X post at :30", vi: "Đăng X vào phút :30" },
     items: [{ en: "Social cron at :30 so the post can go out at 8:30, after an 8:00 engine run", vi: "Cron đăng bài chạy phút :30 để đăng lúc 8:30, sau lần chạy engine lúc 8:00" }],
   },
@@ -365,13 +562,13 @@ export const FEATURES: FeatureGroup[] = [
       { name: { en: "Guides", vi: "Hướng dẫn" }, desc: { en: "Best-of pages per category and a weekly digest, written by the Editor", vi: "Trang tổng hợp tốt nhất theo danh mục và bản tin tuần, do Editor viết" }, status: "live", code: "/guides" },
       { name: { en: "English and Vietnamese", vi: "Tiếng Anh và tiếng Việt" }, desc: { en: "EN at /, VI at /vi, every string in both", vi: "EN ở /, VI ở /vi, mọi chuỗi đều có hai thứ tiếng" }, status: "live", code: "src/proxy.ts · src/lib/i18n.ts" },
       { name: { en: "Accounts", vi: "Tài khoản" }, desc: { en: "Magic link, Google, GitHub; personal airsc_ key for MCP; open history", vi: "Magic link, Google, GitHub; khóa airsc_ riêng cho MCP; lịch sử mở" }, status: "live", code: "/login · /account" },
-      { name: { en: "Pricing", vi: "Bảng giá" }, desc: { en: "Free and Pro ($5 once, for life) via Polar; the old Support page redirects here, the Ko-fi webhook still records gifts", vi: "Miễn phí và Pro ($5 một lần, trọn đời) qua Polar; trang Ủng hộ cũ chuyển về đây, webhook Ko-fi vẫn ghi nhận quà tặng" }, status: "live", code: "/pricing · /api/webhooks/polar · /api/webhooks/kofi" },
+      { name: { en: "Pricing", vi: "Bảng giá" }, desc: { en: "Free (5 install unlocks and 30 MCP calls a day) and Pro ($5 once, for life, unlimited) via Polar; launch price and seats read from Polar; the old Support page redirects here", vi: "Miễn phí (5 lượt mở cài đặt và 30 lần gọi MCP mỗi ngày) và Pro ($5 một lần, trọn đời, không giới hạn) qua Polar; giá ra mắt và số suất đọc từ Polar; trang Ủng hộ cũ chuyển về đây" }, status: "live", code: "/pricing · /api/webhooks/polar · /api/webhooks/kofi" },
     ],
   },
   {
     title: { en: "For agents", vi: "Cho agent" },
     items: [
-      { name: { en: "Airsc MCP server", vi: "MCP server Airsc" }, desc: { en: "search_resources, get_resource, list_kits, get_kit, install_resource; no key needed, CORS on", vi: "search_resources, get_resource, list_kits, get_kit, install_resource; không cần khóa, bật CORS" }, status: "live", code: "/api/mcp · /mcp" },
+      { name: { en: "Airsc MCP server", vi: "MCP server Airsc" }, desc: { en: "search_resources, get_resource, list_kits, get_kit, install_resource; works without a key (10 calls a day per IP), 30 with a key, unlimited on Pro; CORS on", vi: "search_resources, get_resource, list_kits, get_kit, install_resource; dùng được không cần khóa (10 lần mỗi ngày theo IP), 30 lần nếu có khóa, Pro không giới hạn; bật CORS" }, status: "live", code: "/api/mcp · /mcp" },
       { name: { en: "xAI marketplace", vi: "Marketplace xAI" }, desc: { en: "Submission prepared for Grok Bot and Cursor", vi: "Đã chuẩn bị hồ sơ cho Grok Bot và Cursor" }, status: "partial", code: "docs/marketplaces/xai-grok.md" },
     ],
   },
@@ -388,7 +585,8 @@ export const FEATURES: FeatureGroup[] = [
   {
     title: { en: "Distribution", vi: "Phân phối" },
     items: [
-      { name: { en: "Daily X post", vi: "Bài X hằng ngày" }, desc: { en: "Sonnet copy, card in three styles, auto at the set hour, never posted twice", vi: "Sonnet viết bài, card ba style, tự đăng đúng giờ, không bao giờ đăng trùng" }, status: "live", code: "src/lib/social · /api/cron/social" },
+      { name: { en: "X posts", vi: "Bài đăng X" }, desc: { en: "Spotlights (one resource, author tagged after approval, link in the reply) and applied stories; scheduled by hour and minute; never posted twice; views and clicks read back every few hours", vi: "Spotlight (một tài nguyên, tag tác giả sau khi duyệt, link ở reply) và bài applied; hẹn theo giờ và phút; không bao giờ đăng trùng; số liệu xem và bấm được đọc lại vài giờ một lần" }, status: "live", code: "src/lib/social · /api/cron/social" },
+      { name: { en: "Three-day review", vi: "Đánh giá ba ngày" }, desc: { en: "Sonnet compares the last three days with the three before and rewrites the writing guidance", vi: "Sonnet so sánh ba ngày gần nhất với ba ngày trước và viết lại hướng dẫn viết" }, status: "live", code: "src/lib/social/review.ts · docs/x-posts.md" },
       { name: { en: "Short video", vi: "Video ngắn" }, desc: { en: "30 s vertical promo in Remotion, on a branch", vi: "Video dọc 30 giây bằng Remotion, đang ở nhánh riêng" }, status: "planned", code: "feat/airsc-short-video" },
     ],
   },
@@ -398,8 +596,17 @@ export const FEATURES: FeatureGroup[] = [
       { name: { en: "Overview", vi: "Tổng quan" }, desc: { en: "KPIs, views, GitHub opens, AI cost charts, top viewed", vi: "KPI, lượt xem, lượt mở GitHub, biểu đồ chi phí AI, xem nhiều nhất" }, status: "live", code: "/admin" },
       { name: { en: "Resources", vi: "Tài nguyên" }, desc: { en: "Filters by type, status, stage; publish, hide, redo", vi: "Lọc theo loại, trạng thái, bước; đăng, ẩn, làm lại" }, status: "live", code: "/admin/resources" },
       { name: { en: "Agents & costs", vi: "Agent & chi phí" }, desc: { en: "Runs and logs, run now, limits, models, budget, run hour", vi: "Các lần chạy và log, chạy ngay, giới hạn, model, ngân sách, giờ chạy" }, status: "live", code: "/admin/agents" },
-      { name: { en: "Social posts", vi: "Bài đăng mạng xã hội" }, desc: { en: "Today's draft and card, settings, connection test, history", vi: "Nháp và card hôm nay, thiết lập, kiểm tra kết nối, lịch sử" }, status: "live", code: "/admin/social" },
-      { name: { en: "Product Management", vi: "Quản lý sản phẩm" }, desc: { en: "This section", vi: "Phần này" }, status: "live", code: "/admin/pm" },
+      { name: { en: "Social posts", vi: "Bài đăng mạng xã hội" }, desc: { en: "Queue, all posts with numbers and a page each, new applied post, three-day reviews, settings, connection test", vi: "Hàng đợi, mọi bài kèm số liệu và trang riêng, viết bài applied, đánh giá ba ngày, thiết lập, kiểm tra kết nối" }, status: "live", code: "/admin/social" },
+      { name: { en: "Revenue, users, payments", vi: "Doanh thu, người dùng, thanh toán" }, desc: { en: "Net revenue, Pro conversion, give or remove Pro by hand, orders from Polar", vi: "Doanh thu ròng, tỷ lệ lên Pro, cấp hoặc gỡ Pro thủ công, đơn hàng từ Polar" }, status: "live", code: "/admin/billing · /admin/users · /admin/payments" },
+      { name: { en: "Product Management", vi: "Quản lý sản phẩm" }, desc: { en: "Architecture snapshots with history and an out-of-date notice, Tech stack with the locked core, roadmap, changelog with a missing-PR check, features, picks history", vi: "Bản chụp kiến trúc có lịch sử và thông báo khi đã cũ, Tech stack kèm phần core đã khóa, lộ trình, changelog có kiểm tra PR còn thiếu, tính năng, lịch sử chọn lọc" }, status: "live", code: "/admin/pm" },
+    ],
+  },
+  {
+    title: { en: "Guardrails", vi: "Rào chắn" },
+    items: [
+      { name: { en: "Architecture snapshots", vi: "Bản chụp kiến trúc" }, desc: { en: "Archify diagrams kept per date; the admin compares main with the commit they were traced from; /refresh-architecture adds a snapshot, and the button will start it on GitHub", vi: "Sơ đồ Archify lưu theo ngày; admin so main với commit đã vẽ; /refresh-architecture thêm bản chụp mới, và nút sẽ chạy việc đó trên GitHub" }, status: "partial", code: "src/lib/pm · .claude/commands/refresh-architecture.md" },
+      { name: { en: "Stack lock", vi: "Khóa stack" }, desc: { en: "The build fails when a core package is added, removed or moved to another major", vi: "Build lỗi khi thêm, bỏ hoặc nâng major một package core" }, status: "live", code: "stack.lock.json · scripts/check-stack.mjs" },
+      { name: { en: "Changelog check", vi: "Kiểm tra changelog" }, desc: { en: "The admin lists merged pull requests with no entry; a GitHub check that fails such a pull request comes next", vi: "Admin liệt kê các pull request đã merge mà chưa có mục; bước kiểm tra trên GitHub làm hỏng pull request như vậy sẽ có ở bước tiếp theo" }, status: "partial", code: "/admin/pm/changelog · .github/workflows/pm-docs.yml (next)" },
     ],
   },
 ];
