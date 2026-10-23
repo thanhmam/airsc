@@ -142,7 +142,9 @@ export async function setSocialTime(id: number, hourVn: number): Promise<SocialR
   await guard();
   const post = (await db.socialPosts(200)).find((p) => p.id === id);
   if (!post || !Number.isInteger(hourVn) || hourVn < 0 || hourVn > 23) return { ok: false, error: "bad post or hour" };
-  const saved = await db.updateSocial(id, { scheduled_at: slotTime(post.day, hourVn) });
+  // a post left over from an earlier day is rescheduled on today's date
+  const day = post.day < vnDay() ? vnDay() : post.day;
+  const saved = await db.updateSocial(id, { scheduled_at: slotTime(day, hourVn) });
   refresh();
   return saved ? { ok: true } : { ok: false, error: "this post has already gone out" };
 }

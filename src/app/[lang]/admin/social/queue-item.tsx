@@ -20,12 +20,14 @@ export const TONE: Record<string, string> = {
 /** One post in the queue: its editor on the left, its card (spotlight) or screenshots (applied) on the right */
 export function QueueItem({
   post,
+  overdue,
   lang,
   configured,
   defaults,
   t,
 }: {
   post: SocialPost;
+  overdue: boolean;
   lang: Locale;
   configured: boolean;
   defaults: { style: CardStyle; theme: CardTheme };
@@ -42,6 +44,7 @@ export function QueueItem({
           </span>
         )}
         <span className={cn("rounded-full px-2 py-0.5 text-xs font-medium", TONE[post.status])}>{t.status[post.status]}</span>
+        {overdue && <span className="rounded-full bg-caution-soft px-2 py-0.5 text-xs font-medium text-caution">{t.overdue}</span>}
         {post.post_url && (
           <a href={post.post_url} target="_blank" rel="noreferrer" className="text-accent hover:underline">
             {post.post_url}

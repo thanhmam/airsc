@@ -29,6 +29,9 @@ export const TYPE_LABEL: Record<Resource["type"], string> = { skill: "skill", mc
 /** Today's date in Vietnam (the day daily_picks and social posts are keyed by) */
 export const vnDay = (d = new Date()) => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Ho_Chi_Minh" }).format(d);
 
+/** The Vietnam day `days` days before today */
+export const daysAgo = (days: number) => vnDay(new Date(Date.now() - days * 86_400_000));
+
 export const dayLabel = (day: string) =>
   new Date(`${day}T12:00:00+07:00`).toLocaleDateString("en-US", { month: "short", day: "numeric", timeZone: "Asia/Ho_Chi_Minh" });
 

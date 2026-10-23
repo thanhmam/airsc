@@ -2,7 +2,8 @@ import Link from "next/link";
 import { db } from "@/lib/engine/db";
 import { socialSettings } from "@/lib/engine/settings";
 import { href, type Locale } from "@/lib/i18n";
-import { vnDay } from "@/lib/social/compose";
+import { daysAgo, vnDay } from "@/lib/social/compose";
+import { isOpen, isOverdue } from "@/lib/social/publish";
 import { xConfigured } from "@/lib/social/x";
 import { draftToday } from "../actions";
 import { ActionButton } from "./action-button";
@@ -18,7 +19,7 @@ export default async function SocialQueue({ params }: PageProps<"/[lang]/admin/s
   const s = socialSettings(settings);
   const configured = xConfigured();
   const queue = posts
-    .filter((p) => p.day >= today && p.channel === "x" && (p.status !== "posted" || p.day === today))
+    .filter((p) => p.channel === "x" && p.kind !== "picks" && ((isOpen(p) && p.day >= daysAgo(14)) || (p.status === "posted" && p.day === today)))
     .sort((a, b) => (a.scheduled_at ?? a.created_at).localeCompare(b.scheduled_at ?? b.created_at));
 
   return (
@@ -37,7 +38,7 @@ export default async function SocialQueue({ params }: PageProps<"/[lang]/admin/s
       </div>
       {!queue.length && <p className="text-sm text-muted">{t.queueEmpty}</p>}
       {queue.map((p) => (
-        <QueueItem key={p.id} post={p} lang={lang} configured={configured} defaults={{ style: s.x_card_style, theme: s.x_card_theme }} t={t} />
+        <QueueItem key={p.id} post={p} overdue={isOverdue(p)} lang={lang} configured={configured} defaults={{ style: s.x_card_style, theme: s.x_card_theme }} t={t} />
       ))}
     </div>
   );

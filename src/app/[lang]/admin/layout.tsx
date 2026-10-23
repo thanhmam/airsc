@@ -5,7 +5,8 @@ import { requireAdmin } from "@/lib/admin";
 import { aiCredits } from "@/lib/engine/credits";
 import { db } from "@/lib/engine/db";
 import { getDict, hasLocale, href } from "@/lib/i18n";
-import { vnDay } from "@/lib/social/compose";
+import { daysAgo } from "@/lib/social/compose";
+import { isOverdue } from "@/lib/social/publish";
 import { RESOURCE_TYPES } from "@/lib/types";
 import { adminCopy } from "./copy";
 import { AdminNav, type NavItem } from "./nav";
@@ -22,8 +23,8 @@ export default async function AdminLayout({ children, params }: LayoutProps<"/[l
   const t = getDict(lang);
   const [counts, credits, posts] = await Promise.all([db.navCounts(), aiCredits(), db.socialPosts(60).catch(() => [])]);
   const social = href(lang, "/admin/social");
-  // posts that still need a look: drafts and failures from today on
-  const waiting = posts.filter((p) => p.day >= vnDay() && (p.status === "draft" || p.status === "failed")).length;
+  // posts that still need a look: drafts, failures and overdue posts of the last two weeks
+  const waiting = posts.filter((p) => p.kind !== "picks" && p.day >= daysAgo(14) && (p.status === "draft" || p.status === "failed" || isOverdue(p))).length;
   const res = href(lang, "/admin/resources");
 
   const items: NavItem[] = [

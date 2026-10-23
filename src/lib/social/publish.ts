@@ -65,6 +65,16 @@ export async function publishPost(
   return { ok: true, url: result.url, replyError };
 }
 
+/** A post that is not finished: it stays in the queue, whatever its day, until someone posts or skips it */
+export const isOpen = (p: Pick<SocialPost, "status">) => p.status === "draft" || p.status === "approved" || p.status === "failed" || p.status === "posting";
+
+/** The cron sends a post at most this long after its hour; later than that it waits for an admin */
+const LATE_MS = 3 * 3_600_000;
+
+/** An open post whose hour passed more than three hours ago: the cron will not send it any more */
+export const isOverdue = (p: Pick<SocialPost, "status" | "scheduled_at">, now = Date.now()) =>
+  isOpen(p) && !!p.scheduled_at && new Date(p.scheduled_at).getTime() < now - LATE_MS;
+
 /**
  * What the hourly cron may post now: approved posts whose time has come, and (when automatic posting is
  * on) spotlight drafts whose time has come, without their @mentions. Posts more than three hours late
@@ -75,7 +85,7 @@ export function duePosts(posts: SocialPost[], auto: boolean, now = Date.now()) {
     .filter((p) => {
       if (p.channel !== "x" || !p.scheduled_at) return false;
       const t = new Date(p.scheduled_at).getTime();
-      if (t > now + 2 * 60_000 || t < now - 3 * 3_600_000) return false;
+      if (t > now + 2 * 60_000 || t < now - LATE_MS) return false;
       return p.status === "approved" || (auto && p.status === "draft" && p.kind === "spotlight");
     })
     .sort((a, b) => a.scheduled_at!.localeCompare(b.scheduled_at!));
