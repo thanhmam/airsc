@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "node scripts/check-stack.mjs && next build",
+    "check:stack": "node scripts/check-stack.mjs",
     "start": "next start",
     "lint": "eslint",
     "crawl": "node --env-file=.env.local --import tsx scripts/crawl.ts",

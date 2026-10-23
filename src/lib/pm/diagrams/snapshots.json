@@ -1,0 +1,132 @@
+[
+  {
+    "id": "2026-10-23-b79089e",
+    "date": "2026-10-23",
+    "revision": "b79089e",
+    "note": {
+      "en": "Adds the Polar Pro plan, the Free and Pro daily quota and the X posting loop (spotlights, approval, the five-minute cron, numbers read back, the three-day review). Drawn from main at the merge of PR #22; the three plan and quota diagrams are from 21 Oct (commit 7a48da3), still accurate.",
+      "vi": "Bổ sung gói Pro qua Polar, hạn mức Free và Pro theo ngày và vòng đăng bài X (spotlight, duyệt, cron năm phút, đọc lại số liệu, đánh giá ba ngày). Vẽ từ main tại lần merge PR #22; ba sơ đồ về gói và hạn mức vẽ ngày 21/10 (commit 7a48da3), vẫn còn đúng."
+    },
+    "diagrams": [
+      {
+        "name": "architecture",
+        "kind": "architecture",
+        "title": {
+          "en": "System architecture",
+          "vi": "Kiến trúc hệ thống"
+        },
+        "desc": {
+          "en": "Request paths, the MCP server, the Polar webhook, the daily quota, the crons, the Content Engine, the X posting loop and the services they call.",
+          "vi": "Luồng request, MCP server, webhook Polar, hạn mức theo ngày, các cron, Content Engine, vòng đăng bài X và các dịch vụ chúng gọi."
+        }
+      },
+      {
+        "name": "content-engine",
+        "kind": "workflow",
+        "title": {
+          "en": "Content Engine run",
+          "vi": "Một lần chạy Content Engine"
+        },
+        "desc": {
+          "en": "One daily run: discover, curate, build content, then choose the picks and draft the X spotlights.",
+          "vi": "Một lần chạy hằng ngày: tìm, chọn lọc, dựng nội dung, rồi chọn Chọn lọc hôm nay và viết nháp các spotlight cho X."
+        }
+      },
+      {
+        "name": "x-posts",
+        "kind": "sequence",
+        "title": {
+          "en": "X posts: draft, approve, post, measure",
+          "vi": "Bài X: viết nháp, duyệt, đăng, đo"
+        },
+        "desc": {
+          "en": "How a spotlight is drafted at :30, approved, sent by the five-minute cron with its link reply, and how the numbers and the three-day review come back.",
+          "vi": "Cách một spotlight được viết nháp lúc :30, được duyệt, được cron năm phút đăng kèm reply chứa link, và cách số liệu cùng đánh giá ba ngày quay lại."
+        }
+      },
+      {
+        "name": "quota-gating",
+        "kind": "workflow",
+        "title": {
+          "en": "Free and Pro: daily quota gate",
+          "vi": "Free và Pro: cổng hạn mức theo ngày"
+        },
+        "desc": {
+          "en": "How the site and the MCP server decide whether an install or a call is allowed today, and what happens when the database is down.",
+          "vi": "Cách trang web và MCP server quyết định một lượt cài hay một lần gọi có được phép hôm nay không, và điều gì xảy ra khi database lỗi."
+        }
+      },
+      {
+        "name": "pro-plan",
+        "kind": "lifecycle",
+        "title": {
+          "en": "Free to Pro: plan lifecycle",
+          "vi": "Free lên Pro: vòng đời gói"
+        },
+        "desc": {
+          "en": "What is stored for a plan and what moves a user between Free and Pro.",
+          "vi": "Gói được lưu thế nào và điều gì chuyển người dùng giữa Free và Pro."
+        }
+      },
+      {
+        "name": "pro-upgrade",
+        "kind": "sequence",
+        "title": {
+          "en": "Going Pro through Polar",
+          "vi": "Lên Pro qua Polar"
+        },
+        "desc": {
+          "en": "Checkout, the signed webhook and the set_pro call, with the safeguards at each step.",
+          "vi": "Thanh toán, webhook có chữ ký và lệnh set_pro, cùng các biện pháp bảo vệ ở mỗi bước."
+        }
+      }
+    ]
+  },
+  {
+    "id": "2026-10-16-aa0701e",
+    "date": "2026-10-16",
+    "revision": "aa0701e",
+    "note": {
+      "en": "First set: system architecture, one Content Engine run, and the daily X post of Today's picks.",
+      "vi": "Bộ đầu tiên: kiến trúc hệ thống, một lần chạy Content Engine và bài X hằng ngày về Chọn lọc hôm nay."
+    },
+    "diagrams": [
+      {
+        "name": "architecture",
+        "kind": "architecture",
+        "title": {
+          "en": "System architecture",
+          "vi": "Kiến trúc hệ thống"
+        },
+        "desc": {
+          "en": "Request paths, the MCP server, webhooks, crons, the Content Engine and the services they call.",
+          "vi": "Luồng request, MCP server, webhook, cron, Content Engine và các dịch vụ chúng gọi."
+        }
+      },
+      {
+        "name": "content-engine",
+        "kind": "workflow",
+        "title": {
+          "en": "Content Engine run",
+          "vi": "Một lần chạy Content Engine"
+        },
+        "desc": {
+          "en": "One daily run: discover, curate, build content, then choose the picks and draft the X post.",
+          "vi": "Một lần chạy hằng ngày: tìm, chọn lọc, dựng nội dung, rồi chọn Chọn lọc hôm nay và viết nháp bài X."
+        }
+      },
+      {
+        "name": "x-daily-post",
+        "kind": "sequence",
+        "title": {
+          "en": "Today's picks to X",
+          "vi": "Chọn lọc hôm nay lên X"
+        },
+        "desc": {
+          "en": "How the picks become a draft, and how the hourly cron claims it, renders the card and posts it.",
+          "vi": "Cách các tài nguyên được chọn thành bản nháp, và cron hằng giờ nhận, vẽ card rồi đăng."
+        }
+      }
+    ]
+  }
+]
