@@ -50,11 +50,10 @@ export default async function AdminLayout({ children, params }: LayoutProps<"/[l
       label: c.tabs.social,
       icon: "social",
       exact: true,
-      count: waiting,
-      tone: "warn",
       children: [
+        { href: `${social}/queue`, label: c.tabs.socialQueue, icon: "queue", count: waiting, tone: "warn" },
+        { href: `${social}/posts`, label: c.tabs.socialPosts, icon: "performance" },
         { href: `${social}/new`, label: c.tabs.socialNew, icon: "write" },
-        { href: `${social}/performance`, label: c.tabs.socialPerformance, icon: "performance" },
         { href: `${social}/reviews`, label: c.tabs.socialReviews, icon: "reviews" },
         { href: `${social}/settings`, label: c.tabs.socialSettings, icon: "settings" },
       ],

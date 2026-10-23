@@ -85,7 +85,7 @@ export async function rewriteSpotlight(post: SocialPost, slug?: string | null) {
  * An applied post: the admin's notes and screenshots about using `slug` in a project, written up by
  * Sonnet as a first-person post. It waits as a draft until the admin approves or posts it.
  */
-export async function makeApplied(i: { slug: string; notes: string; project?: string; images: string[]; day: string; hourVn: number }) {
+export async function makeApplied(i: { slug: string; notes: string; project?: string; images: string[]; day: string; hourVn: number; minute?: number }) {
   const [r] = await loadResources([i.slug]);
   if (!r) throw new Error(`"${i.slug}" is not a published resource`);
   const s = socialSettings(await db.settings());
@@ -106,7 +106,7 @@ export async function makeApplied(i: { slug: string; notes: string; project?: st
     image_alt: w.image_alt,
     images: i.images,
     note: [i.project ? `Project: ${i.project}` : "", i.notes].filter(Boolean).join("\n"),
-    scheduled_at: slotTime(i.day, i.hourVn),
+    scheduled_at: slotTime(i.day, i.hourVn, i.minute ?? 30),
   });
   return { post, cost: w.cost, model: w.model };
 }

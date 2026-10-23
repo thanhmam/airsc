@@ -34,7 +34,7 @@ export default async function SocialNew({ params }: PageProps<"/[lang]/admin/soc
           <li key={step}>{step}</li>
         ))}
       </ol>
-      <AppliedForm presets={presets} resources={resources} today={vnDay()} queueHref={href(lang, "/admin/social")} queueLabel={t.openQueue} c={t.applied} />
+      <AppliedForm presets={presets} resources={resources} today={vnDay()} queueHref={href(lang, "/admin/social/queue")} queueLabel={t.openQueue} c={t.applied} />
     </div>
   );
 }

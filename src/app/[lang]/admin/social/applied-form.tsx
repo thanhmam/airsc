@@ -22,6 +22,8 @@ export type AppliedCopy = {
   imagesHint: string;
   day: string;
   hour: string;
+  hourLabel: string;
+  minuteLabel: string;
   submit: string;
   working: string;
   done: string;
@@ -167,14 +169,22 @@ export function AppliedForm({
           <span className="text-muted">{c.day}</span>
           <input type="date" name="day" defaultValue={today} className={input} />
         </label>
-        <label className="flex flex-col gap-1 text-sm">
+        <div className="flex flex-col gap-1 text-sm">
           <span className="text-muted">{c.hour}</span>
-          <select name="hour" defaultValue={21} className={input}>
-            {Array.from({ length: 24 }, (_, h) => (
-              <option key={h} value={h}>{`${String(h).padStart(2, "0")}:30`}</option>
-            ))}
-          </select>
-        </label>
+          <div className="flex items-center gap-1.5">
+            <select name="hour" aria-label={c.hourLabel} defaultValue={21} className={input}>
+              {Array.from({ length: 24 }, (_, h) => (
+                <option key={h} value={h}>{String(h).padStart(2, "0")}</option>
+              ))}
+            </select>
+            <span aria-hidden>:</span>
+            <select name="minute" aria-label={c.minuteLabel} defaultValue={30} className={input}>
+              {Array.from({ length: 12 }, (_, i) => (
+                <option key={i} value={i * 5}>{String(i * 5).padStart(2, "0")}</option>
+              ))}
+            </select>
+          </div>
+        </div>
         <button
           disabled={pending || total > 1}
           className="inline-flex h-10 items-center gap-2 rounded-lg bg-accent px-4 text-sm font-medium text-accent-fg hover:opacity-90 disabled:opacity-50"
