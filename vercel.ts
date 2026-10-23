@@ -9,5 +9,7 @@ export const config: VercelConfig = {
   crons: [
     { path: "/api/cron/pipeline", schedule: "0 * * * *" },
     { path: "/api/cron/social", schedule: "30 * * * *" },
+    // sends the posts whose time (to the nearest five minutes, set in /admin/social/queue) has come
+    { path: "/api/cron/social?task=post", schedule: "*/5 * * * *" },
   ],
 };

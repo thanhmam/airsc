@@ -18,11 +18,12 @@ export type CardCopy = {
   save: string;
   working: string;
   saved: string;
+  alt: string;
 };
 
 const btn = "inline-flex h-9 items-center gap-1.5 rounded-lg border border-line px-3 text-sm font-medium transition hover:border-accent/60 disabled:cursor-not-allowed disabled:opacity-50";
 
-/** A spotlight's card: preview a style instantly, edit Sonnet's headline (Write again gives a new one) */
+/** A card's picture, full width of its column, with its description and (while the post is waiting) style, colours and headline */
 export function CardControls({ post, defaults, c }: { post: SocialPost; defaults: { style: CardStyle; theme: CardTheme }; c: CardCopy }) {
   const saved = { style: post.card_style ?? defaults.style, theme: defaults.theme, headline: post.headline ?? "" };
   const [style, setStyle] = useState<CardStyle>(saved.style);
@@ -77,27 +78,35 @@ export function CardControls({ post, defaults, c }: { post: SocialPost; defaults
           <div className="flex flex-wrap items-center gap-2 text-sm">
             <span className="text-muted">{c.style}</span>
             {toggle(CARD_STYLES, style, setStyle, c.styles)}
-            <span className="ml-2 text-muted">{c.theme}</span>
+            <span className="ml-1 text-muted">{c.theme}</span>
             {toggle(CARD_THEMES, theme, setTheme, c.themes)}
           </div>
-          <label className="flex flex-col gap-1 text-sm">
-            <span className="flex justify-between text-muted">
-              {c.headline}
-              <span className={cn("tabular-nums", headline.length > 48 && "text-caution")}>
-                {headline.length} · {c.headlineHint}
+          <div className="flex items-end gap-2">
+            <label className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
+              <span className="flex justify-between text-muted">
+                {c.headline}
+                <span className={cn("tabular-nums", headline.length > 48 && "text-caution")}>
+                  {headline.length} · {c.headlineHint}
+                </span>
               </span>
-            </span>
-            <input
-              value={headline}
-              onChange={(e) => setHeadline(e.target.value)}
-              maxLength={90}
-              className="h-10 rounded-lg border border-line bg-bg px-3 text-[15px] outline-none focus:border-accent"
-            />
-          </label>
-          <button className={cn(btn, "w-fit border-transparent bg-accent text-accent-fg hover:opacity-90")} disabled={pending || !dirty} onClick={save}>
-            {c.save}
-          </button>
+              <input
+                value={headline}
+                onChange={(e) => setHeadline(e.target.value)}
+                maxLength={90}
+                className="h-9 rounded-lg border border-line bg-bg px-3 text-sm outline-none focus:border-accent"
+              />
+            </label>
+            <button className={cn(btn, "border-transparent bg-accent text-accent-fg hover:opacity-90")} disabled={pending || !dirty} onClick={save}>
+              {c.save}
+            </button>
+          </div>
         </>
+      )}
+      {post.image_alt && (
+        <details open className="text-xs text-muted">
+          <summary className="cursor-pointer">{c.alt}</summary>
+          <p className="mt-1.5 leading-relaxed">{post.image_alt}</p>
+        </details>
       )}
       {msg && <p className={cn("text-sm", msg.ok ? "text-safe" : "text-danger")}>{msg.text}</p>}
     </div>

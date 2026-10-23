@@ -1,6 +1,6 @@
 const en = {
   title: "Airsc admin",
-  tabs: { overview: "Overview", resources: "Resources", agents: "Agents & costs", social: "Social posts", socialNew: "New applied post", socialPerformance: "Performance", socialReviews: "Three-day reviews", socialSettings: "Settings", allResources: "All resources", queued: "Waiting for agents", hidden: "Filtered out", site: "View site", billing: "Revenue", users: "Users", payments: "Payments" },
+  tabs: { overview: "Overview", resources: "Resources", agents: "Agents & costs", social: "Social posts", socialQueue: "Queue", socialPosts: "All posts", socialNew: "New applied post", socialReviews: "Three-day reviews", socialSettings: "Settings", allResources: "All resources", queued: "Waiting for agents", hidden: "Filtered out", site: "View site", billing: "Revenue", users: "Users", payments: "Payments" },
   reasons: {
     not_relevant: "Not an agent resource (app, library or framework)",
     low_quality: "Quality score under 40",
@@ -67,7 +67,7 @@ export type AdminCopy = typeof en;
 
 const vi: AdminCopy = {
   title: "Quản trị Airsc",
-  tabs: { overview: "Tổng quan", resources: "Tài nguyên", agents: "Agent & chi phí", social: "Bài đăng mạng xã hội", socialNew: "Viết bài applied", socialPerformance: "Hiệu quả", socialReviews: "Đánh giá 3 ngày", socialSettings: "Thiết lập", allResources: "Tất cả", queued: "Chờ agent xử lý", hidden: "Agent đã lọc bỏ", site: "Xem trang web", billing: "Doanh thu", users: "Người dùng", payments: "Thanh toán" },
+  tabs: { overview: "Tổng quan", resources: "Tài nguyên", agents: "Agent & chi phí", social: "Bài đăng mạng xã hội", socialQueue: "Hàng đợi", socialPosts: "Tất cả bài đăng", socialNew: "Viết bài applied", socialReviews: "Đánh giá 3 ngày", socialSettings: "Thiết lập", allResources: "Tất cả", queued: "Chờ agent xử lý", hidden: "Agent đã lọc bỏ", site: "Xem trang web", billing: "Doanh thu", users: "Người dùng", payments: "Thanh toán" },
   reasons: {
     not_relevant: "Không phải tài nguyên cho agent (app, thư viện, framework)",
     low_quality: "Điểm chất lượng dưới 40",

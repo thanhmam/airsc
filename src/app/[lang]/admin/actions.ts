@@ -137,12 +137,14 @@ export async function saveSocialPost(id: number, p: { text: string; reply_text: 
   return saved ? { ok: true } : { ok: false, error: "this post has already gone out" };
 }
 
-/** Moves a post to another hour of its day (Vietnam time, :30) */
-export async function setSocialTime(id: number, hourVn: number): Promise<SocialResult> {
+/** Moves a post to another time of its day (Vietnam time, minutes in blocks of five) */
+export async function setSocialTime(id: number, hourVn: number, minute: number): Promise<SocialResult> {
   await guard();
   const post = (await db.socialPosts(200)).find((p) => p.id === id);
-  if (!post || !Number.isInteger(hourVn) || hourVn < 0 || hourVn > 23) return { ok: false, error: "bad post or hour" };
-  const saved = await db.updateSocial(id, { scheduled_at: slotTime(post.day, hourVn) });
+  if (!post || !Number.isInteger(hourVn) || hourVn < 0 || hourVn > 23 || !Number.isInteger(minute) || minute < 0 || minute > 59) return { ok: false, error: "bad post or time" };
+  // a post left over from an earlier day is rescheduled on today's date
+  const day = post.day < vnDay() ? vnDay() : post.day;
+  const saved = await db.updateSocial(id, { scheduled_at: slotTime(day, hourVn, minute) });
   refresh();
   return saved ? { ok: true } : { ok: false, error: "this post has already gone out" };
 }
@@ -216,6 +218,7 @@ export async function createApplied(form: FormData): Promise<SocialResult> {
     if (!slug || notes.length < 20) return { ok: false, error: "pick a resource and write a few lines of notes" };
     const day = /^\d{4}-\d{2}-\d{2}$/.test(String(form.get("day"))) ? String(form.get("day")) : vnDay();
     const hourVn = clamp(form.get("hour"), 0, 23, 20);
+    const minute = clamp(form.get("minute"), 0, 59, 30);
     const images = form
       .getAll("image_url")
       .map(String)
@@ -227,7 +230,7 @@ export async function createApplied(form: FormData): Promise<SocialResult> {
       images.push((await put(`social/${day}/${crypto.randomUUID()}.${ext}`, f, { access: "public", contentType: f.type })).url);
     }
     if (images.length > 1) return { ok: false, error: "One image per post: design a before/after (see docs/x-posts.md)" };
-    await makeApplied({ slug, notes, project: String(form.get("project") ?? "").trim() || undefined, images, day, hourVn });
+    await makeApplied({ slug, notes, project: String(form.get("project") ?? "").trim() || undefined, images, day, hourVn, minute });
     refresh();
     return { ok: true };
   } catch (e) {

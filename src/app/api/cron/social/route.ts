@@ -10,7 +10,7 @@ import { runReview } from "@/lib/social/review";
 export const maxDuration = 300;
 
 /**
- * Hourly cron at :30 (vercel.ts). Once the day's engine run is done it drafts today's spotlights if the
+ * Cron at :30 every hour (vercel.ts), and `?task=post` every five minutes. Once the day's engine run is done it drafts today's spotlights if the
  * engine has not; posts at most one post whose time has come (approved ones as written, spotlight drafts
  * without @mentions when automatic posting is on); reads the numbers of recent posts; and every three
  * days writes the review that updates the writing guidance. Each part fails on its own.
@@ -23,8 +23,10 @@ export async function GET(req: Request) {
   const s = socialSettings(settings);
   const out: Record<string, unknown> = {};
   const day = vnDay();
+  // ?task=post runs every five minutes and only sends what is due, so a post goes out within five minutes of its time
+  const postOnly = new URL(req.url).searchParams.get("task") === "post";
 
-  if (s.x_enabled && vnHour() > settings.run_hour_vn) {
+  if (!postOnly && s.x_enabled && vnHour() > settings.run_hour_vn) {
     try {
       const d = await makeDrafts(day);
       out.drafts = d.posts.length ? d.posts.map((p) => p.highlight) : d.reason;
@@ -42,6 +44,8 @@ export async function GET(req: Request) {
       posts = await db.socialPosts(120);
     }
   }
+
+  if (postOnly) return Response.json(out);
 
   try {
     out.metrics = await refreshMetrics(staleMetrics(posts));
