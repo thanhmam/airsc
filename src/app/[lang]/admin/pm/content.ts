@@ -319,7 +319,7 @@ export const PHASES: Phase[] = [
     when: "2026-10-23",
     status: "doing",
     items: [
-      { en: "Architecture snapshots with history and an out-of-date notice; a locked core stack (PR #23); the GitHub workflows that check the changelog on every pull request and refresh the architecture from the admin (next)", vi: "Bản chụp kiến trúc có lịch sử và thông báo khi đã cũ; khóa core stack (PR #23); các workflow GitHub kiểm tra changelog ở mỗi pull request và cập nhật kiến trúc từ admin (tiếp theo)" },
+      { en: "Architecture snapshots with history and an out-of-date notice; a locked core stack (PR #23); the GitHub workflows that check the changelog on every pull request and refresh the architecture from the admin (PR #24)", vi: "Bản chụp kiến trúc có lịch sử và thông báo khi đã cũ; khóa core stack (PR #23); các workflow GitHub kiểm tra changelog ở mỗi pull request và cập nhật kiến trúc từ admin (PR #24)" },
     ],
   },
   {
@@ -372,6 +372,16 @@ export const REQUESTS: Request[] = [
 export type Change = { when: string; pr?: number; also?: number[]; open?: boolean; title: L; items: L[] };
 
 export const CHANGELOG: Change[] = [
+  {
+    when: "2026-10-23",
+    pr: 24,
+    open: true,
+    title: { en: "GitHub workflows: changelog check and architecture refresh", vi: "Workflow GitHub: kiểm tra changelog và cập nhật kiến trúc" },
+    items: [
+      { en: "Product docs: a pull request that changes src/, a migration, vercel.ts or package.json without touching the changelog fails (label no-changelog for the exceptions), and package.json must match stack.lock.json", vi: "Product docs: pull request đổi src/, migration, vercel.ts hoặc package.json mà không sửa changelog sẽ lỗi (nhãn no-changelog cho ngoại lệ), và package.json phải khớp stack.lock.json" },
+      { en: "Refresh architecture: Claude runs Archify and opens a pull request with a new snapshot; started from the admin (needs ANTHROPIC_API_KEY on GitHub and GITHUB_DISPATCH_TOKEN on Vercel)", vi: "Refresh architecture: Claude chạy Archify và mở pull request với bản chụp mới; bắt đầu từ admin (cần ANTHROPIC_API_KEY trên GitHub và GITHUB_DISPATCH_TOKEN trên Vercel)" },
+    ],
+  },
   {
     when: "2026-10-23",
     pr: 23,
@@ -604,9 +614,9 @@ export const FEATURES: FeatureGroup[] = [
   {
     title: { en: "Guardrails", vi: "Rào chắn" },
     items: [
-      { name: { en: "Architecture snapshots", vi: "Bản chụp kiến trúc" }, desc: { en: "Archify diagrams kept per date; the admin compares main with the commit they were traced from; /refresh-architecture adds a snapshot, and the button will start it on GitHub", vi: "Sơ đồ Archify lưu theo ngày; admin so main với commit đã vẽ; /refresh-architecture thêm bản chụp mới, và nút sẽ chạy việc đó trên GitHub" }, status: "partial", code: "src/lib/pm · .claude/commands/refresh-architecture.md" },
+      { name: { en: "Architecture snapshots", vi: "Bản chụp kiến trúc" }, desc: { en: "Archify diagrams kept per date; the admin compares main with the commit they were traced from; /refresh-architecture or the Update architecture button (once the keys are set) adds a snapshot", vi: "Sơ đồ Archify lưu theo ngày; admin so main với commit đã vẽ; /refresh-architecture hoặc nút Cập nhật kiến trúc (khi đã đặt khóa) thêm bản chụp mới" }, status: "live", code: "src/lib/pm · .github/workflows/refresh-architecture.yml · .claude/commands/refresh-architecture.md" },
       { name: { en: "Stack lock", vi: "Khóa stack" }, desc: { en: "The build fails when a core package is added, removed or moved to another major", vi: "Build lỗi khi thêm, bỏ hoặc nâng major một package core" }, status: "live", code: "stack.lock.json · scripts/check-stack.mjs" },
-      { name: { en: "Changelog check", vi: "Kiểm tra changelog" }, desc: { en: "The admin lists merged pull requests with no entry; a GitHub check that fails such a pull request comes next", vi: "Admin liệt kê các pull request đã merge mà chưa có mục; bước kiểm tra trên GitHub làm hỏng pull request như vậy sẽ có ở bước tiếp theo" }, status: "partial", code: "/admin/pm/changelog · .github/workflows/pm-docs.yml (next)" },
+      { name: { en: "Changelog check", vi: "Kiểm tra changelog" }, desc: { en: "A pull request that changes the product must update the changelog (the check fails otherwise); the admin lists merged pull requests with no entry", vi: "Pull request đổi sản phẩm phải cập nhật changelog (nếu không bước kiểm tra sẽ lỗi); admin liệt kê các pull request đã merge mà chưa có mục" }, status: "live", code: ".github/workflows/pm-docs.yml · /admin/pm/changelog" },
     ],
   },
 ];

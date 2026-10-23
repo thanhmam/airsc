@@ -1,0 +1,44 @@
+# Keeps the product docs and the stack from drifting: every pull request that changes the product updates the
+# changelog (src/app/[lang]/admin/pm/content.ts), and package.json must match stack.lock.json.
+name: Product docs
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+jobs:
+  changelog:
+    name: Changelog is updated
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check the changed files
+        env:
+          LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          if [[ ",$LABELS," == *",no-changelog,"* ]]; then echo "Label no-changelog: skipped."; exit 0; fi
+          files=$(git diff --name-only "$BASE" "$HEAD")
+          # product files: the app, the database, the crons and the dependencies; the admin's own pm pages and the diagram snapshots do not count
+          product=$(echo "$files" | grep -E '^(src/|supabase/migrations/|vercel\.ts$|package\.json$|stack\.lock\.json$)' | grep -vE '^(src/app/\[lang\]/admin/pm/|src/lib/pm/)' || true)
+          if [ -z "$product" ]; then echo "No product files changed."; exit 0; fi
+          if echo "$files" | grep -qxF 'src/app/[lang]/admin/pm/content.ts'; then echo "Changelog file updated."; exit 0; fi
+          echo "::error file=src/app/[lang]/admin/pm/content.ts::This pull request changes the product but not the changelog. Add an entry to CHANGELOG (with this PR's number) in src/app/[lang]/admin/pm/content.ts, and update the roadmap (PHASES, REQUESTS), FEATURES and STACK if they changed. A pure fix of a typo can carry the label no-changelog."
+          echo "Product files changed:"
+          echo "$product"
+          exit 1
+
+  stack:
+    name: Core stack is unchanged
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/check-stack.mjs
