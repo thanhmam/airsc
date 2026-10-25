@@ -77,9 +77,10 @@ export default async function AdminLayout({ children, params }: LayoutProps<"/[l
     { href: `${pm}/picks`, label: p.tabs.picks, icon: "picks" },
   ];
 
+  // min-w-0 keeps the one column of phones at the screen's width; fields stay at 16px there because phones zoom into smaller ones
   return (
-    <div className="mx-auto grid max-w-[1400px] gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[230px_1fr]">
-      <aside className="lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:self-start lg:overflow-y-auto">
+    <div className="mx-auto grid max-w-[1400px] gap-4 px-4 py-4 sm:px-6 sm:py-6 lg:grid-cols-[230px_1fr] lg:gap-6 max-sm:[&_input]:text-base max-sm:[&_select]:text-base max-sm:[&_textarea]:text-base">
+      <aside className="min-w-0 lg:sticky lg:top-20 lg:max-h-[calc(100vh-6rem)] lg:self-start lg:overflow-y-auto">
         <Suspense>
           <AdminNav
             sections={[

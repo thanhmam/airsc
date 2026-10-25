@@ -37,8 +37,10 @@ export type EditorCopy = {
   notConfigured: string;
 };
 
-const btn = "inline-flex h-9 items-center gap-1.5 rounded-lg border border-line px-3 text-sm font-medium transition hover:border-accent/60 disabled:cursor-not-allowed disabled:opacity-50";
-const sel = "h-9 rounded-lg border border-line bg-bg px-2 text-sm tabular-nums";
+const btn = "inline-flex h-10 items-center justify-center gap-1.5 rounded-lg border border-line px-3 text-sm font-medium transition hover:border-accent/60 disabled:cursor-not-allowed disabled:opacity-50 sm:h-9";
+const sel = "h-10 rounded-lg border border-line bg-bg px-2 text-sm tabular-nums sm:h-9";
+/** on phones a field grows with its text (rowsFor counts desktop-wide lines), so the page scrolls instead of the field */
+const area = "w-full resize-y rounded-xl border border-line bg-bg p-3 font-mono text-[13px] leading-relaxed outline-none focus:border-accent read-only:opacity-80 max-sm:field-sizing-content max-sm:font-sans";
 
 /** X shows about this many characters before "Show more" */
 const VISIBLE = 280;
@@ -99,7 +101,7 @@ export function PostEditor({ post, configured, c, preview }: { post: SocialPost;
               onChange={(e) => setText(e.target.value)}
               readOnly={!editable}
               rows={rowsFor(text, 58, 6, 18)}
-              className="w-full resize-y rounded-xl border border-line bg-bg p-3 font-mono text-[13px] leading-relaxed outline-none focus:border-accent read-only:opacity-80"
+              className={cn(area, "max-sm:min-h-36")}
             />
           </label>
           <p className={cn("-mt-1.5 text-right text-xs tabular-nums", len > POST_MAX ? "text-danger" : len > VISIBLE ? "text-caution" : "text-muted")}>
@@ -115,7 +117,7 @@ export function PostEditor({ post, configured, c, preview }: { post: SocialPost;
               onChange={(e) => setReply(e.target.value)}
               readOnly={!editable}
               rows={rowsFor(reply, 58, 3, 6)}
-              className="w-full resize-y rounded-xl border border-line bg-bg p-3 font-mono text-[13px] leading-relaxed outline-none focus:border-accent read-only:opacity-80"
+              className={cn(area, "max-sm:min-h-20")}
             />
           </label>
           {tagged.length > 0 && editable && (
@@ -129,7 +131,7 @@ export function PostEditor({ post, configured, c, preview }: { post: SocialPost;
 
       {editable && (
         <div className="flex flex-col gap-2 border-t border-line bg-soft/40 px-4 py-3">
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-5 sm:gap-y-2">
             <div className="flex items-center gap-1.5 text-sm">
               <span className="mr-1 text-muted">{c.time}</span>
               <select aria-label={c.hourLabel} value={at.hour} disabled={pending} onChange={(e) => reschedule({ ...at, hour: Number(e.target.value) })} className={sel}>
@@ -147,8 +149,9 @@ export function PostEditor({ post, configured, c, preview }: { post: SocialPost;
                   </option>
                 ))}
               </select>
+              {pending && <Loader2 className="ml-auto size-4 animate-spin text-muted sm:hidden" aria-hidden />}
             </div>
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center">
               <button className={btn} disabled={pending || !dirty} onClick={() => run(() => saveSocialPost(post.id, { text, reply_text: reply }), c.saved)}>
                 {c.save}
               </button>
@@ -177,7 +180,7 @@ export function PostEditor({ post, configured, c, preview }: { post: SocialPost;
               <button className={btn} disabled={pending} onClick={() => run(() => setSocialStatus(post.id, "skipped"), c.saved)}>
                 {c.skip}
               </button>
-              {pending && <Loader2 className="size-4 animate-spin text-muted" aria-hidden />}
+              {pending && <Loader2 className="hidden size-4 animate-spin text-muted sm:block" aria-hidden />}
             </div>
           </div>
           {post.kind === "spotlight" && (
@@ -189,13 +192,13 @@ export function PostEditor({ post, configured, c, preview }: { post: SocialPost;
                 value={other}
                 onChange={(e) => setOther(e.target.value)}
                 placeholder={c.rewriteOther}
-                className="h-9 min-w-56 flex-1 rounded-lg border border-line bg-bg px-3 font-mono text-xs outline-none focus:border-accent"
+                className="h-10 min-w-56 flex-1 sm:h-9 rounded-lg border border-line bg-bg px-3 font-mono text-xs outline-none focus:border-accent"
               />
             </div>
           )}
           {blocked && <p className="text-xs text-muted">{blocked}</p>}
           {msg && (
-            <p className={cn("text-sm", msg.ok ? "text-safe" : "text-danger")}>
+            <p className={cn("break-words text-sm", msg.ok ? "text-safe" : "text-danger")}>
               {msg.text}{" "}
               {msg.url && (
                 <a href={msg.url} target="_blank" rel="noreferrer" className="text-accent underline">

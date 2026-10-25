@@ -373,6 +373,18 @@ export type Change = { when: string; pr?: number; also?: number[]; open?: boolea
 
 export const CHANGELOG: Change[] = [
   {
+    when: "2026-10-25",
+    pr: 25,
+    open: true,
+    title: { en: "Admin on phones", vi: "Admin trên điện thoại" },
+    items: [
+      { en: "The admin fits a phone screen: the long row of menu links no longer widens every page, so phones stopped showing it zoomed out like the desktop", vi: "Admin vừa màn hình điện thoại: hàng link menu dài không còn kéo rộng mọi trang, nên điện thoại không còn hiện thu nhỏ như bản desktop" },
+      { en: "On phones the menu is one button naming the current page, with the pages of its group (Queue, All posts, New applied post, reviews, settings) as tabs under it", vi: "Trên điện thoại, menu là một nút ghi tên trang đang mở, kèm các trang cùng nhóm (Hàng đợi, Tất cả bài đăng, Viết bài applied, đánh giá, thiết lập) thành tab ngay bên dưới" },
+      { en: "Queue on phones: the post and reply fields grow with their text, the actions are two columns of larger buttons, and fields are 16px so the phone does not zoom in when one is tapped", vi: "Hàng đợi trên điện thoại: ô bài đăng và reply giãn theo nội dung, các nút thao tác xếp hai cột và to hơn, ô nhập cỡ chữ 16px để điện thoại không tự phóng to khi bấm vào" },
+      { en: "All posts on phones: one card per post with its numbers, instead of the wide table", vi: "Tất cả bài đăng trên điện thoại: mỗi bài một thẻ kèm số liệu, thay cho bảng rộng" },
+    ],
+  },
+  {
     when: "2026-10-23",
     pr: 24,
     open: true,
