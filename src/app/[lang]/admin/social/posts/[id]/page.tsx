@@ -54,7 +54,7 @@ export default async function SocialPostDetail({ params }: PageProps<"/[lang]/ad
         <div className="space-y-4">
           <section className={box}>
             <p className={label}>{p.fullText}</p>
-            <p className="mt-2 whitespace-pre-wrap text-[15px] leading-relaxed">{post.text}</p>
+            <p className="mt-2 whitespace-pre-wrap break-words text-[15px] leading-relaxed">{post.text}</p>
             {post.reply_text && (
               <>
                 <p className={cn(label, "mt-5")}>{p.reply}</p>
@@ -71,7 +71,7 @@ export default async function SocialPostDetail({ params }: PageProps<"/[lang]/ad
           {post.note && (
             <section className={box}>
               <p className={label}>{p.notes}</p>
-              <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-muted">{post.note}</p>
+              <p className="mt-2 whitespace-pre-wrap break-words text-sm leading-relaxed text-muted">{post.note}</p>
             </section>
           )}
         </div>

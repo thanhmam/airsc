@@ -21,7 +21,7 @@ export type CardCopy = {
   alt: string;
 };
 
-const btn = "inline-flex h-9 items-center gap-1.5 rounded-lg border border-line px-3 text-sm font-medium transition hover:border-accent/60 disabled:cursor-not-allowed disabled:opacity-50";
+const btn = "inline-flex h-10 items-center gap-1.5 rounded-lg border border-line px-3 text-sm font-medium transition hover:border-accent/60 disabled:cursor-not-allowed disabled:opacity-50 sm:h-9";
 
 /** A card's picture, full width of its column, with its description and (while the post is waiting) style, colours and headline */
 export function CardControls({ post, defaults, c }: { post: SocialPost; defaults: { style: CardStyle; theme: CardTheme }; c: CardCopy }) {
@@ -48,7 +48,7 @@ export function CardControls({ post, defaults, c }: { post: SocialPost; defaults
           type="button"
           onClick={() => set(v)}
           aria-pressed={value === v}
-          className={cn("h-8 rounded-md px-3 text-sm", value === v ? "bg-accent-soft font-medium text-accent" : "text-muted hover:text-fg")}
+          className={cn("h-9 rounded-md px-3 text-sm sm:h-8", value === v ? "bg-accent-soft font-medium text-accent" : "text-muted hover:text-fg")}
         >
           {labels[v]}
         </button>
@@ -83,7 +83,7 @@ export function CardControls({ post, defaults, c }: { post: SocialPost; defaults
           </div>
           <div className="flex items-end gap-2">
             <label className="flex min-w-0 flex-1 flex-col gap-1 text-sm">
-              <span className="flex justify-between text-muted">
+              <span className="flex justify-between gap-2 text-muted">
                 {c.headline}
                 <span className={cn("tabular-nums", headline.length > 48 && "text-caution")}>
                   {headline.length} · {c.headlineHint}
@@ -93,7 +93,7 @@ export function CardControls({ post, defaults, c }: { post: SocialPost; defaults
                 value={headline}
                 onChange={(e) => setHeadline(e.target.value)}
                 maxLength={90}
-                className="h-9 rounded-lg border border-line bg-bg px-3 text-sm outline-none focus:border-accent"
+                className="h-10 rounded-lg border border-line bg-bg px-3 text-sm outline-none focus:border-accent sm:h-9"
               />
             </label>
             <button className={cn(btn, "border-transparent bg-accent text-accent-fg hover:opacity-90")} disabled={pending || !dirty} onClick={save}>
