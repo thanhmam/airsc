@@ -30,7 +30,7 @@ export function CopyButton({
         "inline-flex items-center gap-1.5 rounded-lg text-sm font-medium transition",
         variant === "solid"
           ? "bg-fg px-3 py-2 text-bg hover:opacity-90"
-          : "px-2 py-1 text-muted hover:bg-soft hover:text-fg",
+          : "px-2.5 py-2.5 text-muted hover:bg-soft hover:text-fg sm:px-2 sm:py-1",
         className,
       )}
     >

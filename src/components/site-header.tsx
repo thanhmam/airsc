@@ -16,7 +16,7 @@ export async function SiteHeader({ lang, t }: { lang: Locale; t: Dict }) {
   return (
     <header className="border-b border-line/80 bg-bg/80 backdrop-blur-md">
       <div className="mx-auto flex h-14 max-w-6xl items-center gap-4 px-4 sm:px-6">
-        <Link href={href(lang)} aria-label="Airsc home" className="flex items-center text-fg">
+        <Link href={href(lang)} aria-label="Airsc home" className="flex h-10 items-center text-fg">
           <Logo className="h-7 w-auto" />
         </Link>
         <nav className="hidden items-center gap-1 text-sm md:flex">
@@ -31,7 +31,7 @@ export async function SiteHeader({ lang, t }: { lang: Locale; t: Dict }) {
           {user ? (
             <Link
               href={href(lang, "/account")}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-line px-3 py-1.5 text-sm font-medium hover:border-fg/30"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-line px-3 py-2.5 text-sm font-medium hover:border-fg/30 sm:py-1.5"
             >
               <span>{t.nav.account}</span>
 
@@ -39,16 +39,16 @@ export async function SiteHeader({ lang, t }: { lang: Locale; t: Dict }) {
           ) : (
             <Link
               href={href(lang, "/login")}
-              className="rounded-lg bg-fg px-3 py-1.5 text-sm font-medium text-bg hover:opacity-90"
+              className="rounded-lg bg-fg px-3 py-2.5 text-sm font-medium text-bg hover:opacity-90 sm:py-1.5"
             >
               {t.nav.signIn}
             </Link>
           )}
         </div>
       </div>
-      <nav className="flex gap-1 overflow-x-auto border-t border-line/60 px-3 py-1.5 text-sm md:hidden">
+      <nav className="flex gap-1 overflow-x-auto border-t border-line/60 px-3 py-1 text-sm md:hidden">
         {nav.map((n) => (
-          <Link key={n.path} href={href(lang, n.path)} className="shrink-0 rounded-lg px-3 py-1 text-muted hover:bg-soft hover:text-fg">
+          <Link key={n.path} href={href(lang, n.path)} className="shrink-0 rounded-lg px-3 py-2.5 text-muted hover:bg-soft hover:text-fg">
             {n.label}
           </Link>
         ))}

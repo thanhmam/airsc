@@ -49,7 +49,7 @@ export function Slideshow({ slides, name, c }: { slides: Slide[]; name: string; 
   if (!slides.length) return null;
   const go = (n: number) => setI((n + slides.length) % slides.length);
   const cur = slides[i];
-  const btn = "grid size-8 place-items-center rounded-full border border-line bg-card text-fg transition hover:border-accent/60 hover:text-accent focus-visible:outline-2 focus-visible:outline-accent";
+  const btn = "grid size-10 place-items-center sm:size-8 rounded-full border border-line bg-card text-fg transition hover:border-accent/60 hover:text-accent focus-visible:outline-2 focus-visible:outline-accent";
 
   return (
     <div

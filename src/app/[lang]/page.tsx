@@ -277,13 +277,13 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
       <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
         <div className="flex flex-wrap gap-x-12 gap-y-10 rounded-3xl bg-[#0f0f14] p-[clamp(24px,4vw,48px)] text-[#e8e8ee]">
           <div className="min-w-0 flex-[1_1_400px]">
-            <p className="mb-3 font-mono text-xs font-medium uppercase tracking-[0.08em] text-[#a99bff]">{h.mcpEyebrow}</p>
+            <p className="mb-3 font-mono text-xs font-medium uppercase tracking-[0.08em] text-panel-accent">{h.mcpEyebrow}</p>
             <h2 className="text-[clamp(28px,3vw,38px)] font-semibold leading-[1.1] tracking-[-0.03em] text-white text-balance">{h.mcpTitle}</h2>
-            <p className="mt-3.5 max-w-[480px] text-[16.5px] leading-[1.55] text-[#b4b3bd]">{t.mcp.sub}</p>
+            <p className="mt-3.5 max-w-[480px] text-[16.5px] leading-[1.55] text-panel-muted">{t.mcp.sub}</p>
             <pre className="mt-6 whitespace-pre-wrap break-words rounded-xl border border-white/10 bg-[#08070d] px-4 py-3.5 font-mono text-[12.5px] leading-[1.65]">
               {`claude mcp add --transport http airsc ${site}/api/mcp --header "Authorization: Bearer YOUR_AIRSC_KEY"`}
             </pre>
-            <ul className="mt-5 grid grid-cols-[repeat(auto-fit,minmax(min(210px,100%),1fr))] gap-x-5 gap-y-3 text-[13.5px] text-[#b4b3bd]">
+            <ul className="mt-5 grid grid-cols-[repeat(auto-fit,minmax(min(210px,100%),1fr))] gap-x-5 gap-y-3 text-[13.5px] text-panel-muted">
               {h.mcpTools.map(([name, desc]) => (
                 <li key={name}>
                   <code className="block font-mono text-[12.5px] text-white">{name}</code>

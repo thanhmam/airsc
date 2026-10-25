@@ -28,7 +28,7 @@ export function ResourceArt({ type }: { type: ResourceType }) {
     );
   if (type === "rule")
     return (
-      <Cover className="bg-[#16141f]" label=".cursor/rules" labelClass="text-[#a3a0b5]">
+      <Cover className="bg-panel-raised" label=".cursor/rules" labelClass="text-panel-muted">
         <div className="flex w-32 flex-col gap-[7px]">
           {[
             [44, 0],
@@ -36,12 +36,12 @@ export function ResourceArt({ type }: { type: ResourceType }) {
             [36, 8],
           ].map(([w, indent], i) => (
             <div key={i} className="flex items-center gap-[7px]">
-              <span className="font-mono text-[9px] leading-none text-[#a3a0b5]">{i + 1}</span>
+              <span className="font-mono text-[9px] leading-none text-panel-muted">{i + 1}</span>
               <span
-                className={`h-1 rounded-sm ${i === 0 ? "bg-[#a99bff]" : "bg-[#e8e8ee]"}`}
+                className={`h-1 rounded-sm ${i === 0 ? "bg-panel-accent" : "bg-[#e8e8ee]"}`}
                 style={{ width: `${w}%`, marginLeft: indent }}
               />
-              {i === 2 && <span className="rv-cursor -ml-[3px] h-[11px] w-[5px] bg-[#a99bff]" />}
+              {i === 2 && <span className="rv-cursor -ml-[3px] h-[11px] w-[5px] bg-panel-accent" />}
             </div>
           ))}
         </div>

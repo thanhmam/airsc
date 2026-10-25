@@ -135,14 +135,14 @@ export function TodaysPicks({ lang, picks, c }: { lang: Locale; picks: Pick[]; c
                 }}
                 className={cn(
                   "h-[34px] rounded-lg px-3.5 text-[13.5px] font-medium transition-colors",
-                  tab === k ? "bg-white/12 text-white" : "text-[#b4b3bd] hover:text-white",
+                  tab === k ? "bg-white/12 text-white" : "text-panel-muted hover:text-white",
                 )}
               >
                 {k === "result" ? c.tabResult : c.tabInstall}
               </button>
             ))}
           </div>
-          <span className="ml-auto min-w-0 truncate font-mono text-xs text-[#a3a0b5]">
+          <span className="ml-auto min-w-0 truncate font-mono text-xs text-panel-muted">
             {cur.owner}/{cur.name}
           </span>
         </div>
@@ -157,7 +157,7 @@ export function TodaysPicks({ lang, picks, c }: { lang: Locale; picks: Pick[]; c
           )}
         </div>
         {tab === "result" && (cur.scene || cur.shot) && (
-          <p className="px-5 pb-3 text-xs text-[#a3a0b5]">{cur.scene ? c.walkNote : cur.shot!.note}</p>
+          <p className="px-5 pb-3 text-xs text-panel-muted">{cur.scene ? c.walkNote : cur.shot!.note}</p>
         )}
 
         <div className="flex flex-wrap items-center gap-x-5 gap-y-3 border-t border-white/10 py-3.5 pl-5 pr-4">
@@ -171,11 +171,11 @@ export function TodaysPicks({ lang, picks, c }: { lang: Locale; picks: Pick[]; c
                 })()}
                 {c.safety[cur.safety]}
               </span>
-              <span className="font-mono text-xs text-[#a3a0b5]">
+              <span className="font-mono text-xs text-panel-muted">
                 {[c.types[cur.type], cur.license || c.noLicense, `★ ${compact(cur.stars)}`].join(" · ")}
               </span>
             </div>
-            <p className="mt-1 line-clamp-2 text-[13.5px] leading-[1.45] text-[#b4b3bd]">{cur.blurb}</p>
+            <p className="mt-1 line-clamp-2 text-[13.5px] leading-[1.45] text-panel-muted">{cur.blurb}</p>
           </div>
           <div className="flex flex-none gap-2">
             <Link
@@ -211,7 +211,7 @@ function Install({ cmds, c }: { cmds: string[]; c: PicksCopy }) {
       <div className="flex flex-1 flex-col gap-1 overflow-x-auto rounded-xl border border-white/10 bg-[#08070d] px-[18px] py-4 font-mono text-[13px] leading-[1.7]">
         {cmds.map((cmd, i) => (
           <div key={i} className="a-rise whitespace-pre" style={{ animationDelay: `${0.15 + i * 0.4}s` }}>
-            <span className="text-[#a99bff]">$ </span>
+            <span className="text-panel-accent">$ </span>
             {cmd}
           </div>
         ))}
@@ -219,7 +219,7 @@ function Install({ cmds, c }: { cmds: string[]; c: PicksCopy }) {
           <Check className="size-3.5" strokeWidth={2.5} aria-hidden /> {c.installed}
         </div>
       </div>
-      <p className="text-[12.5px] text-[#a3a0b5]">{c.installNote}</p>
+      <p className="text-[12.5px] text-panel-muted">{c.installNote}</p>
     </>
   );
 }
@@ -227,11 +227,11 @@ function Install({ cmds, c }: { cmds: string[]; c: PicksCopy }) {
 function Shot({ shot }: { shot: NonNullable<Pick["shot"]> }) {
   return (
     <>
-      <div className="a-pop relative min-h-[240px] flex-1 overflow-hidden rounded-xl border border-white/10 bg-[#16141f]">
+      <div className="a-pop relative min-h-[240px] flex-1 overflow-hidden rounded-xl border border-white/10 bg-panel-raised">
         {/* pre-sized WebP, so Next does not optimise it again */}
         <Image src={shot.src} alt={shot.caption} width={shot.width} height={shot.height} unoptimized className="absolute inset-0 size-full object-contain" />
       </div>
-      <p className="a-rise line-clamp-2 text-[13px] leading-[1.45] text-[#b4b3bd]" style={{ animationDelay: "0.3s" }}>
+      <p className="a-rise line-clamp-2 text-[13px] leading-[1.45] text-panel-muted" style={{ animationDelay: "0.3s" }}>
         {shot.caption}
       </p>
     </>
@@ -280,7 +280,7 @@ const d = (s: number) => ({ animationDelay: `${s}s` });
 function You({ text, dur = 1.1 }: { text: string; dur?: number }) {
   return (
     <div className="flex items-baseline gap-2 font-mono text-[13px] leading-[1.6]">
-      <span className="flex-none text-[#a99bff]">you ›</span>
+      <span className="flex-none text-panel-accent">you ›</span>
       <span className="a-type" style={{ animationDuration: `${dur}s` }}>{text}</span>
     </div>
   );
@@ -321,7 +321,7 @@ function Scene({ kind, lang }: { kind: SceneKind; lang: Locale }) {
           <div className="flex flex-[1_1_140px] flex-col gap-2">
             {[
               ["STYLE 1", "bg-[#f6f3ea] shadow-[0_0_0_2px_#8f7bff]", "text-[#5c5a52]", "bg-[#141413] w-[70%]", 2],
-              ["STYLE 2", "bg-[#1f1c2e] border border-white/12", "text-[#b4b3bd]", "bg-[#f2f1f7] w-[55%]", 2.15],
+              ["STYLE 2", "bg-[#1f1c2e] border border-white/12", "text-panel-muted", "bg-[#f2f1f7] w-[55%]", 2.15],
               ["STYLE 3", "bg-[#5a3df0]", "text-white", "bg-white w-[80%]", 2.3],
             ].map(([label, box, fg, bar, at]) => (
               <div key={label as string} className={`a-rise flex min-h-[60px] flex-1 flex-col justify-between rounded-[10px] px-3 py-2.5 ${box}`} style={d(at as number)}>
@@ -345,8 +345,8 @@ function Scene({ kind, lang }: { kind: SceneKind; lang: Locale }) {
     return (
       <>
         <You text={s.diagram.ask} dur={1.3} />
-        <div className="a-pop flex flex-1 flex-col gap-[18px] overflow-x-auto rounded-xl border border-white/10 bg-[#16141f] px-[18px] pb-5 pt-4" style={d(1.5)}>
-          <div className="flex min-w-[560px] justify-between gap-3 font-mono text-[11px] tracking-[0.06em] text-[#a3a0b5]">
+        <div className="a-pop flex flex-1 flex-col gap-[18px] overflow-x-auto rounded-xl border border-white/10 bg-panel-raised px-[18px] pb-5 pt-4" style={d(1.5)}>
+          <div className="flex min-w-[560px] justify-between gap-3 font-mono text-[11px] tracking-[0.06em] text-panel-muted">
             <span>CI/CD PIPELINE</span>
             <span>INTERACTIVE HTML</span>
           </div>
@@ -363,7 +363,7 @@ function Scene({ kind, lang }: { kind: SceneKind; lang: Locale }) {
                     )}
                     style={d(1.8 + i * 0.5)}
                   >
-                    <div className={cn("font-mono text-[10.5px] tracking-[0.08em]", last ? "text-[#4cc58a]" : "text-[#a99bff]")}>{k}</div>
+                    <div className={cn("font-mono text-[10.5px] tracking-[0.08em]", last ? "text-[#4cc58a]" : "text-panel-accent")}>{k}</div>
                     <div className="mt-1.5 text-sm font-semibold text-[#f2f1f7]">{v}</div>
                   </div>
                 </div>
@@ -383,21 +383,21 @@ function Scene({ kind, lang }: { kind: SceneKind; lang: Locale }) {
         <div className="flex flex-1 flex-wrap gap-x-6 gap-y-4">
           <div className="flex min-w-0 flex-[1_1_240px] flex-col gap-2.5 font-mono text-[12.5px] leading-normal">
             <div className="a-rise flex flex-wrap gap-1.5" style={d(0.9)}>
-              <span className="text-[#a99bff]">›</span>
+              <span className="text-panel-accent">›</span>
               <span>playwright_resize</span>
-              <span className="text-[#a3a0b5]">{'{ device: "iPhone 13" }'}</span>
+              <span className="text-panel-muted">{'{ device: "iPhone 13" }'}</span>
             </div>
             <div className="a-rise flex items-center gap-1.5 text-[#4cc58a]" style={d(1.4)}>
               <Check className="size-3.5" strokeWidth={2.5} aria-hidden /> {s.browser.ok}
             </div>
             <div className="a-rise mt-1.5 flex gap-2" style={d(2.4)}>
-              <span className="flex-none text-[#a99bff]">you ›</span>
+              <span className="flex-none text-panel-accent">you ›</span>
               <span>{s.browser.ask2}</span>
             </div>
             <div className="a-rise flex items-center gap-1.5 text-[#4cc58a]" style={d(2.9)}>
               <Check className="size-3.5" strokeWidth={2.5} aria-hidden /> {s.browser.shot}
             </div>
-            <span className="a-rise mt-auto self-start rounded-full border border-white/16 px-2.5 py-1 text-[11.5px] text-[#b4b3bd]" style={d(3.4)}>
+            <span className="a-rise mt-auto self-start rounded-full border border-white/16 px-2.5 py-1 text-[11.5px] text-panel-muted" style={d(3.4)}>
               {s.browser.presets}
             </span>
           </div>
@@ -410,7 +410,7 @@ function Scene({ kind, lang }: { kind: SceneKind; lang: Locale }) {
                 <div className="h-1.5 w-[70%] rounded-[3px] bg-[#c9c7bf]" />
                 <div className="mt-auto h-5 rounded-md bg-[#5a3df0]" />
               </div>
-              <span className="font-mono text-[11px] text-[#a3a0b5]">iPhone 13</span>
+              <span className="font-mono text-[11px] text-panel-muted">iPhone 13</span>
             </div>
             <div className="a-pop flex flex-col items-center gap-2" style={d(3)}>
               <div aria-hidden className="flex h-[218px] w-44 flex-col gap-2 rounded-[14px] border-2 border-[#3a3750] bg-[#f6f5f0] px-2.5 pb-2.5 pt-3">
@@ -429,7 +429,7 @@ function Scene({ kind, lang }: { kind: SceneKind; lang: Locale }) {
                   <div className="flex-1 rounded-lg bg-[#ece8ff]" />
                 </div>
               </div>
-              <span className="font-mono text-[11px] text-[#a3a0b5]">iPad</span>
+              <span className="font-mono text-[11px] text-panel-muted">iPad</span>
             </div>
           </div>
         </div>
@@ -437,7 +437,7 @@ function Scene({ kind, lang }: { kind: SceneKind; lang: Locale }) {
     );
 
   // plan
-  const dots = ["bg-[#f0a843]", "bg-[#4cc58a]", "bg-[#a99bff]"];
+  const dots = ["bg-[#f0a843]", "bg-[#4cc58a]", "bg-panel-accent"];
   return (
     <>
       <You text={s.plan.ask} />
@@ -449,13 +449,13 @@ function Scene({ kind, lang }: { kind: SceneKind; lang: Locale }) {
               key={col.k}
               className={cn(
                 "a-rise flex flex-col gap-2.5 rounded-xl border p-4",
-                last ? "border-[#4cc58a]/50 bg-[#16261f]" : "border-white/10 bg-[#16141f]",
+                last ? "border-[#4cc58a]/50 bg-[#16261f]" : "border-white/10 bg-panel-raised",
               )}
               style={d(1.4 + i * 0.6)}
             >
-              <div className={cn("font-mono text-[11px] tracking-[0.08em]", last ? "text-[#4cc58a]" : "text-[#a99bff]")}>{col.k}</div>
+              <div className={cn("font-mono text-[11px] tracking-[0.08em]", last ? "text-[#4cc58a]" : "text-panel-accent")}>{col.k}</div>
               <div className="text-[15px] font-semibold text-[#f2f1f7]">{col.t}</div>
-              <div className="flex flex-col gap-1.5 text-[13px] text-[#b4b3bd]">
+              <div className="flex flex-col gap-1.5 text-[13px] text-panel-muted">
                 {col.items.map((it, j) =>
                   i === 0 ? (
                     <span key={it}>{it}</span>
