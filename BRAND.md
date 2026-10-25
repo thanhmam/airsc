@@ -56,7 +56,7 @@ Always use the CSS tokens in `src/app/globals.css` (Tailwind: `bg-accent`, `text
 | `ink` / `sketch` | `#111113` / `#c9c7bf` | `#ecebe6` / `#3c3c45` | Illustration strokes and placeholder lines |
 | `safe` / `caution` / `danger` (+ `-soft`) | green / amber / red | lighter on dark | Safety labels only |
 
-Always-dark panels (Today's picks stage, Airsc MCP block, terminals) use `#0f0f14` with Violet 400 `#8f7bff` as their accent and `#4cc58a` for success, in both themes.
+Always-dark panels (Today's picks stage, Airsc MCP block, terminals) use `#0f0f14` with Violet 400 `#8f7bff` as their accent and `#4cc58a` for success, in both themes. Their other colours are tokens too, the same in both themes: `panel-accent` `#8f7bff`, `panel-muted` `#a3a0b5` (secondary text), `panel-raised` `#16141f` (a card on the panel) and `panel-line` `#2a2838` (bars and rules). Do not write a new raw hex in a panel: add a token here first.
 
 ## Typography
 

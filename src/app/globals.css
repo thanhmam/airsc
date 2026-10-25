@@ -96,6 +96,8 @@ body {
 .caret { animation: blink 1s step-end infinite; }
 
 /* ---------- Homepage ---------- */
+/* always-dark panels (Today's picks, Airsc MCP block, demos): the same in both themes */
+:root { --panel-accent: #8f7bff; --panel-muted: #a3a0b5; --panel-raised: #16141f; --panel-line: #2a2838; }
 :root { --ink: #111113; --sketch: #c9c7bf; --line-strong: #d9d7cf; --art: #f4f2ec; --dot: #d6d4cb; }
 @media (prefers-color-scheme: dark) {
   :root { --ink: #ecebe6; --sketch: #3c3c45; --line-strong: #34343c; --art: #17171c; --dot: #26262c; }

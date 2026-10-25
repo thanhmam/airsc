@@ -30,7 +30,7 @@ export function SearchBox({
         aria-label={placeholder}
         className={cn(
           "w-full rounded-2xl border border-line bg-card outline-none transition placeholder:text-muted/80 focus:border-accent focus:ring-4 focus:ring-accent/15",
-          size === "lg" ? "h-14 pl-12 pr-4 text-base shadow-sm" : "h-11 pl-9 pr-3 text-sm",
+          size === "lg" ? "h-14 pl-12 pr-4 text-base shadow-sm" : "h-11 pl-9 pr-3 text-base sm:text-sm",
         )}
       />
       {Object.entries(hidden ?? {}).map(([k, v]) => (v ? <input key={k} type="hidden" name={k} value={v} /> : null))}

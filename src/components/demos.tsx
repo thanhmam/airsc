@@ -59,7 +59,7 @@ export function HeroDemo({ lang, results, className }: { lang: "en" | "vi"; resu
       </div>
       <div className="min-h-[300px] space-y-3 p-4 font-mono text-[13px] leading-relaxed sm:p-5">
         <p>
-          <span className="text-[#a99bff]">you ›</span> {step === 0 ? typed : c.ask}
+          <span className="text-panel-accent">you ›</span> {step === 0 ? typed : c.ask}
           {step === 0 && <span className="caret">▍</span>}
         </p>
         <AnimatePresence>
@@ -80,7 +80,7 @@ export function HeroDemo({ lang, results, className }: { lang: "en" | "vi"; resu
                   className={`flex items-center justify-between rounded-lg px-3 py-2 ${i === 0 && step >= 3 ? "bg-[#8f7bff]/20 ring-1 ring-[#8f7bff]/60" : "bg-white/5"}`}
                 >
                   <span className="flex items-center gap-2">
-                    <Sparkles className="size-3.5 text-[#a99bff]" aria-hidden />
+                    <Sparkles className="size-3.5 text-panel-accent" aria-hidden />
                     {r.name}
                     <span className="text-white/40">{r.type}</span>
                   </span>
@@ -99,7 +99,7 @@ export function HeroDemo({ lang, results, className }: { lang: "en" | "vi"; resu
           )}
           {step >= 3 && (
             <motion.p key="picked" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-white/80">
-              <span className="text-[#a99bff]">claude ›</span> {c.picked}
+              <span className="text-panel-accent">claude ›</span> {c.picked}
             </motion.p>
           )}
           {step >= 4 && (
@@ -132,7 +132,7 @@ export function InstallPreview({ lines, doneLabel }: { lines: string[]; doneLabe
       <div className="min-h-[120px] space-y-1 overflow-x-auto p-3">
         {lines.slice(0, shown).map((l, i) => (
           <motion.p key={i} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="whitespace-pre text-white/85">
-            <span className="text-[#a99bff]">$ </span>
+            <span className="text-panel-accent">$ </span>
             {l}
           </motion.p>
         ))}

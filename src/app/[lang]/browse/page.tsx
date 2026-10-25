@@ -24,7 +24,7 @@ function Item({ to, active, count, lang, children }: { to: string; active: boole
       href={to}
       aria-current={active ? "true" : undefined}
       className={cn(
-        "flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-sm transition",
+        "flex items-center gap-2 rounded-lg px-2.5 py-2.5 text-sm lg:py-1.5 transition",
         active ? "bg-accent-soft font-medium text-accent" : "text-muted hover:bg-soft hover:text-fg",
       )}
     >
@@ -158,7 +158,7 @@ export default async function Browse({ params, searchParams }: PageProps<"/[lang
                 <Link
                   key={key}
                   href={link({ sort: key === "stars" ? undefined : key, page: undefined })}
-                  className={cn("shrink-0 rounded-lg px-3 py-1", sort === key ? "bg-soft font-medium text-fg" : "text-muted hover:text-fg")}
+                  className={cn("shrink-0 rounded-lg px-3 py-2.5 sm:py-1", sort === key ? "bg-soft font-medium text-fg" : "text-muted hover:text-fg")}
                 >
                   {label}
                 </Link>
@@ -179,7 +179,7 @@ export default async function Browse({ params, searchParams }: PageProps<"/[lang
           {pages > 1 && (
             <nav className="mt-10 flex items-center justify-center gap-3 text-sm" aria-label="Pagination">
               {page > 1 && (
-                <Link href={link({ page: String(page - 1) })} className="rounded-lg border border-line bg-card px-3 py-1.5 hover:border-fg/30">
+                <Link href={link({ page: String(page - 1) })} className="rounded-lg border border-line bg-card px-3 py-2.5 sm:py-1.5 hover:border-fg/30">
                   ← {t.browse.prev}
                 </Link>
               )}
@@ -187,7 +187,7 @@ export default async function Browse({ params, searchParams }: PageProps<"/[lang
                 {page} / {pages}
               </span>
               {page < pages && (
-                <Link href={link({ page: String(page + 1) })} className="rounded-lg border border-line bg-card px-3 py-1.5 hover:border-fg/30">
+                <Link href={link({ page: String(page + 1) })} className="rounded-lg border border-line bg-card px-3 py-2.5 sm:py-1.5 hover:border-fg/30">
                   {t.browse.next} →
                 </Link>
               )}

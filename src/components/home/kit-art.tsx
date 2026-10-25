@@ -85,10 +85,10 @@ const ART: Record<string, ReactNode> = {
   rocket: (
     <div className="flex w-[136px] flex-col gap-[9px] rounded-lg bg-[#0f0f14] px-3 pb-3 pt-[11px]">
       <div className="flex items-center gap-1.5">
-        <span className="font-mono text-[10px] leading-none text-[#a99bff]">$</span>
+        <span className="font-mono text-[10px] leading-none text-panel-accent">$</span>
         <span className="h-1 w-[46%] rounded-sm bg-[#e8e8ee]" />
       </div>
-      <div className="h-1.5 overflow-hidden rounded-[3px] bg-[#2a2838]">
+      <div className="h-1.5 overflow-hidden rounded-[3px] bg-panel-line">
         <div className="kv-fill h-full rounded-[3px] bg-[#8f7bff]" />
       </div>
       <div className="flex items-center gap-1.5">

@@ -220,6 +220,8 @@ export const STACK: StackGroup[] = [
       { name: "tsx", pkg: "tsx", role: { en: "Runs the scripts (crawl, rescore, dry runs)", vi: "Chạy các script (crawl, rescore, chạy thử)" } },
       { name: "@vercel/config", pkg: "@vercel/config", role: { en: "Typed vercel.ts: regions and crons", vi: "vercel.ts có kiểu: vùng và cron" } },
       { name: "Stack lock", role: { en: "stack.lock.json and scripts/check-stack.mjs: the build fails when the core stack drifts (docs/decisions)", vi: "stack.lock.json và scripts/check-stack.mjs: build lỗi khi core stack bị lệch (docs/decisions)" } },
+      { name: "Playwright MCP", role: { en: "Drives a browser for scripts/mobile-audit.mjs and scripts/brand-drift.mjs (npx, no package; server in .mcp.json)", vi: "Điều khiển trình duyệt cho scripts/mobile-audit.mjs và scripts/brand-drift.mjs (npx, không thêm package; server trong .mcp.json)" } },
+      { name: "design-dna", role: { en: "Claude Code skill in .claude/skills; its CIE ΔE colour maths measures brand drift against BRAND.md", vi: "Skill của Claude Code trong .claude/skills; phép tính màu CIE ΔE đo độ lệch thương hiệu so với BRAND.md" } },
       { name: "Archify + Claude Code", role: { en: "Architecture snapshots (/refresh-architecture, docs/architecture-snapshots.md)", vi: "Các bản chụp kiến trúc (/refresh-architecture, docs/architecture-snapshots.md)" } },
     ],
   },
@@ -374,8 +376,18 @@ export type Change = { when: string; pr?: number; also?: number[]; open?: boolea
 export const CHANGELOG: Change[] = [
   {
     when: "2026-10-25",
-    pr: 25,
+    pr: 26,
     open: true,
+    title: { en: "Playwright MCP and design-dna on Airsc itself: phone audit, brand drift", vi: "Playwright MCP và design-dna chạy trên chính Airsc: audit điện thoại, độ lệch thương hiệu" },
+    items: [
+      { en: "scripts/mobile-audit.mjs drives the Playwright MCP server over stdio (no package added) and checks ten public pages at 390 px. Before: 170 tap targets under 40 px, 1 text field that makes iOS zoom in. After: 45 and 0. No page was wider than the screen before or after. Cost: the sticky header is 12 px taller on phones (131 to 143)", vi: "scripts/mobile-audit.mjs điều khiển Playwright MCP server qua stdio (không thêm package) và kiểm tra mười trang công khai ở 390 px. Trước: 170 vùng bấm dưới 40 px, 1 ô nhập khiến iOS phóng to. Sau: 45 và 0. Không trang nào rộng hơn màn hình, cả trước lẫn sau. Cái giá: header cố định cao thêm 12 px trên điện thoại (131 lên 143)" },
+      { en: "design-dna installed as a project skill. scripts/brand-drift.mjs uses its CIE ΔE maths to compare every painted colour on nine pages with the tokens: 10 colours outside the tokens became 5, painted elements off brand 46 became 14 (2.6% to 0.8%); the always-dark panels now use panel-accent, panel-muted, panel-raised and panel-line tokens, written in BRAND.md. The violet on those panels is now Violet 400 as BRAND.md says (contrast on the panel 8.0 to 5.9)", vi: "Cài design-dna làm skill của dự án. scripts/brand-drift.mjs dùng phép tính CIE ΔE của nó để so mọi màu được vẽ trên chín trang với các token: 10 màu ngoài token còn 5, phần tử lệch thương hiệu từ 46 còn 14 (2,6% còn 0,8%); các panel luôn tối giờ dùng token panel-accent, panel-muted, panel-raised, panel-line, ghi trong BRAND.md. Màu tím trên các panel đó nay là Violet 400 như BRAND.md quy định (độ tương phản trên panel từ 8,0 còn 5,9)" },
+      { en: "Both runs added to the resource pages (Airsc runs) and to the applied-post presets in the admin", vi: "Cả hai lần chạy được thêm vào trang tài nguyên (Airsc runs) và vào preset bài applied trong admin" },
+    ],
+  },
+  {
+    when: "2026-10-25",
+    pr: 25,
     title: { en: "Admin on phones", vi: "Admin trên điện thoại" },
     items: [
       { en: "The admin fits a phone screen: the long row of menu links no longer widens every page, so phones stopped showing it zoomed out like the desktop", vi: "Admin vừa màn hình điện thoại: hàng link menu dài không còn kéo rộng mọi trang, nên điện thoại không còn hiện thu nhỏ như bản desktop" },
@@ -387,7 +399,6 @@ export const CHANGELOG: Change[] = [
   {
     when: "2026-10-23",
     pr: 24,
-    open: true,
     title: { en: "GitHub workflows: changelog check and architecture refresh", vi: "Workflow GitHub: kiểm tra changelog và cập nhật kiến trúc" },
     items: [
       { en: "Product docs: a pull request that changes src/, a migration, vercel.ts or package.json without touching the changelog fails (label no-changelog for the exceptions), and package.json must match stack.lock.json", vi: "Product docs: pull request đổi src/, migration, vercel.ts hoặc package.json mà không sửa changelog sẽ lỗi (nhãn no-changelog cho ngoại lệ), và package.json phải khớp stack.lock.json" },
@@ -397,7 +408,6 @@ export const CHANGELOG: Change[] = [
   {
     when: "2026-10-23",
     pr: 23,
-    open: true,
     title: { en: "Guardrails: architecture snapshots, locked core stack, changelog check", vi: "Rào chắn: bản chụp kiến trúc, khóa core stack, kiểm tra changelog" },
     items: [
       { en: "Architecture diagrams are dated snapshots with a history; the page says when main has moved past them and the nav shows a badge; /refresh-architecture in Claude Code adds a new snapshot (the Update architecture button starts the same recipe on GitHub once the workflow is added)", vi: "Sơ đồ kiến trúc là các bản chụp theo ngày, có lịch sử; trang báo khi main đã đi xa hơn sơ đồ và menu hiện huy hiệu; /refresh-architecture trong Claude Code thêm bản chụp mới (nút Cập nhật kiến trúc chạy cùng quy trình đó trên GitHub khi workflow được thêm vào)" },
@@ -628,6 +638,7 @@ export const FEATURES: FeatureGroup[] = [
     items: [
       { name: { en: "Architecture snapshots", vi: "Bản chụp kiến trúc" }, desc: { en: "Archify diagrams kept per date; the admin compares main with the commit they were traced from; /refresh-architecture or the Update architecture button (once the keys are set) adds a snapshot", vi: "Sơ đồ Archify lưu theo ngày; admin so main với commit đã vẽ; /refresh-architecture hoặc nút Cập nhật kiến trúc (khi đã đặt khóa) thêm bản chụp mới" }, status: "live", code: "src/lib/pm · .github/workflows/refresh-architecture.yml · .claude/commands/refresh-architecture.md" },
       { name: { en: "Stack lock", vi: "Khóa stack" }, desc: { en: "The build fails when a core package is added, removed or moved to another major", vi: "Build lỗi khi thêm, bỏ hoặc nâng major một package core" }, status: "live", code: "stack.lock.json · scripts/check-stack.mjs" },
+      { name: { en: "Phone audit and brand drift", vi: "Audit điện thoại và độ lệch thương hiệu" }, desc: { en: "Two scripts that drive a browser through the Playwright MCP server: tap targets, zoom-on-focus fields, overflow and console errors at 390 px; every painted colour against the BRAND.md tokens", vi: "Hai script điều khiển trình duyệt qua Playwright MCP server: vùng bấm, ô nhập gây phóng to, tràn ngang và lỗi console ở 390 px; mọi màu được vẽ so với token trong BRAND.md" }, status: "live", code: "scripts/mobile-audit.mjs · scripts/brand-drift.mjs · .mcp.json" },
       { name: { en: "Changelog check", vi: "Kiểm tra changelog" }, desc: { en: "A pull request that changes the product must update the changelog (the check fails otherwise); the admin lists merged pull requests with no entry", vi: "Pull request đổi sản phẩm phải cập nhật changelog (nếu không bước kiểm tra sẽ lỗi); admin liệt kê các pull request đã merge mà chưa có mục" }, status: "live", code: ".github/workflows/pm-docs.yml · /admin/pm/changelog" },
     ],
   },

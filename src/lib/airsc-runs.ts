@@ -108,6 +108,38 @@ export const AIRSC_RUNS: Record<string, AirscRun> = {
       }, "seo-audit"),
     ],
   },
+  "microsoft-playwright-mcp": {
+    task: {
+      en: "Audit ten public Airsc pages at 390 px with the Playwright MCP server (tap targets, text fields that make iOS zoom, overflow, console errors), fix what it found, and run it again. Next to it, design-dna's colour maths measured every painted colour on nine pages against the BRAND.md tokens; the off-brand panel colours moved onto tokens.",
+      vi: "Audit mười trang công khai của Airsc ở 390 px bằng Playwright MCP server (vùng bấm, ô nhập khiến iOS tự phóng to, tràn ngang, lỗi console), sửa những gì nó tìm ra rồi chạy lại. Song song, phép tính màu của design-dna đo mọi màu được vẽ trên chín trang so với các token trong BRAND.md; các màu lệch thương hiệu trong panel đã chuyển sang token.",
+    },
+    agent: "Claude Code",
+    date: "2026-10-25",
+    images: [
+      img("microsoft-playwright-mcp", "phone-and-brand", 1600, 900, {
+        en: "Before and after: tap targets under 40 px 170 → 45, text fields that make iOS zoom 1 → 0, colours outside the brand tokens 10 → 5; the sticky header grew from 131 to 143 px",
+        vi: "Trước và sau: vùng bấm dưới 40 px từ 170 còn 45, ô nhập khiến iOS phóng to từ 1 còn 0, màu ngoài token thương hiệu từ 10 còn 5; header cố định cao thêm từ 131 lên 143 px",
+      }, "scripts/mobile-audit.mjs · scripts/brand-drift.mjs"),
+      img("microsoft-playwright-mcp", "phone-audit", 1600, 900, {
+        en: "Phone audit of 10 public pages at 390 px, before and after the fixes. No page was wider than the screen before or after.",
+        vi: "Audit điện thoại cho 10 trang công khai ở 390 px, trước và sau khi sửa. Không trang nào rộng hơn màn hình, cả trước lẫn sau.",
+      }, "scripts/mobile-audit.mjs"),
+    ],
+  },
+  "zanwei-design-dna": {
+    task: {
+      en: "Measure every painted background and text colour on nine Airsc pages, light and dark, against the BRAND.md tokens with CIE ΔE, then move the off-brand colours of the always-dark panels onto tokens.",
+      vi: "Đo mọi màu nền và màu chữ được vẽ trên chín trang Airsc, sáng và tối, so với các token trong BRAND.md bằng CIE ΔE, rồi chuyển các màu lệch thương hiệu của panel luôn tối sang token.",
+    },
+    agent: "Claude Code",
+    date: "2026-10-25",
+    images: [
+      img("zanwei-design-dna", "brand-drift", 1600, 900, {
+        en: "Brand drift on 9 pages: 10 colours outside the tokens → 5, painted elements off brand 46 → 14 (2.6% → 0.8%)",
+        vi: "Lệch thương hiệu trên 9 trang: màu ngoài token từ 10 còn 5, phần tử lệch thương hiệu từ 46 còn 14 (2,6% còn 0,8%)",
+      }, "scripts/brand-drift.mjs"),
+    ],
+  },
 };
 
 export const runFor = (slug: string): AirscRun | undefined => AIRSC_RUNS[slug];

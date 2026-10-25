@@ -12,7 +12,7 @@ export function LangSwitch({ lang }: { lang: Locale }) {
     <Link
       href={target}
       hrefLang={lang === "en" ? "vi" : "en"}
-      className="rounded-lg px-2 py-1 text-xs font-semibold uppercase tracking-wide text-muted hover:bg-soft hover:text-fg"
+      className="rounded-lg px-3 py-3 text-xs font-semibold uppercase sm:px-2 sm:py-1 tracking-wide text-muted hover:bg-soft hover:text-fg"
     >
       {lang === "en" ? "VI" : "EN"}
     </Link>
