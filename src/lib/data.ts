@@ -2,6 +2,7 @@ import "server-only";
 import { anonClient } from "@/lib/supabase/anon";
 import { AIRSC_RUNS } from "@/lib/airsc-runs";
 import type { AdminFilter, AdminResourceRow } from "@/lib/engine/db";
+import { type Playbook, type PlaybookStep, playbookSlugs } from "@/lib/playbooks";
 import type { GuidePageRow, Kit, Resource, ResourceType } from "@/lib/types";
 
 const CARD_BASE =
@@ -308,4 +309,29 @@ export async function adminSlideshowResources(f: AdminFilter): Promise<{ total: 
     };
   }) as unknown as AdminResourceRow[];
   return { total: count ?? rows.length, rows };
+}
+
+export type ResolvedStep = PlaybookStep & {
+  /** the resource shown as the pick: the recommended one, or the first alternative still published */
+  card: ResourceCard | null;
+  promoted: boolean;
+  others: ResourceCard[];
+};
+
+/**
+ * A playbook with its resources. Hidden, removed or danger-rated resources drop out; when the recommended
+ * one is gone, the first alternative takes its place and `promoted` says so.
+ */
+export async function resolvePlaybook(p: Playbook): Promise<ResolvedStep[]> {
+  const { data } = await anonClient()
+    .from("resources")
+    .select(await cardFields())
+    .in("slug", playbookSlugs(p))
+    .neq("safety", "danger");
+  const bySlug = new Map(((data ?? []) as unknown as ResourceCard[]).map((r) => [r.slug, r]));
+  return p.steps.map((s) => {
+    const live = [s.pick, ...s.alternatives].map((slug) => bySlug.get(slug)).filter((r): r is ResourceCard => !!r);
+    const card = live[0] ?? null;
+    return { ...s, card, promoted: !!card && card.slug !== s.pick, others: live.slice(1) };
+  });
 }

@@ -8,7 +8,7 @@ export const hasLocale = (l: string): l is Locale => (LOCALES as readonly string
 export const href = (lang: Locale, path = "/") => (lang === "en" ? path : `/vi${path === "/" ? "" : path}`);
 
 const en = {
-  nav: { browse: "Browse", kits: "Kits", guides: "Guides", mcp: "Airsc MCP", pricing: "Pricing", signIn: "Sign in", account: "Account" },
+  nav: { browse: "Browse", jobs: "By job", kits: "Kits", guides: "Guides", mcp: "Airsc MCP", pricing: "Pricing", signIn: "Sign in", account: "Account" },
   content: {
     tryAsking: "Try asking your agent",
     useCases: "What you can do with it",
@@ -161,6 +161,26 @@ const en = {
     noCredits: "You're out of credits this week.",
     upgrade: "Get more credits",
   },
+  jobs: {
+    title: "AI agent resources for your job",
+    sub: "Pick your work. Each job has step-by-step playbooks: one recommended resource per step, with alternatives, why we chose it and what it needs to run.",
+    playbooks: "Playbooks",
+    steps: "steps",
+    resources: "resources",
+    recommended: "Recommended",
+    alternatives: "Alternatives",
+    airscUsed: "Airsc used it",
+    needs: "Needs",
+    promoted: "The usual pick is not available right now; this is the first alternative.",
+    top: "Most-starred for this job",
+    seeAll: "See all {n} in Browse",
+    noPlaybook: "No playbook yet for this job: these are its best-rated resources.",
+    allJobs: "All jobs",
+    reviewed: "Picks reviewed by hand: a recommended resource is rated Safe with a quality score of 85 or more and updated in the last 90 days. Alternatives marked Caution are worth reading about first.",
+    proTitle: "Install the whole playbook at once",
+    proText: "Pro members get one prompt that installs the recommended resource of every step. The playbook itself is free for everyone.",
+    promptIntro: "Paste this into your agent:",
+  },
   kits: {
     title: "Kits",
     sub: "Bundles of the best resources for one goal, picked from the library and safety-checked.",
@@ -282,7 +302,7 @@ const en = {
 export type Dict = typeof en;
 
 const vi: Dict = {
-  nav: { browse: "Khám phá", kits: "Kit", guides: "Hướng dẫn", mcp: "Airsc MCP", pricing: "Bảng giá", signIn: "Đăng nhập", account: "Tài khoản" },
+  nav: { browse: "Khám phá", jobs: "Theo nghề", kits: "Kit", guides: "Hướng dẫn", mcp: "Airsc MCP", pricing: "Bảng giá", signIn: "Đăng nhập", account: "Tài khoản" },
   content: {
     tryAsking: "Thử hỏi agent của bạn",
     useCases: "Bạn có thể làm gì với nó",
@@ -434,6 +454,26 @@ const vi: Dict = {
     manual: "Chưa có cài 1-click. Dùng lệnh terminal hoặc nhờ agent bằng prompt.",
     noCredits: "Bạn đã hết credit tuần này.",
     upgrade: "Mua thêm credit",
+  },
+  jobs: {
+    title: "Tài nguyên AI agent cho công việc của bạn",
+    sub: "Chọn công việc của bạn. Mỗi nghề có lộ trình từng bước: mỗi bước một tài nguyên khuyên dùng, kèm lựa chọn thay thế, lý do chọn và những gì cần để chạy.",
+    playbooks: "Lộ trình",
+    steps: "bước",
+    resources: "tài nguyên",
+    recommended: "Khuyên dùng",
+    alternatives: "Thay thế",
+    airscUsed: "Airsc đã dùng",
+    needs: "Cần",
+    promoted: "Lựa chọn thường dùng đang không có sẵn; đây là lựa chọn thay thế đầu tiên.",
+    top: "Nhiều sao nhất cho nghề này",
+    seeAll: "Xem cả {n} tài nguyên trong Khám phá",
+    noPlaybook: "Nghề này chưa có lộ trình: đây là các tài nguyên được đánh giá cao nhất.",
+    allJobs: "Mọi nghề",
+    reviewed: "Lựa chọn được duyệt bằng tay: tài nguyên khuyên dùng phải được đánh giá An toàn, điểm chất lượng từ 85 và có cập nhật trong 90 ngày. Lựa chọn thay thế có nhãn Cẩn trọng thì nên đọc báo cáo trước.",
+    proTitle: "Cài cả lộ trình một lần",
+    proText: "Thành viên Pro có một prompt cài tài nguyên khuyên dùng của mọi bước. Bản thân lộ trình miễn phí cho mọi người.",
+    promptIntro: "Dán đoạn này vào agent của bạn:",
   },
   kits: {
     title: "Kit",

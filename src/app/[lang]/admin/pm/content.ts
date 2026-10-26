@@ -329,7 +329,7 @@ export const PHASES: Phase[] = [
     when: "2026-10-26",
     status: "doing",
     items: [
-      { en: "P0 Jobs and playbooks: the catalog by profession, step-by-step playbooks with a recommended pick and alternatives per step", vi: "P0 Nghề và lộ trình: thư viện theo nghề, lộ trình từng bước có lựa chọn khuyên dùng và thay thế cho mỗi bước" },
+      { en: "P0 Jobs and playbooks (done in PRs 27 and 28): the catalog by profession, step-by-step playbooks with a recommended pick and alternatives per step", vi: "P0 Nghề và lộ trình: thư viện theo nghề, lộ trình từng bước có lựa chọn khuyên dùng và thay thế cho mỗi bước" },
       { en: "P1 Signals and scoreboard: search log, clicks and installs per resource, /admin/engine with the health of every loop", vi: "P1 Tín hiệu và scoreboard: nhật ký tìm kiếm, click và lượt cài theo tài nguyên, /admin/engine với sức khoẻ từng vòng" },
       { en: "P2 Evals: golden cases per agent, code graders first, a CI check on every prompt or model change", vi: "P2 Eval: bộ case chuẩn cho từng agent, chấm bằng code trước, kiểm tra CI cho mọi thay đổi prompt hoặc model" },
       { en: "P3 Memory, run journal and a daily planner", vi: "P3 Bộ nhớ, nhật ký run và bộ lập kế hoạch hằng ngày" },
@@ -391,8 +391,19 @@ export type Change = { when: string; pr?: number; also?: number[]; open?: boolea
 export const CHANGELOG: Change[] = [
   {
     when: "2026-10-26",
-    pr: 27,
+    pr: 28,
     open: true,
+    title: { en: "Playbooks by job: /for", vi: "Lộ trình theo nghề: /for" },
+    items: [
+      { en: "/for lists the twelve jobs with their resource counts; /for/<job> shows its playbooks and most-starred resources; /for/<job>/<playbook> is the step-by-step page", vi: "/for liệt kê mười hai nghề kèm số tài nguyên; /for/<nghề> hiện các lộ trình và tài nguyên nhiều sao nhất; /for/<nghề>/<lộ trình> là trang từng bước" },
+      { en: "Ten playbooks, 47 steps, reviewed by hand: build a project with an agent, launch marketing, a pipeline to find customers, office automation, content for every channel, deep research, collect and analyse data, idea to PRD, financial analysis, check before you install. Each step has one recommended resource (rated Safe, quality 85 or more) and alternatives, why, and what it needs", vi: "Mười lộ trình, 47 bước, duyệt bằng tay: xây dự án cùng agent, marketing cho sản phẩm mới, pipeline tìm khách hàng, tự động hoá văn phòng, nội dung đa kênh, nghiên cứu sâu, thu thập và phân tích dữ liệu, từ ý tưởng đến PRD, phân tích tài chính, kiểm tra trước khi cài. Mỗi bước có một tài nguyên khuyên dùng (An toàn, chất lượng từ 85) cùng lựa chọn thay thế, lý do và điều kiện chạy" },
+      { en: "A pick that is hidden or removed drops out and the first alternative still published takes its place; a playbook never points at a dead page. Resources Airsc ran on its own code are marked", vi: "Tài nguyên bị ẩn hoặc gỡ sẽ tự rơi ra và lựa chọn thay thế còn hiển thị đầu tiên thế chỗ; lộ trình không bao giờ trỏ tới trang chết. Tài nguyên Airsc đã chạy trên code của mình được đánh dấu" },
+      { en: "Pro: one prompt installs the recommended resource of every step, as in kits. A By job link in the header and the sitemap", vi: "Pro: một prompt cài tài nguyên khuyên dùng của mọi bước, như kit. Link Theo nghề trên header và trong sitemap" },
+    ],
+  },
+  {
+    when: "2026-10-26",
+    pr: 27,
     title: { en: "Jobs: the catalog sorted by the work it helps with", vi: "Nghề: thư viện chia theo công việc mà tài nguyên hỗ trợ" },
     items: [
       { en: "Twelve jobs (software development, office work, content, marketing, sales and support, data, research, design, product, finance, security, legal and HR) and thirteen industries; every published resource labelled (migration 20261026000100)", vi: "Mười hai nghề (lập trình, văn phòng, nội dung, marketing, bán hàng và CSKH, dữ liệu, nghiên cứu, thiết kế, sản phẩm, tài chính, bảo mật, pháp lý và nhân sự) và mười ba lĩnh vực; mọi tài nguyên đang hiển thị đều được gắn nhãn (migration 20261026000100)" },
@@ -404,7 +415,6 @@ export const CHANGELOG: Change[] = [
   {
     when: "2026-10-25",
     pr: 26,
-    open: true,
     title: { en: "Playwright MCP and design-dna on Airsc itself: phone audit, brand drift", vi: "Playwright MCP và design-dna chạy trên chính Airsc: audit điện thoại, độ lệch thương hiệu" },
     items: [
       { en: "scripts/mobile-audit.mjs drives the Playwright MCP server over stdio (no package added) and checks ten public pages at 390 px. Before: 170 tap targets under 40 px, 1 text field that makes iOS zoom in. After: 45 and 0. No page was wider than the screen before or after. Cost: the sticky header is 12 px taller on phones (131 to 143)", vi: "scripts/mobile-audit.mjs điều khiển Playwright MCP server qua stdio (không thêm package) và kiểm tra mười trang công khai ở 390 px. Trước: 170 vùng bấm dưới 40 px, 1 ô nhập khiến iOS phóng to. Sau: 45 và 0. Không trang nào rộng hơn màn hình, cả trước lẫn sau. Cái giá: header cố định cao thêm 12 px trên điện thoại (131 lên 143)" },
@@ -634,6 +644,7 @@ export const FEATURES: FeatureGroup[] = [
   {
     title: { en: "Content Engine", vi: "Content Engine" },
     items: [
+      { name: { en: "Playbooks by job", vi: "Lộ trình theo nghề" }, desc: { en: "Ten reviewed playbooks (47 steps) with a recommended resource and alternatives per step; a hidden pick is replaced by its first live alternative; one install prompt for Pro", vi: "Mười lộ trình đã duyệt (47 bước), mỗi bước có tài nguyên khuyên dùng và lựa chọn thay thế; pick bị ẩn được thay bằng lựa chọn còn sống đầu tiên; một prompt cài đặt cho Pro" }, status: "live", code: "src/lib/playbooks.ts · /for · /for/[job]/[playbook]" },
       { name: { en: "Jobs and industries", vi: "Nghề và lĩnh vực" }, desc: { en: "Every resource carries the jobs it helps with and, when it has one, its field; the Curator sets them; Browse filters by job", vi: "Mỗi tài nguyên có nghề mà nó hỗ trợ và lĩnh vực nếu có; Curator gắn; Khám phá lọc được theo nghề" }, status: "live", code: "src/lib/taxonomy.ts · src/lib/engine/agents/curator.ts · /browse?job=" },
       { name: { en: "Daily run", vi: "Chạy hằng ngày" }, desc: { en: "Durable workflow at the hour set in /admin; presets and limits per run", vi: "Workflow bền vững vào giờ đặt trong /admin; có preset và giới hạn mỗi lần chạy" }, status: "live", code: "src/workflows/content-engine.ts" },
       { name: { en: "Seven agents", vi: "Bảy agent" }, desc: { en: "Scout, Analyst, Curator, Producer, Demo, Previewer, Editor", vi: "Scout, Analyst, Curator, Producer, Demo, Previewer, Editor" }, status: "live", code: "src/lib/engine/agents" },
