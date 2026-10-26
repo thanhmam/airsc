@@ -1,8 +1,10 @@
 import {
+  BookOpen, Briefcase, Clapperboard, Code, Handshake, Landmark, Lightbulb, Megaphone, Scale,
   Blocks, Bot, Box, ChartColumn, CreditCard, Database, FileCode2, Layout, Lock, Mail, Palette, Plug, Rocket,
   Search, ShieldAlert, ShieldCheck, ShieldQuestion, Sparkles, Users,
   type LucideIcon,
 } from "lucide-react";
+import type { JobSlug } from "@/lib/taxonomy";
 import type { ResourceType, Safety } from "@/lib/types";
 
 export const TYPE_ICON: Record<ResourceType, LucideIcon> = {
@@ -31,4 +33,19 @@ export const SAFETY_ICON: Record<Safety, LucideIcon> = {
   safe: ShieldCheck,
   caution: ShieldQuestion,
   danger: ShieldAlert,
+};
+
+export const JOB_ICON: Record<JobSlug, LucideIcon> = {
+  engineering: Code,
+  office: Briefcase,
+  content: Clapperboard,
+  marketing: Megaphone,
+  sales: Handshake,
+  data: ChartColumn,
+  research: BookOpen,
+  design: Palette,
+  product: Lightbulb,
+  finance: Landmark,
+  security: ShieldCheck,
+  "legal-hr": Scale,
 };
