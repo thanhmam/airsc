@@ -92,8 +92,36 @@ export const db = {
   settings: () => rpc<EngineSettings>("get_engine_settings", {}),
   saveSettings: (value: EngineSettings) => rpc<EngineSettings>("set_engine_settings", { p_value: value }),
   cronRanToday: () => rpc<boolean>("cron_ran_today_vn", {}),
+  logSearch: (q: string, results: number, source: string, job?: string) =>
+    rpc<void>("log_search", { p_q: q, p_results: results, p_source: source, p_job: job ?? null }),
+  scoreboard: () => rpc<Scoreboard>("engine_scoreboard", {}),
   navCounts: () =>
     rpc<{ total: number; by_type: Record<string, number>; review: number; queued: number; hidden: number }>("admin_nav_counts", {}),
+};
+
+/** engine_scoreboard (migration 20261026000300) */
+export type Scoreboard = {
+  searches: {
+    last7: number;
+    prev7: number;
+    zero_last7: number;
+    zero_prev7: number;
+    mcp_last7: number;
+    zero_queries: { q: string; n: number }[];
+    top_queries: { q: string; n: number; avg_results: number }[];
+  };
+  catalog: {
+    published: number;
+    new7: number;
+    new_prev7: number;
+    hidden: number;
+    unclassified: number;
+    unlabelled: number;
+    views: number;
+    opens: number;
+    jobs: Record<string, number>;
+  };
+  runs: { id: number; trigger: string; status: string; stats: Record<string, number>; started_at: string; finished_at: string | null }[];
 };
 
 export type AdminFilter = {

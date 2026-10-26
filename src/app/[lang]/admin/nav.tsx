@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { Blocks, Bot, CalendarDays, ChartColumn, ChevronDown, ClipboardCheck, EyeOff, ExternalLink, CreditCard, FileCode2, History, Inbox, Layers, LayoutDashboard, Library, ListChecks, ListTodo, Menu, Milestone, Network, PenLine, Plug, Send, Sparkles, SlidersHorizontal, Users, UsersRound, Wallet, type LucideIcon } from "lucide-react";
+import { Blocks, Bot, CalendarDays, Gauge, ChartColumn, ChevronDown, ClipboardCheck, EyeOff, ExternalLink, CreditCard, FileCode2, History, Inbox, Layers, LayoutDashboard, Library, ListChecks, ListTodo, Menu, Milestone, Network, PenLine, Plug, Send, Sparkles, SlidersHorizontal, Users, UsersRound, Wallet, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export type NavItem = {
@@ -18,7 +18,7 @@ export type NavItem = {
   tone?: "warn";
 };
 
-const ICONS = { overview: LayoutDashboard, library: Library, skill: Sparkles, mcp: Plug, plugin: Blocks, agent: Users, rule: FileCode2, review: Inbox, hidden: EyeOff, agents: Bot, social: Send, queue: ListTodo, write: PenLine, performance: ChartColumn, reviews: ClipboardCheck, settings: SlidersHorizontal, site: ExternalLink, architecture: Network, stack: Layers, roadmap: Milestone, changelog: History, features: ListChecks, picks: CalendarDays, billing: Wallet, accounts: UsersRound, payments: CreditCard } satisfies Record<string, LucideIcon>;
+const ICONS = { overview: LayoutDashboard, library: Library, skill: Sparkles, mcp: Plug, plugin: Blocks, agent: Users, rule: FileCode2, review: Inbox, hidden: EyeOff, agents: Bot, engine: Gauge, social: Send, queue: ListTodo, write: PenLine, performance: ChartColumn, reviews: ClipboardCheck, settings: SlidersHorizontal, site: ExternalLink, architecture: Network, stack: Layers, roadmap: Milestone, changelog: History, features: ListChecks, picks: CalendarDays, billing: Wallet, accounts: UsersRound, payments: CreditCard } satisfies Record<string, LucideIcon>;
 
 function useActive() {
   const path = usePathname();

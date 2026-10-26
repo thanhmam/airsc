@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { createMcpHandler, withMcpAuth } from "mcp-handler";
 import { z } from "zod";
 import { getKit, getKits, getResource, searchResources } from "@/lib/data";
+import { logSearch } from "@/lib/engine/signals";
 import { agentPrompt } from "@/lib/install-links";
 import { LIMITS, quota } from "@/lib/quota";
 import { anonClient } from "@/lib/supabase/anon";
@@ -63,6 +64,7 @@ const handler = createMcpHandler(
           safeOnly: safe_only,
           pageSize: limit ?? 8,
         });
+        logSearch({ q: query, results: total, source: "mcp" });
         return text({
           total,
           results: items.map((r) => ({

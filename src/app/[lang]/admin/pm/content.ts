@@ -330,7 +330,7 @@ export const PHASES: Phase[] = [
     status: "doing",
     items: [
       { en: "P0 Jobs and playbooks: the catalog by profession, step-by-step playbooks with a recommended pick and alternatives per step", vi: "P0 Nghề và lộ trình: thư viện theo nghề, lộ trình từng bước có lựa chọn khuyên dùng và thay thế cho mỗi bước" },
-      { en: "P1 Signals and scoreboard: search log, clicks and installs per resource, /admin/engine with the health of every loop", vi: "P1 Tín hiệu và scoreboard: nhật ký tìm kiếm, click và lượt cài theo tài nguyên, /admin/engine với sức khoẻ từng vòng" },
+      { en: "P1 Signals and scoreboard (search log and /admin/engine done; clicks and installs per resource next)", vi: "P1 Tín hiệu và scoreboard: nhật ký tìm kiếm, click và lượt cài theo tài nguyên, /admin/engine với sức khoẻ từng vòng" },
       { en: "P2 Evals: golden cases per agent, code graders first, a CI check on every prompt or model change", vi: "P2 Eval: bộ case chuẩn cho từng agent, chấm bằng code trước, kiểm tra CI cho mọi thay đổi prompt hoặc model" },
       { en: "P3 Memory, run journal and a daily planner", vi: "P3 Bộ nhớ, nhật ký run và bộ lập kế hoạch hằng ngày" },
       { en: "P4 Discovery and ranking that learn from yield and real use", vi: "P4 Discovery và xếp hạng tự học từ hiệu suất và hành vi thật" },
@@ -389,6 +389,17 @@ export const REQUESTS: Request[] = [
 export type Change = { when: string; pr?: number; also?: number[]; open?: boolean; title: L; items: L[] };
 
 export const CHANGELOG: Change[] = [
+  {
+    when: "2026-10-26",
+    pr: 29,
+    open: true,
+    title: { en: "Engine scoreboard and search signals", vi: "Scoreboard của cỗ máy và tín hiệu tìm kiếm" },
+    items: [
+      { en: "Every search (instant dropdown, Browse, the MCP server) is recorded with how many results it had (table search_log, migration 20261026000300); the write happens after the response and never blocks or breaks a search", vi: "Mỗi lượt tìm (gợi ý nhanh, Khám phá, MCP server) được ghi lại cùng số kết quả (bảng search_log, migration 20261026000300); việc ghi diễn ra sau khi trả lời và không bao giờ chặn hay làm hỏng lượt tìm" },
+      { en: "/admin/engine: searches and the share with no result against the week before, what people looked for and did not find, resources per job, the latest engine runs, AI credit", vi: "/admin/engine: số lượt tìm và tỷ lệ không ra kết quả so với tuần trước, thứ người ta tìm mà không thấy, số tài nguyên theo nghề, các lần chạy engine gần nhất, credit AI" },
+      { en: "The six loops that run Airsc written down with a trigger, a goal a machine can check, a verifier, stop rules and what each learns (src/lib/loops/specs.ts), shown on the same page with how much of each exists today", vi: "Sáu vòng lặp vận hành Airsc được viết rõ: kích hoạt, mục tiêu máy kiểm tra được, cách kiểm tra, điều kiện dừng và thứ mỗi vòng học được (src/lib/loops/specs.ts), hiện trên cùng trang kèm mức đã có đến đâu" },
+    ],
+  },
   {
     when: "2026-10-26",
     pr: 27,
@@ -634,6 +645,7 @@ export const FEATURES: FeatureGroup[] = [
   {
     title: { en: "Content Engine", vi: "Content Engine" },
     items: [
+      { name: { en: "Engine scoreboard", vi: "Scoreboard cỗ máy" }, desc: { en: "Searches and what was not found, catalog growth, resources per job, latest runs and the written-out loops with their goals and verifiers", vi: "Lượt tìm và thứ không tìm thấy, tăng trưởng thư viện, tài nguyên theo nghề, các lần chạy gần nhất và các vòng lặp được viết rõ cùng mục tiêu và cách kiểm tra" }, status: "live", code: "/admin/engine · src/lib/loops/specs.ts · src/lib/engine/signals.ts" },
       { name: { en: "Jobs and industries", vi: "Nghề và lĩnh vực" }, desc: { en: "Every resource carries the jobs it helps with and, when it has one, its field; the Curator sets them; Browse filters by job", vi: "Mỗi tài nguyên có nghề mà nó hỗ trợ và lĩnh vực nếu có; Curator gắn; Khám phá lọc được theo nghề" }, status: "live", code: "src/lib/taxonomy.ts · src/lib/engine/agents/curator.ts · /browse?job=" },
       { name: { en: "Daily run", vi: "Chạy hằng ngày" }, desc: { en: "Durable workflow at the hour set in /admin; presets and limits per run", vi: "Workflow bền vững vào giờ đặt trong /admin; có preset và giới hạn mỗi lần chạy" }, status: "live", code: "src/workflows/content-engine.ts" },
       { name: { en: "Seven agents", vi: "Bảy agent" }, desc: { en: "Scout, Analyst, Curator, Producer, Demo, Previewer, Editor", vi: "Scout, Analyst, Curator, Producer, Demo, Previewer, Editor" }, status: "live", code: "src/lib/engine/agents" },

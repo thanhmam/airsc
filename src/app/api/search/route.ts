@@ -1,4 +1,5 @@
 import { searchResources } from "@/lib/data";
+import { logSearch } from "@/lib/engine/signals";
 import { RESOURCE_TYPES, type ResourceType } from "@/lib/types";
 
 /** Instant results for the homepage search dropdown: top 5 + total, same ranking as /browse */
@@ -9,6 +10,7 @@ export async function GET(req: Request) {
   const type = RESOURCE_TYPES.includes(sp.get("type") as ResourceType) ? (sp.get("type") as ResourceType) : undefined;
   const vi = sp.get("lang") === "vi";
   const { items, total } = await searchResources({ q, type, safeOnly: sp.get("safe") === "1", pageSize: 5 });
+  logSearch({ q, results: total, source: "web" });
   return Response.json(
     {
       total,
