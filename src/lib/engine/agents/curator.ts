@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { CATEGORIES, CATEGORY_SLUGS } from "@/lib/taxonomy";
+import { CATEGORIES, CATEGORY_SLUGS, INDUSTRIES, INDUSTRY_SLUGS, JOBS, JOB_SLUGS } from "@/lib/taxonomy";
 import type { Resource } from "@/lib/types";
 import { generateObject } from "../ai";
 
@@ -13,6 +13,8 @@ const schema = z.object({
         .boolean()
         .describe("True only if this is something a user installs into an AI coding agent: a skill, MCP server, plugin, subagent, rules/prompts pack, or a curated collection of those"),
       category: z.enum(CATEGORY_SLUGS),
+      jobs: z.array(z.enum(JOB_SLUGS)).min(1).max(2).describe("The main job first; a second only when it clearly serves two"),
+      industries: z.array(z.enum(INDUSTRY_SLUGS)).max(2).describe("Empty unless it is made for one specific field"),
       tags: z.array(z.string()).min(2).max(6).describe("lowercase kebab-case, e.g. stripe, supabase, tailwind"),
       level: z.enum(["beginner", "intermediate", "advanced"]).describe("How hard it is for a non-developer to install and use"),
       quality: z.number().int().min(0).max(100),
@@ -29,6 +31,8 @@ const SYSTEM = `You curate Airsc, a library of AI agent resources for vibe coder
 For every item decide:
 - relevant: is it installable into an AI coding agent (Claude skill, MCP server, Claude Code plugin/subagent, Cursor rules, prompt/rules pack, or an awesome-list of those)? NOT relevant: standalone apps and desktop/web clients, SDKs or frameworks for building agents or MCP servers, tutorials, courses, getting-started guides and example-project collections, model weights, and products that merely "use AI".
 - category: the outcome it helps with. Options: ${CATEGORIES.map((c) => `${c.slug} (${c.en})`).join(", ")}.
+- jobs: who it helps and with what work, main one first. Options: ${JOBS.map((j) => `${j.slug} (${j.en}: ${j.hint.en})`).join("; ")}. A tool for coding agents themselves (memory, rules, orchestration, code search) is engineering; a Gmail or Notion connector is office; a lead scraper is sales.
+- industries: only when it is built for one field, else empty. Options: ${INDUSTRIES.map((i) => `${i.slug} (${i.en})`).join(", ")}.
 - quality 0-100 for a vibe coder: clear README and install steps (+), focused and useful (+), active maintenance and stars (+), vague/placeholder/spam/abandoned (-), needs heavy setup or paid keys (-).
 - summary: plain words, no hype, no emoji; summary_vi and use_cases.vi in natural Vietnamese (keep product names and terms like MCP, Claude, Cursor, API in English).
 Base everything only on the provided data; never invent features. Return every key.`;
