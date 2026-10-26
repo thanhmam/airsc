@@ -5,9 +5,9 @@ import { ShieldCheck, SlidersHorizontal, X } from "lucide-react";
 import { TYPE_ICON } from "@/components/icons";
 import { ResourceCard } from "@/components/resource-card";
 import { SearchBox } from "@/components/search-box";
-import { getCategoryCounts, getTypeCounts, searchResources, type SortKey } from "@/lib/data";
+import { getCategoryCounts, getJobCounts, getTypeCounts, searchResources, type SortKey } from "@/lib/data";
 import { getDict, hasLocale, href } from "@/lib/i18n";
-import { CATEGORIES } from "@/lib/taxonomy";
+import { CATEGORIES, JOBS } from "@/lib/taxonomy";
 import { RESOURCE_TYPES, type ResourceType } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -45,21 +45,24 @@ export default async function Browse({ params, searchParams }: PageProps<"/[lang
   const type = RESOURCE_TYPES.includes(one("type") as ResourceType) ? (one("type") as ResourceType) : undefined;
   const sort = (["stars", "recent", "downloads", "new"].includes(one("sort") ?? "") ? one("sort") : "stars") as SortKey;
   const category = CATEGORIES.some((c) => c.slug === one("category")) ? one("category") : undefined;
+  const jobCounts = await getJobCounts();
+  // no counts means the jobs column is not there yet (migration 20261026000100): ignore the filter
+  const job = Object.keys(jobCounts).length && JOBS.some((j) => j.slug === one("job")) ? one("job") : undefined;
   const safe = one("safe") === "1";
   const page = Math.max(1, Number(one("page")) || 1);
 
   const [{ items, total }, categoryCounts, typeCounts] = await Promise.all([
-    searchResources({ q, type, category, safeOnly: safe, sort, page, pageSize: PAGE_SIZE }),
+    searchResources({ q, type, category, job, safeOnly: safe, sort, page, pageSize: PAGE_SIZE }),
     getCategoryCounts(),
     getTypeCounts(),
   ]);
   const pages = Math.ceil(total / PAGE_SIZE);
   const allCount = Object.values(typeCounts).reduce((a, b) => a + b, 0);
-  const activeFilters = [type, category, safe ? "1" : undefined].filter(Boolean).length;
+  const activeFilters = [type, category, job, safe ? "1" : undefined].filter(Boolean).length;
 
   const link = (patch: Record<string, string | undefined>) => {
     const next = new URLSearchParams();
-    const merged = { q, type, category, sort: sort === "stars" ? undefined : sort, safe: safe ? "1" : undefined, ...patch };
+    const merged = { q, type, category, job, sort: sort === "stars" ? undefined : sort, safe: safe ? "1" : undefined, ...patch };
     Object.entries(merged).forEach(([k, v]) => v && next.set(k, v));
     const s = next.toString();
     return href(lang, "/browse") + (s ? `?${s}` : "");
@@ -82,6 +85,20 @@ export default async function Browse({ params, searchParams }: PageProps<"/[lang
           })}
         </nav>
       </section>
+
+      {Object.keys(jobCounts).length > 0 && (
+        <section aria-labelledby="f-job">
+          <h2 id="f-job" className="mb-1.5 px-2.5 text-xs font-semibold uppercase tracking-wide text-muted">{t.browse.job}</h2>
+          <nav className="space-y-0.5">
+            <Item lang={lang} to={link({ job: undefined, page: undefined })} active={!job}>{t.browse.allJobs}</Item>
+            {JOBS.filter((j) => jobCounts[j.slug]).map((j) => (
+              <Item key={j.slug} lang={lang} to={link({ job: j.slug, page: undefined })} active={job === j.slug} count={jobCounts[j.slug]}>
+                {j[lang]}
+              </Item>
+            ))}
+          </nav>
+        </section>
+      )}
 
       {Object.keys(categoryCounts).length > 0 && (
         <section aria-labelledby="f-cat">
@@ -106,7 +123,7 @@ export default async function Browse({ params, searchParams }: PageProps<"/[lang
       </section>
 
       {activeFilters > 0 && (
-        <Link href={link({ type: undefined, category: undefined, safe: undefined, page: undefined })} className="flex items-center gap-1.5 px-2.5 text-sm text-muted hover:text-fg">
+        <Link href={link({ type: undefined, category: undefined, job: undefined, safe: undefined, page: undefined })} className="flex items-center gap-1.5 px-2.5 text-sm text-muted hover:text-fg">
           <X className="size-4" aria-hidden /> {t.browse.clear}
         </Link>
       )}
@@ -128,7 +145,7 @@ export default async function Browse({ params, searchParams }: PageProps<"/[lang
               lang={lang}
               placeholder={t.home.searchPlaceholder}
               defaultValue={q}
-              hidden={{ type, category, sort: sort === "stars" ? undefined : sort, safe: safe ? "1" : undefined }}
+              hidden={{ type, category, job, sort: sort === "stars" ? undefined : sort, safe: safe ? "1" : undefined }}
             />
           </div>
 

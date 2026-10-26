@@ -57,6 +57,9 @@ export type Resource = {
   // Content Engine fields
   status: "published" | "pending" | "hidden";
   category: string | null;
+  /** jobs and industries from src/lib/taxonomy.ts (migration 20261026000100) */
+  jobs: string[];
+  industries: string[];
   tags: string[];
   level: "beginner" | "intermediate" | "advanced" | null;
   quality: number | null;

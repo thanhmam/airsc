@@ -325,6 +325,21 @@ export const PHASES: Phase[] = [
     ],
   },
   {
+    title: { en: "Autonomous engine (loop engineering)", vi: "Cỗ máy tự động (loop engineering)" },
+    when: "2026-10-26",
+    status: "doing",
+    items: [
+      { en: "P0 Jobs and playbooks: the catalog by profession, step-by-step playbooks with a recommended pick and alternatives per step", vi: "P0 Nghề và lộ trình: thư viện theo nghề, lộ trình từng bước có lựa chọn khuyên dùng và thay thế cho mỗi bước" },
+      { en: "P1 Signals and scoreboard: search log, clicks and installs per resource, /admin/engine with the health of every loop", vi: "P1 Tín hiệu và scoreboard: nhật ký tìm kiếm, click và lượt cài theo tài nguyên, /admin/engine với sức khoẻ từng vòng" },
+      { en: "P2 Evals: golden cases per agent, code graders first, a CI check on every prompt or model change", vi: "P2 Eval: bộ case chuẩn cho từng agent, chấm bằng code trước, kiểm tra CI cho mọi thay đổi prompt hoặc model" },
+      { en: "P3 Memory, run journal and a daily planner", vi: "P3 Bộ nhớ, nhật ký run và bộ lập kế hoạch hằng ngày" },
+      { en: "P4 Discovery and ranking that learn from yield and real use", vi: "P4 Discovery và xếp hạng tự học từ hiệu suất và hành vi thật" },
+      { en: "P5 Playbooks that maintain themselves; emerging topics", vi: "P5 Lộ trình tự bảo trì; phát hiện chủ đề mới nổi" },
+      { en: "P6 Daily radar page; the three-day review for every kind of content", vi: "P6 Trang Radar hằng ngày; review 3 ngày cho mọi loại nội dung" },
+      { en: "P7 Self-improvement harness: Claude Code works through engine/backlog.json once a week and opens a pull request", vi: "P7 Harness tự cải tiến: Claude Code làm theo engine/backlog.json mỗi tuần và mở pull request" },
+    ],
+  },
+  {
     title: { en: "Next", vi: "Tiếp theo" },
     when: "",
     status: "next",
@@ -374,6 +389,18 @@ export const REQUESTS: Request[] = [
 export type Change = { when: string; pr?: number; also?: number[]; open?: boolean; title: L; items: L[] };
 
 export const CHANGELOG: Change[] = [
+  {
+    when: "2026-10-26",
+    pr: 27,
+    open: true,
+    title: { en: "Jobs: the catalog sorted by the work it helps with", vi: "Nghề: thư viện chia theo công việc mà tài nguyên hỗ trợ" },
+    items: [
+      { en: "Twelve jobs (software development, office work, content, marketing, sales and support, data, research, design, product, finance, security, legal and HR) and thirteen industries; every published resource labelled (migration 20261026000100)", vi: "Mười hai nghề (lập trình, văn phòng, nội dung, marketing, bán hàng và CSKH, dữ liệu, nghiên cứu, thiết kế, sản phẩm, tài chính, bảo mật, pháp lý và nhân sự) và mười ba lĩnh vực; mọi tài nguyên đang hiển thị đều được gắn nhãn (migration 20261026000100)" },
+      { en: "The Curator labels new resources with their jobs and industries", vi: "Curator gắn nghề và lĩnh vực cho tài nguyên mới" },
+      { en: "Browse: a By job filter", vi: "Khám phá: bộ lọc Theo nghề" },
+      { en: "The agent workflow category (511 resources, 42% of the catalog) splits into eight: planning method, memory, multi-agent teams, code search, runtimes, setup and rules, MCP infrastructure, collections (migration 20261026000200, applied after deploy)", vi: "Danh mục quy trình agent (511 tài nguyên, 42% thư viện) tách thành tám: phương pháp, bộ nhớ, đội agent, tìm code, runtime, cấu hình và rule, hạ tầng MCP, bộ sưu tập (migration 20261026000200, áp sau khi deploy)" },
+    ],
+  },
   {
     when: "2026-10-25",
     pr: 26,
@@ -607,6 +634,7 @@ export const FEATURES: FeatureGroup[] = [
   {
     title: { en: "Content Engine", vi: "Content Engine" },
     items: [
+      { name: { en: "Jobs and industries", vi: "Nghề và lĩnh vực" }, desc: { en: "Every resource carries the jobs it helps with and, when it has one, its field; the Curator sets them; Browse filters by job", vi: "Mỗi tài nguyên có nghề mà nó hỗ trợ và lĩnh vực nếu có; Curator gắn; Khám phá lọc được theo nghề" }, status: "live", code: "src/lib/taxonomy.ts · src/lib/engine/agents/curator.ts · /browse?job=" },
       { name: { en: "Daily run", vi: "Chạy hằng ngày" }, desc: { en: "Durable workflow at the hour set in /admin; presets and limits per run", vi: "Workflow bền vững vào giờ đặt trong /admin; có preset và giới hạn mỗi lần chạy" }, status: "live", code: "src/workflows/content-engine.ts" },
       { name: { en: "Seven agents", vi: "Bảy agent" }, desc: { en: "Scout, Analyst, Curator, Producer, Demo, Previewer, Editor", vi: "Scout, Analyst, Curator, Producer, Demo, Previewer, Editor" }, status: "live", code: "src/lib/engine/agents" },
       { name: { en: "Publish gate", vi: "Cổng đăng" }, desc: { en: "Relevant, quality 40+ and not danger, otherwise hidden with a reason", vi: "Đúng chủ đề, điểm 40+ và không nguy hiểm, nếu không thì ẩn kèm lý do" }, status: "live", code: "curator.ts gate()" },

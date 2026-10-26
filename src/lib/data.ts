@@ -58,13 +58,14 @@ const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
  * how many words they match (a word in the name counts three times), then stars.
  */
 async function anyWordSearch(opts: Parameters<typeof searchResources>[0], words: string[]) {
-  const { type, category, safeOnly, page = 1, pageSize = 24 } = opts;
+  const { type, category, job, safeOnly, page = 1, pageSize = 24 } = opts;
   let query = anonClient()
     .from("resources")
     .select(await cardFields(), { count: "exact" })
     .textSearch("search", words.map((w) => `${w}:*`).join(" | "), { config: "simple" });
   if (type) query = query.eq("type", type);
   if (category) query = query.eq("category", category);
+  if (job) query = query.contains("jobs", [job]);
   if (safeOnly) query = query.eq("safety", "safe");
   const { data, count, error } = await query.order("stars", { ascending: false }).limit(300);
   if (error) throw new Error(error.message);
@@ -86,17 +87,20 @@ export async function searchResources(opts: {
   q?: string;
   type?: ResourceType;
   category?: string;
+  /** a job slug (src/lib/taxonomy.ts JOBS): resources that help with that work */
+  job?: string;
   safeOnly?: boolean;
   sort?: SortKey;
   page?: number;
   pageSize?: number;
 }): Promise<{ items: ResourceCard[]; total: number }> {
-  const { q, type, category, safeOnly, sort = "stars", page = 1, pageSize = 24 } = opts;
+  const { q, type, category, job, safeOnly, sort = "stars", page = 1, pageSize = 24 } = opts;
   let query = anonClient().from("resources").select(await cardFields(), { count: "exact" });
   const ts = q ? toTsQuery(q) : null;
   if (ts) query = query.textSearch("search", ts, { config: "simple" });
   if (type) query = query.eq("type", type);
   if (category) query = query.eq("category", category);
+  if (job) query = query.contains("jobs", [job]);
   if (safeOnly) query = query.eq("safety", "safe");
   query =
     sort === "recent"
@@ -206,6 +210,19 @@ export async function getCategoryCounts(): Promise<Record<string, number>> {
   for (let from = 0; ; from += 1000) {
     const { data } = await anonClient().from("resources").select("category").not("category", "is", null).range(from, from + 999);
     (data ?? []).forEach((r) => (counts[r.category as string] = (counts[r.category as string] ?? 0) + 1));
+    if (!data || data.length < 1000) break;
+  }
+  return counts;
+}
+
+/** Resources per job (a resource with two jobs counts for both) */
+export async function getJobCounts(): Promise<Record<string, number>> {
+  const counts: Record<string, number> = {};
+  for (let from = 0; ; from += 1000) {
+    const { data, error } = await anonClient().from("resources").select("jobs").range(from, from + 999);
+    // until migration 20261026000100 is applied the column is missing: no job filter
+    if (error) return {};
+    (data ?? []).forEach((r) => ((r.jobs as string[] | null) ?? []).forEach((j) => (counts[j] = (counts[j] ?? 0) + 1)));
     if (!data || data.length < 1000) break;
   }
   return counts;
