@@ -6,6 +6,7 @@ import { TYPE_ICON } from "@/components/icons";
 import { ResourceCard } from "@/components/resource-card";
 import { SearchBox } from "@/components/search-box";
 import { getCategoryCounts, getJobCounts, getTypeCounts, searchResources, type SortKey } from "@/lib/data";
+import { logSearch } from "@/lib/engine/signals";
 import { getDict, hasLocale, href } from "@/lib/i18n";
 import { CATEGORIES, JOBS } from "@/lib/taxonomy";
 import { RESOURCE_TYPES, type ResourceType } from "@/lib/types";
@@ -56,6 +57,7 @@ export default async function Browse({ params, searchParams }: PageProps<"/[lang
     getCategoryCounts(),
     getTypeCounts(),
   ]);
+  if (page === 1) logSearch({ q, results: total, source: "browse", job });
   const pages = Math.ceil(total / PAGE_SIZE);
   const allCount = Object.values(typeCounts).reduce((a, b) => a + b, 0);
   const activeFilters = [type, category, job, safe ? "1" : undefined].filter(Boolean).length;

@@ -46,6 +46,7 @@ export default async function AdminLayout({ children, params }: LayoutProps<"/[l
     { href: `${res}?stage=unclassified`, label: c.tabs.queued, icon: "review", count: counts.queued, match: { stage: "unclassified" } },
     { href: `${res}?status=hidden`, label: c.tabs.hidden, icon: "hidden", count: counts.hidden, match: { status: "hidden" } },
     { href: href(lang, "/admin/agents"), label: c.tabs.agents, icon: "agents", count: undefined },
+    { href: href(lang, "/admin/engine"), label: c.tabs.engine, icon: "engine" },
     {
       href: social,
       label: c.tabs.social,
