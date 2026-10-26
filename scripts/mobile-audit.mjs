@@ -9,7 +9,7 @@ import { spawn } from "node:child_process";
 
 const base = (process.argv.find((a) => a.startsWith("http")) ?? "http://localhost:3100").replace(/\/$/, "");
 const asJson = process.argv.includes("--json");
-const PAGES = ["/", "/vi", "/browse", "/kits", "/guides", "/mcp", "/pricing", "/login", "/r/tt-a1i-archify", "/vi/r/tt-a1i-archify"];
+const PAGES = ["/for", "/for/sales", "/for/sales/lead-pipeline", "/vi/for/engineering/build-with-an-agent", "/", "/vi", "/browse", "/kits", "/guides", "/mcp", "/pricing", "/login", "/r/tt-a1i-archify", "/vi/r/tt-a1i-archify"];
 
 const server = spawn("npx", ["-y", "@playwright/mcp@latest", "--headless", "--isolated", "--viewport-size", "390x844"], {
   stdio: ["pipe", "pipe", "inherit"],

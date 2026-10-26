@@ -8,6 +8,7 @@ export async function SiteHeader({ lang, t }: { lang: Locale; t: Dict }) {
   const { user } = await currentUser();
   const nav = [
     { label: t.nav.browse, path: "/browse" },
+    { label: t.nav.jobs, path: "/for" },
     { label: t.nav.kits, path: "/kits" },
     { label: t.nav.guides, path: "/guides" },
     { label: t.nav.mcp, path: "/mcp" },
