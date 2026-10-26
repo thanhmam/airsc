@@ -514,6 +514,7 @@ from (values
   ('serpro69-capy', 'agent-memory'),
   ('tashangkd-cognitive-os', 'agent-memory'),
   ('naravid19-ai-project-rules-generator', 'agent-setup'),
-  ('egalano-build-a-skill', 'agent-setup')
+  ('egalano-build-a-skill', 'agent-setup'),
+  ('backnotprop-pstack', 'agent-method')
 ) as v(slug, category)
 where r.slug = v.slug and r.category = 'agent-workflow';
