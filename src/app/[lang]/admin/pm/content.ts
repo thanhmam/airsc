@@ -390,6 +390,15 @@ export type Change = { when: string; pr?: number; also?: number[]; open?: boolea
 
 export const CHANGELOG: Change[] = [
   {
+    when: "2026-11-02",
+    pr: 30,
+    title: { en: "Queue keeps the last week; Applied on Airsc", vi: "Hàng đợi giữ lại tuần qua; Đã áp dụng trên Airsc" },
+    items: [
+      { en: "Drafts were never deleted: with automatic posting on, a spotlight nobody approved went out at its hour without its @tag and left the queue the next day. The queue now says whether drafts go out on their own, keeps open posts whatever their day, and lists what was posted or skipped in the last 7 days with its numbers", vi: "Bản nháp chưa từng bị xóa: khi bật tự đăng, spotlight không ai duyệt sẽ lên X đúng giờ, bỏ tag @, rồi sang ngày sau rời hàng đợi. Giờ hàng đợi ghi rõ bản nháp có tự đăng hay không, giữ bài chưa xong dù của ngày nào, và liệt kê các bài đã đăng hoặc bỏ qua trong 7 ngày kèm số liệu" },
+      { en: "/admin/social/applied: each resource Airsc ran on its own code with its task, result images, pull request, commits and files, and its applied posts; runs without a post link to a pre-filled New applied post. Each run in src/lib/airsc-runs.ts now records its pull request, commits and files", vi: "/admin/social/applied: mỗi tài nguyên Airsc đã chạy trên code của mình, kèm việc được giao, ảnh kết quả, pull request, commit, file và các bài applied; lần chạy chưa có bài thì có link mở sẵn form Viết bài applied. Mỗi lần chạy trong src/lib/airsc-runs.ts giờ ghi kèm pull request, commit và file" },
+    ],
+  },
+  {
     when: "2026-10-26",
     pr: 29,
     open: true,
@@ -679,7 +688,8 @@ export const FEATURES: FeatureGroup[] = [
       { name: { en: "Overview", vi: "Tổng quan" }, desc: { en: "KPIs, views, GitHub opens, AI cost charts, top viewed", vi: "KPI, lượt xem, lượt mở GitHub, biểu đồ chi phí AI, xem nhiều nhất" }, status: "live", code: "/admin" },
       { name: { en: "Resources", vi: "Tài nguyên" }, desc: { en: "Filters by type, status, stage; publish, hide, redo", vi: "Lọc theo loại, trạng thái, bước; đăng, ẩn, làm lại" }, status: "live", code: "/admin/resources" },
       { name: { en: "Agents & costs", vi: "Agent & chi phí" }, desc: { en: "Runs and logs, run now, limits, models, budget, run hour", vi: "Các lần chạy và log, chạy ngay, giới hạn, model, ngân sách, giờ chạy" }, status: "live", code: "/admin/agents" },
-      { name: { en: "Social posts", vi: "Bài đăng mạng xã hội" }, desc: { en: "Queue, all posts with numbers and a page each, new applied post, three-day reviews, settings, connection test", vi: "Hàng đợi, mọi bài kèm số liệu và trang riêng, viết bài applied, đánh giá ba ngày, thiết lập, kiểm tra kết nối" }, status: "live", code: "/admin/social" },
+      { name: { en: "Social posts", vi: "Bài đăng mạng xã hội" }, desc: { en: "Queue (open posts whatever their day, then the last 7 days of posted and skipped ones, and whether drafts go out on their own), all posts with numbers and a page each, new applied post, three-day reviews, settings, connection test", vi: "Hàng đợi (bài chưa xong dù của ngày nào, rồi các bài đã đăng hoặc bỏ qua trong 7 ngày, và bản nháp có tự đăng hay không), mọi bài kèm số liệu và trang riêng, viết bài applied, đánh giá ba ngày, thiết lập, kiểm tra kết nối" }, status: "live", code: "/admin/social" },
+      { name: { en: "Applied on Airsc", vi: "Đã áp dụng trên Airsc" }, desc: { en: "Every resource Airsc ran on its own code: the task, images of the result, the pull request, commits and files, and the applied X posts with their numbers; one click starts a post from a run", vi: "Mọi tài nguyên Airsc đã chạy trên chính code của mình: việc được giao, ảnh kết quả, pull request, commit và file, cùng các bài applied trên X kèm số liệu; một cú bấm để viết bài từ một lần chạy" }, status: "live", code: "/admin/social/applied · src/lib/airsc-runs.ts" },
       { name: { en: "Revenue, users, payments", vi: "Doanh thu, người dùng, thanh toán" }, desc: { en: "Net revenue, Pro conversion, give or remove Pro by hand, orders from Polar", vi: "Doanh thu ròng, tỷ lệ lên Pro, cấp hoặc gỡ Pro thủ công, đơn hàng từ Polar" }, status: "live", code: "/admin/billing · /admin/users · /admin/payments" },
       { name: { en: "Product Management", vi: "Quản lý sản phẩm" }, desc: { en: "Architecture snapshots with history and an out-of-date notice, Tech stack with the locked core, roadmap, changelog with a missing-PR check, features, picks history", vi: "Bản chụp kiến trúc có lịch sử và thông báo khi đã cũ, Tech stack kèm phần core đã khóa, lộ trình, changelog có kiểm tra PR còn thiếu, tính năng, lịch sử chọn lọc" }, status: "live", code: "/admin/pm" },
     ],

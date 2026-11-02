@@ -3,6 +3,7 @@ import type { Bilingual, Preview } from "@/lib/types";
 /**
  * Layer-2 previews: resources we installed ourselves and ran on the Airsc codebase.
  * Images live in public/runs/<slug>/; the full transcript and inputs are in the commit that added them.
+ * /admin/social/applied lists every run with its code and the X posts written about it.
  */
 export type AirscRun = {
   /** what we asked the agent to do */
@@ -12,7 +13,11 @@ export type AirscRun = {
   /** YYYY-MM-DD */
   date: string;
   images: Preview[];
+  /** where the run lives in the repo: the pull request, its commits, and files it added that are still in use */
+  code: { pr: number; commits: string[]; files?: string[] };
 };
+
+export const REPO = "https://github.com/thanhmam/airsc";
 
 const img = (slug: string, file: string, width: number, height: number, caption: Bilingual, source: string): Preview => ({
   src: `/runs/${slug}/${file}.webp`,
@@ -43,6 +48,7 @@ export const AIRSC_RUNS: Record<string, AirscRun> = {
         vi: "Một lần chạy Content Engine: Scout → Curator → cổng đăng → Producer → Demo → Editor, kèm nhánh ngân sách và ẩn",
       }, "Diagrams/content-engine-workflow.json"),
     ],
+    code: { pr: 2, commits: ["02aee27"], files: [".claude/commands/refresh-architecture.md", "src/lib/pm/diagrams/snapshots/"] },
   },
   "cathrynlavery-diagram-design": {
     task: {
@@ -57,6 +63,7 @@ export const AIRSC_RUNS: Record<string, AirscRun> = {
         vi: "Luồng dữ liệu: README → lọc sơ bộ → model vision chấm → WebP → Blob + Postgres → thẻ. Đạt bước tự kiểm tra và kiểm tra hình học của skill.",
       }, "type-data-flow"),
     ],
+    code: { pr: 2, commits: ["3f08eda"] },
   },
   "zarazhangrui-frontend-slides": {
     task: {
@@ -79,6 +86,7 @@ export const AIRSC_RUNS: Record<string, AirscRun> = {
         vi: "Phong cách A, preset Swiss Modern",
       }, "style-a"),
     ],
+    code: { pr: 2, commits: ["3f08eda"] },
   },
   "blader-humanizer": {
     task: {
@@ -93,6 +101,7 @@ export const AIRSC_RUNS: Record<string, AirscRun> = {
         vi: "Trước và sau, mỗi dấu hiệu văn AI được đánh số theo mẫu trong skill",
       }, "Curator summaries"),
     ],
+    code: { pr: 2, commits: ["3f08eda"] },
   },
   "coreyhaines31-marketingskills": {
     task: {
@@ -107,6 +116,7 @@ export const AIRSC_RUNS: Record<string, AirscRun> = {
         vi: "Audit SEO của Airsc: 8 vấn đề kèm bằng chứng, cách sửa, mức ảnh hưởng và kế hoạch xử lý",
       }, "seo-audit"),
     ],
+    code: { pr: 2, commits: ["3f08eda"] },
   },
   "microsoft-playwright-mcp": {
     task: {
@@ -125,6 +135,7 @@ export const AIRSC_RUNS: Record<string, AirscRun> = {
         vi: "Audit điện thoại cho 10 trang công khai ở 390 px, trước và sau khi sửa. Không trang nào rộng hơn màn hình, cả trước lẫn sau.",
       }, "scripts/mobile-audit.mjs"),
     ],
+    code: { pr: 26, commits: ["f6cdabd"], files: ["scripts/mobile-audit.mjs"] },
   },
   "zanwei-design-dna": {
     task: {
@@ -139,6 +150,7 @@ export const AIRSC_RUNS: Record<string, AirscRun> = {
         vi: "Lệch thương hiệu trên 9 trang: màu ngoài token từ 10 còn 5, phần tử lệch thương hiệu từ 46 còn 14 (2,6% còn 0,8%)",
       }, "scripts/brand-drift.mjs"),
     ],
+    code: { pr: 26, commits: ["f6cdabd"], files: ["scripts/brand-drift.mjs", ".claude/skills/design-dna/"] },
   },
 };
 

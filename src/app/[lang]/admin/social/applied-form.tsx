@@ -50,6 +50,7 @@ async function shrink(file: File): Promise<File> {
 /** A post about using a resource in a real project: notes + screenshots in, Sonnet's draft out (in the queue) */
 export function AppliedForm({
   presets,
+  initial,
   resources,
   today,
   queueHref,
@@ -57,15 +58,18 @@ export function AppliedForm({
   c,
 }: {
   presets: Preset[];
+  /** slug of the preset to start from */
+  initial?: string;
   resources: { slug: string; name: string }[];
   today: string;
   queueHref: string;
   queueLabel: string;
   c: AppliedCopy;
 }) {
-  const [preset, setPreset] = useState<Preset | null>(null);
-  const [slug, setSlug] = useState("");
-  const [notes, setNotes] = useState("");
+  const start0 = presets.find((x) => x.slug === initial) ?? null;
+  const [preset, setPreset] = useState<Preset | null>(start0);
+  const [slug, setSlug] = useState(start0?.slug ?? "");
+  const [notes, setNotes] = useState(start0?.notes ?? "");
   const [files, setFiles] = useState<File[]>([]);
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [pending, start] = useTransition();
