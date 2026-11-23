@@ -1,6 +1,13 @@
 {
-  "version": 1,
+  "version": 2,
   "skills": {
+    "canvas-design": {
+      "source": "anthropics/skills",
+      "commit": "e4bb5d960d87126ff3b3a8af1a104b7db67560ba",
+      "sourceType": "github",
+      "skillPath": "skills/canvas-design/SKILL.md",
+      "computedHash": "1866477474e694f562261008bb6a817e53f027b6347b062fbd1e2ee2eb83f20d"
+    },
     "design-dna": {
       "source": "zanwei/design-dna",
       "sourceType": "github",
