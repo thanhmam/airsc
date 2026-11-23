@@ -9,6 +9,7 @@ import { getDict, hasLocale, href } from "@/lib/i18n";
 import { agentPrompt } from "@/lib/install-links";
 import { CopyButton } from "@/components/copy-button";
 import { getResource } from "@/lib/data";
+import { BILLING } from "@/lib/billing";
 import { currentPlan } from "@/lib/pro";
 
 export async function generateMetadata({ params }: PageProps<"/[lang]/kits/[slug]">): Promise<Metadata> {
@@ -58,7 +59,7 @@ export default async function KitPage({ params }: PageProps<"/[lang]/kits/[slug]
             <p className="font-semibold">
               {items.length} {t.kits.items}
             </p>
-            <p className="text-sm text-muted">{t.kits.kitCost}</p>
+            {(pro || BILLING) && <p className="text-sm text-muted">{t.kits.kitCost}</p>}
             {pro ? (
               <div className="space-y-2 border-t border-line pt-4">
                 <p className="text-xs text-muted">{t.resource.promptIntro}</p>
@@ -67,7 +68,7 @@ export default async function KitPage({ params }: PageProps<"/[lang]/kits/[slug]
                   <CopyButton text={kitPrompt} copiedLabel={t.resource.copied} className="absolute right-1.5 top-1.5" />
                 </div>
               </div>
-            ) : (
+            ) : BILLING ? (
               <div className="space-y-3 rounded-xl border border-dashed border-line-strong p-4 text-center">
                 <p className="flex items-center justify-center gap-1.5 text-sm font-medium">
                   <Lock className="size-4 text-accent" aria-hidden /> {t.kits.proTitle}
@@ -80,7 +81,7 @@ export default async function KitPage({ params }: PageProps<"/[lang]/kits/[slug]
                   {t.kits.proCta}
                 </Link>
               </div>
-            )}
+            ) : null}
           </div>
         </aside>
       </div>

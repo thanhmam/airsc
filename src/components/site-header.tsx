@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Logo } from "@/components/brand/logo";
 import { LangSwitch } from "@/components/lang-switch";
+import { BILLING } from "@/lib/billing";
 import { href, type Dict, type Locale } from "@/lib/i18n";
 import { currentUser } from "@/lib/supabase/server";
 
@@ -12,7 +13,7 @@ export async function SiteHeader({ lang, t }: { lang: Locale; t: Dict }) {
     { label: t.nav.kits, path: "/kits" },
     { label: t.nav.guides, path: "/guides" },
     { label: t.nav.mcp, path: "/mcp" },
-    { label: t.nav.pricing, path: "/pricing" },
+    ...(BILLING ? [{ label: t.nav.pricing, path: "/pricing" }] : []),
   ];
   return (
     <header className="border-b border-line/80 bg-bg/80 backdrop-blur-md">

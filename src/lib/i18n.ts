@@ -100,6 +100,7 @@ const en = {
       { t: "Install", d: "One click into Cursor or Claude. Updates arrive automatically." },
     ],
     freeLine: "Free for everyone. No account, no card. Pro members keep it running.",
+    freeLineNoPro: "Free for everyone. No account, no card.",
   },
   browse: {
     title: "Browse the library",
@@ -394,6 +395,7 @@ const vi: Dict = {
       { t: "Cài", d: "1 cú bấm vào Cursor hoặc Claude. Bản mới tự cập nhật." },
     ],
     freeLine: "Miễn phí cho tất cả. Không cần tài khoản, không cần thẻ. Thành viên Pro giúp site tiếp tục chạy.",
+    freeLineNoPro: "Miễn phí cho tất cả. Không cần tài khoản, không cần thẻ.",
   },
   browse: {
     title: "Khám phá thư viện",

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Logo } from "@/components/brand/logo";
+import { BILLING } from "@/lib/billing";
 import { href, type Dict, type Locale } from "@/lib/i18n";
 
 export function SiteFooter({ lang, t }: { lang: Locale; t: Dict }) {
@@ -19,7 +20,7 @@ export function SiteFooter({ lang, t }: { lang: Locale; t: Dict }) {
             <li><Link href={href(lang, "/mcp")} className="hover:text-fg">{t.nav.mcp}</Link></li>
           </ul>
           <ul className="space-y-2">
-            <li><Link href={href(lang, "/pricing")} className="hover:text-fg">{t.nav.pricing}</Link></li>
+            {BILLING && <li><Link href={href(lang, "/pricing")} className="hover:text-fg">{t.nav.pricing}</Link></li>}
             <li><Link href={href(lang, "/account")} className="hover:text-fg">{t.nav.account}</Link></li>
           </ul>
         </div>
