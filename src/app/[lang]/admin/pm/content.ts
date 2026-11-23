@@ -381,6 +381,7 @@ export const REQUESTS: Request[] = [
   { when: "2026-10-22", ref: "#20", text: { en: "The daily posts reach almost nobody: one resource per post, tag the authors, show how a resource is used in the real project, measure it and review every three days", vi: "Các bài hằng ngày gần như không ai thấy: mỗi bài một tài nguyên, tag tác giả, kể cách dùng tài nguyên trong dự án thật, đo kết quả và đánh giá mỗi ba ngày" } },
   { when: "2026-10-22", ref: "#21 #22", text: { en: "Split the X admin into sub-pages, keep every open post in the queue, schedule by hour and minute, list all posts with their numbers", vi: "Tách admin X thành các trang con, giữ mọi bài chưa xong trong hàng đợi, hẹn giờ theo giờ và phút, liệt kê mọi bài kèm số liệu" } },
   { when: "2026-10-23", ref: "#23", text: { en: "Keep the architecture current with a history, stop the core stack changing by accident, and make sure the changelog and roadmap are updated with every change", vi: "Giữ kiến trúc luôn mới và có lịch sử, ngăn core stack bị đổi ngoài ý muốn, và bảo đảm changelog, lộ trình luôn được cập nhật theo mỗi thay đổi" } },
+  { when: "2026-11-23", ref: "#30", text: { en: "Hide everything that takes money for now and run on Vercel's free plan", vi: "Tạm ẩn mọi phần thu tiền và chạy trên gói miễn phí của Vercel" } },
 ];
 
 // ---------------------------------------------------------------- changelog
@@ -389,6 +390,19 @@ export const REQUESTS: Request[] = [
 export type Change = { when: string; pr?: number; also?: number[]; open?: boolean; title: L; items: L[] };
 
 export const CHANGELOG: Change[] = [
+  {
+    when: "2026-11-23",
+    pr: 30,
+    open: true,
+    title: { en: "Billing off and daily crons for Vercel Hobby", vi: "Tắt thu tiền và cron mỗi ngày cho Vercel Hobby" },
+    items: [
+      { en: "One switch, BILLING in src/lib/billing.ts, set to false: Vercel's Hobby plan is for non-commercial use only", vi: "Một công tắc, BILLING trong src/lib/billing.ts, đặt là false: gói Hobby của Vercel chỉ cho mục đích phi thương mại" },
+      { en: "Off: /pricing is a 404 and /support goes home; no Pricing link in the header, footer or sitemap; no top bar, See Pro button, Pro upsell on kits, playbooks and resources, or Pro mention in the MCP limit message; checkout and the account upgrade stop", vi: "Khi tắt: /pricing trả 404 và /support về trang chủ; bỏ link Bảng giá ở header, footer và sitemap; bỏ thanh trên cùng, nút Xem gói Pro, lời mời Pro ở kit, lộ trình và tài nguyên, và chữ Pro trong thông báo giới hạn của MCP; dừng thanh toán và nút nâng cấp trong tài khoản" },
+      { en: "Members who already have Pro keep it, with the billing portal; the Free daily limits stay; the Polar webhook and admin payments still work", vi: "Ai đã có Pro vẫn giữ, kèm cổng quản lý thanh toán; giới hạn theo ngày của Free giữ nguyên; webhook Polar và trang thanh toán trong admin vẫn chạy" },
+      { en: "/api/cron/crawl: maxDuration 800 to 300 seconds, the most Hobby allows", vi: "/api/cron/crawl: maxDuration từ 800 xuống 300 giây, mức tối đa của Hobby" },
+      { en: "Crons once a day, as Hobby requires (it refuses to deploy anything more often): the engine at 08:00 Vietnam, whatever hour /admin shows; X at 20:30 Vietnam, drafting and sending the one post that is due. The five-minute ?task=post cron is gone, so a post scheduled for another time waits for an admin, and only the first X slot goes out by itself", vi: "Cron chạy mỗi ngày một lần, theo yêu cầu của Hobby (nó từ chối deploy nếu chạy dày hơn): engine lúc 08:00 giờ VN, bất kể giờ đặt trong /admin; X lúc 20:30 giờ VN, soạn và gửi một bài đã tới giờ. Bỏ cron ?task=post năm phút một lần, nên bài hẹn giờ khác phải chờ admin, và chỉ khung giờ X đầu tiên tự đăng" },
+    ],
+  },
   {
     when: "2026-10-26",
     pr: 29,
@@ -642,7 +656,7 @@ export const FEATURES: FeatureGroup[] = [
       { name: { en: "Guides", vi: "Hướng dẫn" }, desc: { en: "Best-of pages per category and a weekly digest, written by the Editor", vi: "Trang tổng hợp tốt nhất theo danh mục và bản tin tuần, do Editor viết" }, status: "live", code: "/guides" },
       { name: { en: "English and Vietnamese", vi: "Tiếng Anh và tiếng Việt" }, desc: { en: "EN at /, VI at /vi, every string in both", vi: "EN ở /, VI ở /vi, mọi chuỗi đều có hai thứ tiếng" }, status: "live", code: "src/proxy.ts · src/lib/i18n.ts" },
       { name: { en: "Accounts", vi: "Tài khoản" }, desc: { en: "Magic link, Google, GitHub; personal airsc_ key for MCP; open history", vi: "Magic link, Google, GitHub; khóa airsc_ riêng cho MCP; lịch sử mở" }, status: "live", code: "/login · /account" },
-      { name: { en: "Pricing", vi: "Bảng giá" }, desc: { en: "Free (5 install unlocks and 30 MCP calls a day) and Pro ($5 once, for life, unlimited) via Polar; launch price and seats read from Polar; the old Support page redirects here", vi: "Miễn phí (5 lượt mở cài đặt và 30 lần gọi MCP mỗi ngày) và Pro ($5 một lần, trọn đời, không giới hạn) qua Polar; giá ra mắt và số suất đọc từ Polar; trang Ủng hộ cũ chuyển về đây" }, status: "live", code: "/pricing · /api/webhooks/polar · /api/webhooks/kofi" },
+      { name: { en: "Pricing", vi: "Bảng giá" }, desc: { en: "Free (5 install unlocks and 30 MCP calls a day) and Pro ($5 once, for life, unlimited) via Polar; launch price and seats read from Polar; the old Support page redirects here. Switched off (BILLING = false) while on Vercel Hobby: Pro is not sold, members keep it", vi: "Miễn phí (5 lượt mở cài đặt và 30 lần gọi MCP mỗi ngày) và Pro ($5 một lần, trọn đời, không giới hạn) qua Polar; giá ra mắt và số suất đọc từ Polar; trang Ủng hộ cũ chuyển về đây. Đang tắt (BILLING = false) khi chạy Vercel Hobby: không bán Pro, ai đã có Pro vẫn giữ" }, status: "partial", code: "/pricing · /api/webhooks/polar · /api/webhooks/kofi · src/lib/billing.ts" },
     ],
   },
   {

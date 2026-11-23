@@ -10,6 +10,7 @@ import { getResource, resolvePlaybook } from "@/lib/data";
 import { getDict, hasLocale, href } from "@/lib/i18n";
 import { agentPrompt } from "@/lib/install-links";
 import { findPlaybook } from "@/lib/playbooks";
+import { BILLING } from "@/lib/billing";
 import { currentPlan } from "@/lib/pro";
 import { jobLabel } from "@/lib/taxonomy";
 import { compact } from "@/lib/utils";
@@ -122,7 +123,7 @@ export default async function PlaybookPage({ params }: PageProps<"/[lang]/for/[j
                   <CopyButton text={prompt} copiedLabel={t.resource.copied} className="absolute right-1.5 top-1.5" />
                 </div>
               </div>
-            ) : (
+            ) : BILLING ? (
               <div className="space-y-3 rounded-xl border border-dashed border-line-strong p-4 text-center">
                 <p className="flex items-center justify-center gap-1.5 text-sm font-medium">
                   <Lock className="size-4 text-accent" aria-hidden /> {t.jobs.proTitle}
@@ -135,7 +136,7 @@ export default async function PlaybookPage({ params }: PageProps<"/[lang]/for/[j
                   {t.kits.proCta}
                 </Link>
               </div>
-            )}
+            ) : null}
           </div>
         </aside>
       </div>

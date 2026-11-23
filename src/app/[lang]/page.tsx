@@ -10,6 +10,7 @@ import { ResourceArt } from "@/components/home/resource-art";
 import { TodaysPicks, type Pick, type SceneKind } from "@/components/home/todays-picks";
 import { TYPE_ICON } from "@/components/icons";
 import { SafetyBadge } from "@/components/safety-badge";
+import { BILLING } from "@/lib/billing";
 import { getDailyPicks, getGuides, getKit, getKits, getNewThisWeek, getResourcesBySlugs, getStats, getTrending } from "@/lib/data";
 import { getDict, hasLocale, href, type Dict, type Locale } from "@/lib/i18n";
 import { agentPrompt } from "@/lib/install-links";
@@ -305,13 +306,15 @@ export default async function Home({ params }: PageProps<"/[lang]">) {
       </section>
 
       <section className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-x-5 gap-y-3 px-4 pb-6 pt-6 text-center sm:px-6">
-        <p className="text-muted">{h.freeLine}</p>
+        <p className="text-muted">{BILLING ? h.freeLine : h.freeLineNoPro}</p>
+        {BILLING && (
         <Link
           href={href(lang, "/pricing")}
           className="inline-flex h-11 items-center rounded-xl border border-line-strong bg-card px-4 text-sm font-medium hover:border-accent hover:text-accent"
         >
           {h.support} →
         </Link>
+        )}
       </section>
     </>
   );

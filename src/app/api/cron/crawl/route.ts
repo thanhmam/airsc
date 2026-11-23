@@ -1,6 +1,7 @@
 import { crawl } from "@/lib/crawler/run";
 
-export const maxDuration = 800;
+// the most Vercel Hobby allows
+export const maxDuration = 300;
 
 /** Daily refresh (vercel.ts cron). Vercel signs cron calls with CRON_SECRET. */
 export async function GET(req: Request) {
