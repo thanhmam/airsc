@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { BILLING } from "@/lib/billing";
 import { PLAYBOOKS } from "@/lib/playbooks";
 import { anonClient } from "@/lib/supabase/anon";
 import { JOBS } from "@/lib/taxonomy";
@@ -25,7 +26,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     db.from("pages").select("slug,generated_at"),
   ]);
   return [
-    ...["/", "/browse", "/for", "/kits", "/guides", "/mcp", "/pricing"].map((p) => both(p)),
+    ...["/", "/browse", "/for", "/kits", "/guides", "/mcp", ...(BILLING ? ["/pricing"] : [])].map((p) => both(p)),
     ...JOBS.map((j) => both(`/for/${j.slug}`)),
     ...PLAYBOOKS.map((p) => both(`/for/${p.job}/${p.slug}`)),
     ...(pages ?? []).map((p) => both(`/guides/${p.slug}`, p.generated_at)),

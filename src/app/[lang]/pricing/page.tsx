@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Check, Sparkles } from "lucide-react";
 import { startProCheckout } from "@/app/actions";
 import { getDict, hasLocale, href } from "@/lib/i18n";
+import { BILLING } from "@/lib/billing";
 import { currentPlan } from "@/lib/pro";
 import { proOffer, proProductId } from "@/lib/polar";
 import { LIMITS } from "@/lib/quota";
@@ -34,7 +35,7 @@ function Features({ items, icon: Icon = Check }: { items: string[]; icon?: typeo
 export default async function Pricing({ params, searchParams }: PageProps<"/[lang]/pricing">) {
   const { lang } = await params;
   const { billing } = await searchParams;
-  if (!hasLocale(lang)) notFound();
+  if (!hasLocale(lang) || !BILLING) notFound();
   const p = getDict(lang).pricing;
   const [{ user, pro }, offer] = await Promise.all([currentPlan(), proOffer()]);
   const canBuy = !!proProductId();

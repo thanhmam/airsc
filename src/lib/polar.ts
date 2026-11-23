@@ -1,6 +1,7 @@
 import "server-only";
 import { createPolar, type models } from "@polar-sh/sdk/2026-04";
 import { z } from "zod";
+import { BILLING } from "@/lib/billing";
 import { db, type OrderRecord } from "@/lib/engine/db";
 
 /** Pasted env values often carry a stray space or newline */
@@ -21,8 +22,8 @@ export const isSandbox = () => polarEnv("POLAR_SERVER")?.toLowerCase() === "sand
 /** Where an admin goes to refund or look at a sale */
 export const polarDashboardUrl = () => (isSandbox() ? "https://sandbox.polar.sh/dashboard" : "https://polar.sh/dashboard");
 
-/** The Pro upgrade is only offered once the product is configured */
-export const proProductId = () => polarEnv("POLAR_PRODUCT_PRO");
+/** The Pro upgrade is only offered once the product is configured, and while billing is on */
+export const proProductId = () => (BILLING ? polarEnv("POLAR_PRODUCT_PRO") : null);
 
 /** The launch discount in Polar (percentage off, limited seats), applied automatically at checkout */
 export const proDiscountId = () => polarEnv("POLAR_DISCOUNT_PRO");

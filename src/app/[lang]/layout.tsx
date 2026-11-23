@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { DonateBar } from "@/components/donate";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { BILLING } from "@/lib/billing";
 import { getDict, hasLocale, href, LOCALES } from "@/lib/i18n";
 import "../globals.css";
 
@@ -35,7 +36,7 @@ export default async function RootLayout({ children, params }: LayoutProps<"/[la
     <html lang={lang} className={`${geistSans.variable} ${geistMono.variable} h-full`}>
       <body className="flex min-h-full flex-col">
         <div className="sticky top-0 z-40">
-          <DonateBar text={t.pricing.bar} cta={t.pricing.cta} pricingHref={href(lang, "/pricing")} />
+          {BILLING && <DonateBar text={t.pricing.bar} cta={t.pricing.cta} pricingHref={href(lang, "/pricing")} />}
           <SiteHeader lang={lang} t={t} />
         </div>
         <main className="flex-1">{children}</main>

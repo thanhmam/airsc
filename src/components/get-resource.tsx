@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ExternalLink, Lock } from "lucide-react";
 import { unlockInstall } from "@/app/actions";
 import { CopyButton } from "@/components/copy-button";
+import { BILLING } from "@/lib/billing";
 import { href, type Dict, type Locale } from "@/lib/i18n";
 import { agentPrompt, claudeDesktopConfig, cursorDeeplink } from "@/lib/install-links";
 import { quota } from "@/lib/quota";
@@ -99,9 +100,11 @@ export async function GetResource({ r, lang, t }: { r: Resource; lang: Locale; t
           ) : (
             <p className="rounded-xl bg-soft px-3 py-2 text-xs text-muted">{t.resource.limitReached.replace("{n}", String(q?.limit ?? 0))}</p>
           )}
-          <Link href={href(lang, "/pricing")} className="inline-block text-xs font-medium text-accent hover:underline">
-            {t.resource.proUnlimited} →
-          </Link>
+          {BILLING && (
+            <Link href={href(lang, "/pricing")} className="inline-block text-xs font-medium text-accent hover:underline">
+              {t.resource.proUnlimited} →
+            </Link>
+          )}
         </div>
       )}
     </div>

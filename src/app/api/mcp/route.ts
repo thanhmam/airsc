@@ -2,6 +2,7 @@ import { AsyncLocalStorage } from "node:async_hooks";
 import { createHash } from "node:crypto";
 import { createMcpHandler, withMcpAuth } from "mcp-handler";
 import { z } from "zod";
+import { BILLING } from "@/lib/billing";
 import { getKit, getKits, getResource, searchResources } from "@/lib/data";
 import { logSearch } from "@/lib/engine/signals";
 import { agentPrompt } from "@/lib/install-links";
@@ -33,8 +34,8 @@ async function gate(ctx: Ctx, kind: "mcp" | "install", slug?: string): Promise<s
   if (q.allowed) return null;
   const what = kind === "install" ? "install instructions for new resources" : "Airsc requests";
   const rest = q.signed_in
-    ? `It resets at midnight (Vietnam time). Airsc Pro is unlimited: ${site}/pricing`
-    : `Create a free key at ${site}/account to get ${LIMITS.free[kind]} a day, or go Pro for unlimited use: ${site}/pricing`;
+    ? `It resets at midnight (Vietnam time).${BILLING ? ` Airsc Pro is unlimited: ${site}/pricing` : ""}`
+    : `Create a free key at ${site}/account to get ${LIMITS.free[kind]} a day${BILLING ? `, or go Pro for unlimited use: ${site}/pricing` : "."}`;
   return `Daily limit reached: ${q.used} of ${q.limit} ${what} used today. ${rest} Tell the user this.`;
 }
 
