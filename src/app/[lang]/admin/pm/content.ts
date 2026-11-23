@@ -394,12 +394,13 @@ export const CHANGELOG: Change[] = [
     when: "2026-11-23",
     pr: 30,
     open: true,
-    title: { en: "Billing switched off for Vercel Hobby", vi: "Tạm tắt thu tiền khi chạy Vercel Hobby" },
+    title: { en: "Billing off and daily crons for Vercel Hobby", vi: "Tắt thu tiền và cron mỗi ngày cho Vercel Hobby" },
     items: [
       { en: "One switch, BILLING in src/lib/billing.ts, set to false: Vercel's Hobby plan is for non-commercial use only", vi: "Một công tắc, BILLING trong src/lib/billing.ts, đặt là false: gói Hobby của Vercel chỉ cho mục đích phi thương mại" },
       { en: "Off: /pricing is a 404 and /support goes home; no Pricing link in the header, footer or sitemap; no top bar, See Pro button, Pro upsell on kits, playbooks and resources, or Pro mention in the MCP limit message; checkout and the account upgrade stop", vi: "Khi tắt: /pricing trả 404 và /support về trang chủ; bỏ link Bảng giá ở header, footer và sitemap; bỏ thanh trên cùng, nút Xem gói Pro, lời mời Pro ở kit, lộ trình và tài nguyên, và chữ Pro trong thông báo giới hạn của MCP; dừng thanh toán và nút nâng cấp trong tài khoản" },
       { en: "Members who already have Pro keep it, with the billing portal; the Free daily limits stay; the Polar webhook and admin payments still work", vi: "Ai đã có Pro vẫn giữ, kèm cổng quản lý thanh toán; giới hạn theo ngày của Free giữ nguyên; webhook Polar và trang thanh toán trong admin vẫn chạy" },
       { en: "/api/cron/crawl: maxDuration 800 to 300 seconds, the most Hobby allows", vi: "/api/cron/crawl: maxDuration từ 800 xuống 300 giây, mức tối đa của Hobby" },
+      { en: "Crons once a day, as Hobby requires (it refuses to deploy anything more often): the engine at 08:00 Vietnam, whatever hour /admin shows; X at 20:30 Vietnam, drafting and sending the one post that is due. The five-minute ?task=post cron is gone, so a post scheduled for another time waits for an admin, and only the first X slot goes out by itself", vi: "Cron chạy mỗi ngày một lần, theo yêu cầu của Hobby (nó từ chối deploy nếu chạy dày hơn): engine lúc 08:00 giờ VN, bất kể giờ đặt trong /admin; X lúc 20:30 giờ VN, soạn và gửi một bài đã tới giờ. Bỏ cron ?task=post năm phút một lần, nên bài hẹn giờ khác phải chờ admin, và chỉ khung giờ X đầu tiên tự đăng" },
     ],
   },
   {
